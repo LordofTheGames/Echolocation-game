@@ -12,6 +12,10 @@
 # Increase probability of success for merging files with specific extensions
 *.cs diff=csharp
 
+# Unity 
+*.cginc text
+*.shader text
+
 # Macro attribute: Files with Unity's yaml format
 # linguist-generated means the file is ignored for the repository's language statistics and diffs are hidden by default.
 [attr]unity-yaml-file -text merge=unityyamlmerge linguist-generated
