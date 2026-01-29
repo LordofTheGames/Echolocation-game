@@ -217,6 +217,7 @@ GameObject:
   - component: {fileID: 3073548788223834108}
   - component: {fileID: 6706224093000261855}
   - component: {fileID: 2217605721342006932}
+  - component: {fileID: 2258446121446902706}
   m_Layer: 0
   m_Name: Monster
   m_TagString: Untagged
@@ -232,7 +233,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6856964906310489889}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 18.010286, y: -0.0000009536743, z: 20.743103}
   m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
   m_ConstrainProportionsScale: 0
@@ -301,6 +302,8 @@ MonoBehaviour:
   m_BlackboardVariableOverridesList:
   - rid: 2320555136217252090
   - rid: 2320555136217252138
+  - rid: 2978944912070279289
+  - rid: 2978944912070279363
   m_OriginalGraph: {fileID: 0}
   m_IsInitialised: 0
   m_IsStarted: 0
@@ -323,6 +326,41 @@ MonoBehaviour:
           m_Value1: 1858964397802573472
         Name: Player
         m_Value: {fileID: 0}
+    - rid: 2978944912070279289
+      type: {class: 'BlackboardVariable`1[[FieldOfView, Assembly-CSharp]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5154971730438560456
+          m_Value1: 1085863137096009657
+        Name: FovDetector
+        m_Value: {fileID: 2258446121446902706}
+    - rid: 2978944912070279363
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 9414697633342599877
+          m_Value1: 17060511834123246397
+        Name: FollowPlayer
+        m_Value: {fileID: 0}
+--- !u!114 &2258446121446902706
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6856964906310489889}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbf0b31af0e16104c83a220d744db206, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Radius: 12.59
+  Angle: 115
+  DetectionHeight: 2.71
+  ObstructionMask:
+    serializedVersion: 2
+    m_Bits: 0
+  ShowDebugVisuals: 1
 --- !u!1 &8446142633159244774
 GameObject:
   m_ObjectHideFlags: 0
