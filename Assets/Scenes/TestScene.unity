@@ -12039,7 +12039,7 @@ NavMeshAgent:
   m_Speed: 8
   m_Acceleration: 15
   avoidancePriority: 50
-  m_AngularSpeed: 120
+  m_AngularSpeed: 1000
   m_StoppingDistance: 4
   m_AutoTraverseOffMeshLink: 1
   m_AutoBraking: 1
@@ -12132,6 +12132,7 @@ GameObject:
   - component: {fileID: 4594831920428378775}
   - component: {fileID: 2662340337681703038}
   - component: {fileID: 3937675856301742722}
+  - component: {fileID: 4594831920428378776}
   m_Layer: 0
   m_Name: Monster
   m_TagString: Untagged
@@ -12161,6 +12162,44 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7255270090644939075, guid: 202e36b5ef06dec4891d4bb4956578d4, type: 3}
+--- !u!114 &4594831920428378776
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4433555092254682003}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Graph: {fileID: -3197951305673686274, guid: 14f7957ef16e4f840863ceb821ac2a28, type: 2}
+  m_BlackboardVariableOverridesList:
+  - rid: 2320555136217252090
+  - rid: 2320555136217252138
+  m_OriginalGraph: {fileID: 0}
+  m_IsInitialised: 0
+  m_IsStarted: 0
+  references:
+    version: 2
+    RefIds:
+    - rid: 2320555136217252090
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1
+          m_Value1: 0
+        Name: Self
+        m_Value: {fileID: 4433555092254682003}
+    - rid: 2320555136217252138
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 1638183738370235379
+          m_Value1: 1858964397802573472
+        Name: Player
+        m_Value: {fileID: 129662818}
 --- !u!23 &4672226592941844091
 MeshRenderer:
   m_ObjectHideFlags: 0
