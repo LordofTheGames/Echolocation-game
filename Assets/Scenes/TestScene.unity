@@ -200,7 +200,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 16
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -3225,6 +3225,7 @@ GameObject:
   - component: {fileID: 538051699}
   - component: {fileID: 538051698}
   - component: {fileID: 538051700}
+  - component: {fileID: 538051701}
   m_Layer: 4
   m_Name: Water
   m_TagString: Untagged
@@ -3317,6 +3318,27 @@ MonoBehaviour:
   ObjectsRT: {fileID: 8400000, guid: 75f6c3c5611d11e4d828d5b7f66fe4e8, type: 2}
   RippleShader: {fileID: 4800000, guid: 7f0c838b2a36b5447bf17cdb064fc1dc, type: 3}
   AddShader: {fileID: 4800000, guid: 32c6a055fc4b1ff42b22032673149a70, type: 3}
+--- !u!65 &538051701
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 538051695}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 10, y: 0.2, z: 10}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!43 &612670657
 Mesh:
   m_ObjectHideFlags: 0
