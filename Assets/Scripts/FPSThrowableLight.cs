@@ -1,42 +1,45 @@
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.InputSystem;
 
 public class FPSThrowableLight : MonoBehaviour
 {
-    [Header("Í¶ÖÀÉèÖÃ")]
-    [SerializeField] private GameObject cubePrefab;           // CubeÔ¤ÖÆÌå
-    [SerializeField] private GameObject lightPrefab;          // µÆ¹âÔ¤ÖÆÌå
-    [SerializeField] private float throwForce = 20f;          // Í¶ÖÀÁ¦¶È
-    [SerializeField] private float throwHeight = 1.5f;        // Í¶ÖÀ¸ß¶È
-    [SerializeField] private float maxThrowDistance = 50f;    // ×î´óÍ¶ÖÀ¾àÀë
-    [SerializeField] private float cubeThrowSpeed = 15f;      // Cube·ÉÐÐËÙ¶È
+    [Header("Í¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
+    [SerializeField] private GameObject cubePrefab;           // CubeÔ¤ï¿½ï¿½ï¿½ï¿½
+    [SerializeField] private GameObject lightPrefab;          // ï¿½Æ¹ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½
+    [SerializeField] private float throwForce = 20f;          // Í¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    [SerializeField] private float throwHeight = 1.5f;        // Í¶ï¿½ï¿½ï¿½ß¶ï¿½
+    [SerializeField] private float maxThrowDistance = 50f;    // ï¿½ï¿½ï¿½Í¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    [SerializeField] private float cubeThrowSpeed = 15f;      // Cubeï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
 
-    [Header("Î»ÖÃÉèÖÃ")]
-    [SerializeField] private Transform cubeSpawnPoint;        // CubeÉú³ÉÎ»ÖÃ£¨¿É×Ô¶¨Òå£©
-    [SerializeField] private Vector3 defaultSpawnOffset = new Vector3(0.3f, -0.2f, 0.5f); // Ä¬ÈÏÆ«ÒÆ
+    [Header("Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
+    [SerializeField] private Transform cubeSpawnPoint;        // Cubeï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½å£©
+    [SerializeField] private Vector3 defaultSpawnOffset = new Vector3(0.3f, -0.2f, 0.5f); // Ä¬ï¿½ï¿½Æ«ï¿½ï¿½
 
-    [Header("Å×ÎïÏßÉèÖÃ")]
-    [SerializeField] private Material trajectoryMaterial;     // Å×ÎïÏß²ÄÖÊ
+    [Header("ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
+    [SerializeField] private Material trajectoryMaterial;     // ï¿½ï¿½ï¿½ï¿½ï¿½ß²ï¿½ï¿½ï¿½
     [SerializeField] private Color trajectoryStartColor = Color.yellow;
     [SerializeField] private Color trajectoryEndColor = Color.red;
     [SerializeField] private float trajectoryWidth = 0.05f;
-    [SerializeField] private int trajectoryPoints = 50;       // Å×ÎïÏßµãÊý
-    [SerializeField] private float predictionTime = 3f;       // Ô¤²âÊ±¼ä
+    [SerializeField] private int trajectoryPoints = 50;       // ï¿½ï¿½ï¿½ï¿½ï¿½ßµï¿½ï¿½ï¿½
+    [SerializeField] private float predictionTime = 3f;       // Ô¤ï¿½ï¿½Ê±ï¿½ï¿½
 
-    [Header("Ö¸Ê¾Æ÷ÉèÖÃ")]
-    [SerializeField] private GameObject landingIndicatorPrefab; // ÂäµØÖ¸Ê¾Æ÷Ô¤ÖÆÌå
+    [Header("Ö¸Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½")]
+    [SerializeField] private GameObject landingIndicatorPrefab; // ï¿½ï¿½ï¿½Ö¸Ê¾ï¿½ï¿½Ô¤ï¿½ï¿½ï¿½ï¿½
 
-    private GameObject currentCube;              // µ±Ç°ÏÔÊ¾µÄCube
-    private GameObject landingIndicator;         // ÂäµØÎ»ÖÃÖ¸Ê¾Æ÷
-    private LineRenderer trajectoryLine;         // Å×ÎïÏßäÖÈ¾Æ÷
-    private bool isHoldingRightClick = false;    // ÊÇ·ñ°´×¡ÓÒ¼ü
-    private bool isThrowing = false;             // ÊÇ·ñÕýÔÚÍ¶ÖÀÖÐ
+    private GameObject currentCube;              // ï¿½ï¿½Ç°ï¿½ï¿½Ê¾ï¿½ï¿½Cube
+    private GameObject landingIndicator;         // ï¿½ï¿½ï¿½Î»ï¿½ï¿½Ö¸Ê¾ï¿½ï¿½
+    private LineRenderer trajectoryLine;         // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È¾ï¿½ï¿½
+    private bool isHoldingRightClick = false;    // ï¿½Ç·ï¿½×¡ï¿½Ò¼ï¿½
+    private bool isThrowing = false;             // ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ï¿½Í¶ï¿½ï¿½ï¿½ï¿½
     private Camera playerCamera;
     private Transform cameraTransform;
     private List<Vector3> trajectoryPointsList = new List<Vector3>();
-    private Vector3 landingPosition;             // ÂäµØÎ»ÖÃ
-    private Vector3 throwDirection;              // Í¶ÖÀ·½Ïò
-    private Vector3 cubeStartPosition;           // CubeÍ¶ÖÀÆðÊ¼Î»ÖÃ
+    private Vector3 landingPosition;             // ï¿½ï¿½ï¿½Î»ï¿½ï¿½
+    private Vector3 throwDirection;              // Í¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    private Vector3 cubeStartPosition;           // CubeÍ¶ï¿½ï¿½ï¿½ï¿½Ê¼Î»ï¿½ï¿½
+
+    InputAction throwAction;
 
     private void Start()
     {
@@ -45,8 +48,8 @@ public class FPSThrowableLight : MonoBehaviour
         {
             cameraTransform = playerCamera.transform;
         }
-
-        // Èç¹ûÃ»ÓÐÖ¸¶¨CubeÉú³Éµã£¬Ê¹ÓÃÏà»úÎ»ÖÃ+Ä¬ÈÏÆ«ÒÆ
+        throwAction = InputSystem.actions.FindAction("Throw");
+        // ï¿½ï¿½ï¿½Ã»ï¿½ï¿½Ö¸ï¿½ï¿½Cubeï¿½ï¿½ï¿½Éµã£¬Ê¹ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½+Ä¬ï¿½ï¿½Æ«ï¿½ï¿½
         if (cubeSpawnPoint == null)
         {
             GameObject spawnPointObj = new GameObject("CubeSpawnPoint");
@@ -55,10 +58,10 @@ public class FPSThrowableLight : MonoBehaviour
             cubeSpawnPoint = spawnPointObj.transform;
         }
 
-        // ´´½¨²¢ÉèÖÃLineRenderer
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½LineRenderer
         CreateTrajectoryLine();
 
-        // ´´½¨ÂäµØÖ¸Ê¾Æ÷
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸Ê¾ï¿½ï¿½
         CreateLandingIndicator();
     }
 
@@ -67,7 +70,7 @@ public class FPSThrowableLight : MonoBehaviour
         GameObject lineObj = new GameObject("TrajectoryLine");
         trajectoryLine = lineObj.AddComponent<LineRenderer>();
 
-        // ÉèÖÃLineRenderer²ÎÊý
+        // ï¿½ï¿½ï¿½ï¿½LineRendererï¿½ï¿½ï¿½ï¿½
         trajectoryLine.positionCount = trajectoryPoints;
         trajectoryLine.startWidth = trajectoryWidth;
         trajectoryLine.endWidth = trajectoryWidth * 0.5f;
@@ -88,14 +91,14 @@ public class FPSThrowableLight : MonoBehaviour
         }
         else
         {
-            // ´´½¨Ä¬ÈÏµÄÔ²ÖùÌåÖ¸Ê¾Æ÷
+            // ï¿½ï¿½ï¿½ï¿½Ä¬ï¿½Ïµï¿½Ô²ï¿½ï¿½ï¿½ï¿½Ö¸Ê¾ï¿½ï¿½
             landingIndicator = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             landingIndicator.name = "LandingIndicator";
 
-            // ÉèÖÃ²ÄÖÊºÍÑÕÉ«
+            // ï¿½ï¿½ï¿½Ã²ï¿½ï¿½Êºï¿½ï¿½ï¿½É«
             Material mat = new Material(Shader.Find("Standard"));
             mat.color = new Color(1f, 0.5f, 0f, 0.7f);
-            mat.SetFloat("_Mode", 3); // ÉèÖÃÎªTransparentÄ£Ê½
+            mat.SetFloat("_Mode", 3); // ï¿½ï¿½ï¿½ï¿½ÎªTransparentÄ£Ê½
             mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
             mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
             mat.EnableKeyword("_ALPHABLEND_ON");
@@ -103,7 +106,7 @@ public class FPSThrowableLight : MonoBehaviour
 
             landingIndicator.GetComponent<Renderer>().material = mat;
 
-            // ÒÆ³ýÅö×²Æ÷
+            // ï¿½Æ³ï¿½ï¿½ï¿½×²ï¿½ï¿½
             Destroy(landingIndicator.GetComponent<Collider>());
         }
 
@@ -112,25 +115,25 @@ public class FPSThrowableLight : MonoBehaviour
 
     private void Update()
     {
-        // ¼ì²âÓÒ¼ü°´ÏÂ
-        if (Input.GetMouseButtonDown(1))
+        // ï¿½ï¿½ï¿½ï¿½Ò¼ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (throwAction.WasPressedThisFrame())
         {
             StartHolding();
         }
 
-        // ¼ì²âÓÒ¼ü°´×¡
-        if (Input.GetMouseButton(1) && isHoldingRightClick && !isThrowing)
+        // ï¿½ï¿½ï¿½ï¿½Ò¼ï¿½ï¿½ï¿½×¡
+        if (throwAction.IsPressed() && isHoldingRightClick && !isThrowing)
         {
             UpdateHolding();
         }
 
-        // ¼ì²âÓÒ¼üËÉ¿ª
-        if (Input.GetMouseButtonUp(1) && isHoldingRightClick && !isThrowing)
+        // ï¿½ï¿½ï¿½ï¿½Ò¼ï¿½ï¿½É¿ï¿½
+        if (throwAction.WasReleasedThisFrame() && isHoldingRightClick && !isThrowing)
         {
             StartThrowing();
         }
 
-        // ¸üÐÂÍ¶ÖÀ¹ý³Ì
+        // ï¿½ï¿½ï¿½ï¿½Í¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         if (isThrowing && currentCube != null)
         {
             UpdateThrowing();
@@ -142,17 +145,17 @@ public class FPSThrowableLight : MonoBehaviour
         isHoldingRightClick = true;
         isThrowing = false;
 
-        // ÔÚÖ¸¶¨Î»ÖÃÉú³ÉCube
+        // ï¿½ï¿½Ö¸ï¿½ï¿½Î»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Cube
         if (cubePrefab != null && currentCube == null)
         {
             currentCube = Instantiate(cubePrefab, cubeSpawnPoint.position, Quaternion.identity);
             currentCube.transform.SetParent(cubeSpawnPoint);
 
-            // ÎªCubeÌí¼ÓÍ¶ÖÀÐ§¹û
+            // ÎªCubeï¿½ï¿½ï¿½ï¿½Í¶ï¿½ï¿½Ð§ï¿½ï¿½
             MeshRenderer cubeRenderer = currentCube.GetComponent<MeshRenderer>();
             if (cubeRenderer != null)
             {
-                // ÉèÖÃ°ëÍ¸Ã÷²ÄÖÊ
+                // ï¿½ï¿½ï¿½Ã°ï¿½Í¸ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
                 Material cubeMat = cubeRenderer.material;
                 Color cubeColor = cubeMat.color;
                 cubeColor.a = 0.8f;
@@ -160,7 +163,7 @@ public class FPSThrowableLight : MonoBehaviour
             }
         }
 
-        // ÏÔÊ¾Å×ÎïÏßºÍÂäµØÖ¸Ê¾Æ÷
+        // ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½ï¿½ßºï¿½ï¿½ï¿½ï¿½Ö¸Ê¾ï¿½ï¿½
         trajectoryLine.enabled = true;
         landingIndicator.SetActive(true);
     }
@@ -169,12 +172,12 @@ public class FPSThrowableLight : MonoBehaviour
     {
         if (currentCube != null)
         {
-            // ¸üÐÂCubeÎ»ÖÃ£¨¸úËæÉú³Éµã£©
+            // ï¿½ï¿½ï¿½ï¿½CubeÎ»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Éµã£©
             currentCube.transform.position = cubeSpawnPoint.position;
             currentCube.transform.rotation = cubeSpawnPoint.rotation;
         }
 
-        // ¸üÐÂÅ×ÎïÏßÔ¤²â
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô¤ï¿½ï¿½
         UpdateTrajectory();
     }
 
@@ -182,10 +185,10 @@ public class FPSThrowableLight : MonoBehaviour
     {
         if (trajectoryLine == null || currentCube == null) return;
 
-        // ¼ÆËãÍ¶ÖÀ·½Ïò
+        // ï¿½ï¿½ï¿½ï¿½Í¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
         throwDirection = CalculateThrowDirection();
 
-        // ¼ÆËãÅ×ÎïÏßµã
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ßµï¿½
         trajectoryPointsList.Clear();
         cubeStartPosition = currentCube.transform.position;
 
@@ -202,7 +205,7 @@ public class FPSThrowableLight : MonoBehaviour
 
             trajectoryPointsList.Add(currentPos);
 
-            // ¼ì²éÅö×²
+            // ï¿½ï¿½ï¿½ï¿½ï¿½×²
             if (i > 0)
             {
                 Vector3 lastPoint = trajectoryPointsList[i - 1];
@@ -212,12 +215,12 @@ public class FPSThrowableLight : MonoBehaviour
                 RaycastHit hit;
                 if (Physics.Raycast(lastPoint, rayDir.normalized, out hit, rayDist))
                 {
-                    // ¼ÇÂ¼ÂäµØÎ»ÖÃ
+                    // ï¿½ï¿½Â¼ï¿½ï¿½ï¿½Î»ï¿½ï¿½
                     landingPosition = hit.point;
                     trajectoryPointsList[i] = landingPosition;
                     trajectoryLine.positionCount = i + 1;
 
-                    // ¸üÐÂÂäµØÖ¸Ê¾Æ÷
+                    // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸Ê¾ï¿½ï¿½
                     UpdateLandingIndicator(landingPosition, hit.normal);
 
                     hitSomething = true;
@@ -225,7 +228,7 @@ public class FPSThrowableLight : MonoBehaviour
                 }
             }
 
-            // ¼ì²é×î´ó¾àÀë
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
             float distanceFromStart = Vector3.Distance(currentPos, cameraTransform.position);
             if (distanceFromStart > maxThrowDistance)
             {
@@ -233,7 +236,7 @@ public class FPSThrowableLight : MonoBehaviour
                 trajectoryPointsList[i] = landingPosition;
                 trajectoryLine.positionCount = i + 1;
 
-                // ¸üÐÂÂäµØÖ¸Ê¾Æ÷
+                // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸Ê¾ï¿½ï¿½
                 UpdateLandingIndicator(landingPosition, Vector3.up);
 
                 hitSomething = true;
@@ -248,7 +251,7 @@ public class FPSThrowableLight : MonoBehaviour
             UpdateLandingIndicator(landingPosition, Vector3.up);
         }
 
-        // ¸üÐÂLineRenderer
+        // ï¿½ï¿½ï¿½ï¿½LineRenderer
         trajectoryLine.SetPositions(trajectoryPointsList.ToArray());
     }
 
@@ -256,7 +259,7 @@ public class FPSThrowableLight : MonoBehaviour
     {
         if (cameraTransform == null) return Vector3.forward;
 
-        // ½áºÏÏà»úÇ°ÏòºÍ¸ß¶È
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç°ï¿½ï¿½Í¸ß¶ï¿½
         Vector3 direction = cameraTransform.forward;
         direction.y += throwHeight;
 
@@ -269,18 +272,18 @@ public class FPSThrowableLight : MonoBehaviour
 
         landingIndicator.transform.position = position + normal * 0.1f;
 
-        // ¸ù¾Ý·¨Ïß·½ÏòÐý×ªÖ¸Ê¾Æ÷
+        // ï¿½ï¿½ï¿½Ý·ï¿½ï¿½ß·ï¿½ï¿½ï¿½ï¿½ï¿½×ªÖ¸Ê¾ï¿½ï¿½
         if (normal != Vector3.up)
         {
             landingIndicator.transform.rotation = Quaternion.LookRotation(normal);
-            landingIndicator.transform.Rotate(90f, 0f, 0f); // ÈÃÔ²ÖùÌåÆ½·ÅÔÚ±íÃæÉÏ
+            landingIndicator.transform.Rotate(90f, 0f, 0f); // ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½Æ½ï¿½ï¿½ï¿½Ú±ï¿½ï¿½ï¿½ï¿½ï¿½
         }
         else
         {
             landingIndicator.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
         }
 
-        // ¸ù¾Ý¾àÀëµ÷ÕûÖ¸Ê¾Æ÷´óÐ¡
+        // ï¿½ï¿½ï¿½Ý¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸Ê¾ï¿½ï¿½ï¿½ï¿½Ð¡
         float distance = Vector3.Distance(position, cameraTransform.position);
         float scale = Mathf.Lerp(0.3f, 1.5f, distance / maxThrowDistance);
         landingIndicator.transform.localScale = new Vector3(scale, 0.05f, scale);
@@ -292,10 +295,10 @@ public class FPSThrowableLight : MonoBehaviour
 
         isThrowing = true;
 
-        // ÈÃCubeÍÑÀë¸¸¼¶
+        // ï¿½ï¿½Cubeï¿½ï¿½ï¿½ë¸¸ï¿½ï¿½
         currentCube.transform.SetParent(null);
 
-        // Òþ²ØÅ×ÎïÏßºÍÖ¸Ê¾Æ÷
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ßºï¿½Ö¸Ê¾ï¿½ï¿½
         trajectoryLine.enabled = false;
         landingIndicator.SetActive(false);
     }
@@ -304,31 +307,31 @@ public class FPSThrowableLight : MonoBehaviour
     {
         if (currentCube == null) return;
 
-        // ÑØ×ÅÅ×ÎïÏßÒÆ¶¯Cube
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½Cube
         Vector3 targetPos = GetNextPointOnTrajectory();
 
-        // ¼ÆËãÒÆ¶¯·½ÏòºÍÐý×ª
+        // ï¿½ï¿½ï¿½ï¿½ï¿½Æ¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½×ª
         Vector3 moveDirection = (targetPos - currentCube.transform.position).normalized;
         float moveDistance = cubeThrowSpeed * Time.deltaTime;
 
-        // ÒÆ¶¯Cube
+        // ï¿½Æ¶ï¿½Cube
         currentCube.transform.position = Vector3.MoveTowards(
             currentCube.transform.position,
             targetPos,
             moveDistance
         );
 
-        // ÈÃCubeÐý×ª£¨Ä£ÄâÍ¶ÖÀÐ§¹û£©
+        // ï¿½ï¿½Cubeï¿½ï¿½×ªï¿½ï¿½Ä£ï¿½ï¿½Í¶ï¿½ï¿½Ð§ï¿½ï¿½ï¿½ï¿½
         currentCube.transform.Rotate(500f * Time.deltaTime, 300f * Time.deltaTime, 200f * Time.deltaTime);
 
-        // ¼ì²éÊÇ·ñµ½´ïÂäµØÎ»ÖÃ
+        // ï¿½ï¿½ï¿½ï¿½Ç·ñµ½´ï¿½ï¿½ï¿½ï¿½Î»ï¿½ï¿½
         float distanceToLanding = Vector3.Distance(currentCube.transform.position, landingPosition);
         if (distanceToLanding < 0.5f)
         {
-            // µ½´ïÂäµØÎ»ÖÃ£¬Éú³ÉµÆ¹â
+            // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î»ï¿½Ã£ï¿½ï¿½ï¿½ï¿½ÉµÆ¹ï¿½
             CreateLightAtLanding();
 
-            // Ïú»ÙCube
+            // ï¿½ï¿½ï¿½ï¿½Cube
             Destroy(currentCube);
             currentCube = null;
 
@@ -341,7 +344,7 @@ public class FPSThrowableLight : MonoBehaviour
     {
         if (trajectoryPointsList.Count == 0) return landingPosition;
 
-        // ÕÒµ½µ±Ç°CubeÎ»ÖÃ×î½üµÄÅ×ÎïÏßµã
+        // ï¿½Òµï¿½ï¿½ï¿½Ç°CubeÎ»ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ßµï¿½
         int closestIndex = 0;
         float closestDistance = float.MaxValue;
 
@@ -355,7 +358,7 @@ public class FPSThrowableLight : MonoBehaviour
             }
         }
 
-        // ·µ»ØÏÂÒ»¸öµã£¨Èç¹û»¹ÓÐµÄ»°£©
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½ã£¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÐµÄ»ï¿½ï¿½ï¿½
         int nextIndex = Mathf.Min(closestIndex + 1, trajectoryPointsList.Count - 1);
         return trajectoryPointsList[nextIndex];
     }
@@ -364,7 +367,7 @@ public class FPSThrowableLight : MonoBehaviour
     {
         if (lightPrefab == null) return;
 
-        // ¼ì²éµØÃæ·¨Ïß
+        // ï¿½ï¿½ï¿½ï¿½ï¿½æ·¨ï¿½ï¿½
         RaycastHit hit;
         Vector3 spawnPos = landingPosition;
         Quaternion spawnRot = Quaternion.identity;
@@ -375,10 +378,10 @@ public class FPSThrowableLight : MonoBehaviour
             spawnRot = Quaternion.LookRotation(-hit.normal);
         }
 
-        // Éú³ÉµÆ¹â
+        // ï¿½ï¿½ï¿½ÉµÆ¹ï¿½
         GameObject light = Instantiate(lightPrefab, spawnPos, spawnRot);
 
-        // ¿ÉÑ¡£ºÌí¼ÓÉú³ÉÐ§¹û
+        // ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
         StartCoroutine(LightSpawnEffect(light));
     }
 
@@ -390,7 +393,7 @@ public class FPSThrowableLight : MonoBehaviour
             float originalIntensity = pointLight.intensity;
             pointLight.intensity = 0f;
 
-            // µ­ÈëÐ§¹û
+            // ï¿½ï¿½ï¿½ï¿½Ð§ï¿½ï¿½
             float fadeTime = 0.5f;
             float elapsedTime = 0f;
 
@@ -408,7 +411,7 @@ public class FPSThrowableLight : MonoBehaviour
 
     private void OnDestroy()
     {
-        // ÇåÀí×ÊÔ´
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´
         if (currentCube != null)
         {
             Destroy(currentCube);
@@ -425,7 +428,7 @@ public class FPSThrowableLight : MonoBehaviour
         }
     }
 
-    // ÔÚ±à¼­Æ÷ÖÐ¿ÉÊÓ»¯Éú³Éµã
+    // ï¿½Ú±à¼­ï¿½ï¿½ï¿½Ð¿ï¿½ï¿½Ó»ï¿½ï¿½ï¿½ï¿½Éµï¿½
     private void OnDrawGizmosSelected()
     {
         if (cubeSpawnPoint != null)
