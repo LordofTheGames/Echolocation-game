@@ -11,10 +11,10 @@ public class EcholocationManager : MonoBehaviour
     public enum VisualMode { Dots, MeshGrid };
 
     [Header("Grid Visualisation")]
-    public VisualMode currentMode = VisualMode.MeshGrid;
+    public VisualMode currentMode = VisualMode.Dots;
 
     [Header("Scanner Settings")]
-    public int raysPerScan = 4000;          // Number of rays fired for a single scan
+    public int raysPerScan = 20000;          // Number of rays fired for a single scan
     public float maxDistance = 50f;         // Max distance rays can travel
     public LayerMask scanLayers;
 
@@ -25,9 +25,9 @@ public class EcholocationManager : MonoBehaviour
     [Tooltip("Controls the size of the quad 'spotlight' in Grid mode.")]
     public float gridQuadSize = 5.0f;
     [Tooltip("How far to pull the quad/'window' from the hitpoint (in metres) - higher = better for concave areas.")]
-    public float quadOffset = 0.5f;
+    public float quadOffset = 0.1f;
     [Tooltip("How far from the quad/'window' the grid will project the grid (how far surfaces can be before the grid isn't painted on them).")]
-    public float gridDepth = 1.0f;
+    public float gridDepth = 10.0f;
 
     [Header("References")]
     public Transform playerCamera;
@@ -106,15 +106,15 @@ public class EcholocationManager : MonoBehaviour
         scannerMaterial.SetFloat("_Falloff", quadOffset + gridDepth); // set the depth limit form the quad/window - dependent on the quad offset from the wall and grid depth so offset doesn't stop it from scanning surfaces if too high
 
         // Switch visualisation mode logic - checks which is selected
-        if (currentMode == VisualMode.Dots)
+        if (currentMode == VisualMode.MeshGrid)
         {
-            scannerMaterial.SetTexture("_MainTex", dotTexture); // Send the dot texture to the shader
-            scannerMaterial.SetFloat("_UseMesh", 0);            // Send 0 to the "_UseMesh" toggle in the shader (0 = false/unchecked)
+            scannerMaterial.SetTexture("_MainTex", gridTexture);    // Send the grid texture to the shader
+            scannerMaterial.SetFloat("_UseMesh", 1);                // Send 1 to the "_UseMesh" toggle in the shader (1 = true/checked)
         }
-        else // Must be grid mode
+        else // Must be dot mode
         {
-            scannerMaterial.SetTexture("_MainTex", gridTexture); // Send the mesh grid texture to the shader
-            scannerMaterial.SetFloat("_UseMesh", 1);            // Send 1 to the "_UseMesh" toggle in the shader (1 = true/checked)
+            scannerMaterial.SetTexture("_MainTex", dotTexture); // Send the mesh grid texture to the shader
+            scannerMaterial.SetFloat("_UseMesh", 0);            // Send 0 to the "_UseMesh" toggle in the shader (0 = false/unchecked)
         }
     }
 

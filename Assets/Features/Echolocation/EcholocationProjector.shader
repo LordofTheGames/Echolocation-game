@@ -9,7 +9,7 @@ Shader "Echolocation/EcholocationProjector"
         _AlphaMask ("Spotlight Mask (Soft Circle)", 2D) = "white" {}    // "Spotlight" for lighting up sections of surfaces
 
         [Header(Grid Visualisation)]
-        [Toggle] _UseMesh ("Use Mesh Grid", Float) = 1                  // Toggle (appears as checkbox - check = 1/true, no check = 0/false) - defaults to mesh mode
+        [Toggle] _UseMesh ("Use Mesh Grid", Float) = 0                  // Toggle (appears as checkbox - check = 1/true, no check = 0/false) - defaults to dot mode
         _GridTiling("Mesh Grid Density", Float) = 0.2                   // Controls grid density/size of squares, higher = more denser/smaller squares
 
         [Header(Depth and Fade)]
