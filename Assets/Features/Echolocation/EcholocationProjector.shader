@@ -14,10 +14,6 @@ Shader "Echolocation/EcholocationProjector"
 
         [Header(Depth and Fade)]
         _Falloff("Depth Projection Limit", Float) = 1.5                 // Limits how "far behind" the "window" for the mesh grid visualisation we will look for object surfaces to light up
-
-        [Header(Edge Highlighting)]
-        _FresnelPower("Fresnel Sharpness", Range(0.5, 8.0)) = 3.0       // How "spreadout" the effect is - in our case higher value = sharper gridlines
-        _FresnelBoost("Frsenel Intensity", Range(0.0, 2.0)) = 1.0       // How bright the effect is
     }
     SubShader
     {
@@ -67,12 +63,16 @@ Shader "Echolocation/EcholocationProjector"
             sampler2D _MainTex;
             float4 _MainTex_ST;                             // Scale and Translation - tiling and offset, respectively, of the texture from inspector in (x, y, z, w), (x, y) = tiling, (z, w) = offset
             sampler2D _AlphaMask;
-            float4 _Color;
-            float _UseMesh;
-            float _GridTiling;
-            float _Falloff;
-            float _FresnelPower;
-            float _FresnelBoost;
+
+            cbuffer UnityPerMaterial 
+            {
+                float4 _Color;
+                float _UseMesh;
+                float _GridTiling;
+                float _Falloff;
+                float _FresnelPower;
+                float _FresnelBoost;
+            }
 
             // Vertex shader
             v2f vert (appdata v, uint instanceID : SV_InstanceID) // intanceID  is the ID for each instance of the quad mesh/dot - for looking up the correct position in _InstanceMatrices
@@ -133,6 +133,10 @@ Shader "Echolocation/EcholocationProjector"
                 {
                     // Using Triplanar Mapping for mesh grid
 
+                    float3 weights = abs(pixelNormal);                          // Find which "direction" (front, side, or top) has the most impact
+                    weights = pow(weights, 8.0);                                // Male the blending of gridlines "sharp" - higher power = sharper transition
+                    weights = weights / (weights.x + weights.y + weights.z);    // Normalise weights so they sum to 1
+
                     // Project the grid texture from front (xy), top (xz), and side (zy) 
                     // Multiply by _GridTiling to scale the squares up/down
                     float2 uvFront = geometryWorldPos.xy * _GridTiling;
@@ -144,8 +148,8 @@ Shader "Echolocation/EcholocationProjector"
                     fixed4 colTop = tex2D(_MainTex, uvTop);
                     fixed4 colSide = tex2D(_MainTex, uvSide);
 
-                    // Combine the three samples 
-                    patternColour = max(colFront, max(colTop, colSide)); // Use max to combine for sharp gridlines
+                    // Combine the three samples using the weights  
+                    patternColour = colSide * weights.x + colTop * weights.y + colFront * weights.z;
                 }
                 else
                 {
@@ -154,18 +158,11 @@ Shader "Echolocation/EcholocationProjector"
                     patternColour = tex2D(_MainTex, i.uv); // Use Quad's standard UV to keep dot perfectly round in the centre
                 }
 
-                // Step 6: Fresnel effect (glowing/highlighted edges)
+                // Step 6: combine everything
 
-                float3 geoViewDir = normalize(_WorldSpaceCameraPos - geometryWorldPos);     // Get direction from the surface back to the camera
-                float NdotV = saturate(dot(pixelNormal, geoViewDir));                       // Calculate the angle between the surface's normal and the camera and clamp to range 0.0 (glancing angle - edge) to 1.0 (facing directly at camera)
-                float fresnelTerm = pow(1.0 - NdotV, _FresnelPower);                        // Invert NdotV (so edges become 1.0 - bright), and raise to _FresnelPower to make sharper
-                float4 highlight = fresnelTerm * _FresnelBoost * _Color;                   // Multiply by inensity and colour (tint), to get final glow colour
-
-                // Step 7: combine everything
-
-                float spotMask = tex2D(_AlphaMask, i.uv).a;                 // Read the soft circle mask texture to trim the square edges of the quad
-                fixed4 finalCol = (patternColour * _Color) + highlight;    // Add the grid pattern colour + Fresnel glow colour
-                finalCol.a *= spotMask * depthAlpha;                        // Apply transparency - fade out if either outside "spotlight" circle or too far from the "window"/quad
+                float spotMask = tex2D(_AlphaMask, i.uv).a;     // Read the soft circle mask texture to trim the square edges of the quad
+                fixed4 finalCol = patternColour * _Color;       // Add the grid pattern colour
+                finalCol.a *= depthAlpha * spotMask;            // Apply transparency - fade out if either outside "spotlight" circle or too far from the "window"/quad
 
                 return finalCol;
             }

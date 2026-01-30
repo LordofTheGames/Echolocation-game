@@ -1,7 +1,7 @@
 using UnityEngine;
 using Unity.Collections;        // Native collections (NativeArray) for high-performance memory management
 using Unity.Jobs;               // The job system - allows us to run code on multiple CPU cores
-using Unity.Mathematics;        // Advanced math library - for matrix math
+using UnityEngine.InputSystem;  // Input system that makes keybinds for actions, and can have modes such as keyboard+mouse, controller, etc.
 
 public class EcholocationManager : MonoBehaviour
 {
@@ -14,7 +14,6 @@ public class EcholocationManager : MonoBehaviour
     public VisualMode currentMode = VisualMode.MeshGrid;
 
     [Header("Scanner Settings")]
-    public KeyCode triggerKey = KeyCode.E;  // Temporary key to press to fire rays for basic echolocation implementation
     public int raysPerScan = 4000;          // Number of rays fired for a single scan
     public float maxDistance = 50f;         // Max distance rays can travel
     public LayerMask scanLayers;
@@ -31,6 +30,7 @@ public class EcholocationManager : MonoBehaviour
     public float gridDepth = 1.0f;
 
     [Header("References")]
+    public Transform playerCamera;
     public Mesh quadMesh;               // Holds the 3D shape data (vertices and triangles) - we're using a simple flat quad
     public Material scannerMaterial;    // Holds the Shader and Textures
 
@@ -40,7 +40,7 @@ public class EcholocationManager : MonoBehaviour
     public Texture softMask;
 
     
-
+    InputAction echolocateAction;
 
     // Hidden GPU variables
 
@@ -64,6 +64,8 @@ public class EcholocationManager : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        echolocateAction = InputSystem.actions.FindAction("Echolocate");
+
         instanceMatrices = new Matrix4x4[raysPerScan];                                                      // Intialise theh array to hold "raysPerScan" number of matrices (positions)
         matrixBuffer = new ComputeBuffer(raysPerScan, 64);                                                  // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
         argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments); // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
@@ -82,8 +84,8 @@ public class EcholocationManager : MonoBehaviour
     {
         UpdateMaterialSettings(); // Call every from so that if you change the dropdown while playing it changes instantly
 
-        // Check if player pressed 'E' this frame - fire rays to perform scan
-        if (Input.GetKeyDown(triggerKey))
+        // Check if player pressed the corresponding button this frame - fire rays to perform scan
+        if (echolocateAction.IsPressed())
         {
             PerformScan();
         }
@@ -141,18 +143,24 @@ public class EcholocationManager : MonoBehaviour
         commands = new NativeArray<RaycastCommand>(raysPerScan, Allocator.TempJob); // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
         results = new NativeArray<RaycastHit>(raysPerScan, Allocator.TempJob);
 
-        Vector3 origin = transform.position; // Get the current position of the player/scanner
+        Vector3 origin = playerCamera.position; // Get the current position of the player/scanner
 
         // Prepare raycast commands
         for (int i = 0; i < raysPerScan; i++)
         {
+            // Get the standard direction (always points world north)
+            Vector3 localDir = GetFibonacciSphereDirection(i, raysPerScan);
+
+            // Convert to camera space/rotation
+            Vector3 worldDir = playerCamera.rotation * localDir;
+
             // Set up the settings package
             QueryParameters queryParams = QueryParameters.Default;
             queryParams.layerMask = scanLayers;                                         // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
             queryParams.hitBackfaces = false;                                           // Dont't hit the insides of objects
 
             Vector3 dir = GetFibonacciSphereDirection(i, raysPerScan);                  // Get the "perfect" direction for this specific ray number
-            commands[i] = new RaycastCommand(origin, dir, queryParams, maxDistance);    // Start at origin, go in direciton of dir, use these settings, limit distance
+            commands[i] = new RaycastCommand(origin, worldDir, queryParams, maxDistance);    // Start at origin, go in direciton of dir, use these settings, limit distance
         }
 
         JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
@@ -168,7 +176,7 @@ public class EcholocationManager : MonoBehaviour
             if (results[i].collider != null)
             {
                 RaycastHit hit = results[i];                                                                        // Get hit data
-                Quaternion rotation = Quaternion.LookRotation(hit.normal);                                          // Create a rotation that looks "up" away from the surface normal - makes hte quad lie flat on the wall
+                Quaternion rotation = Quaternion.LookRotation(-hit.normal);                                         // Create a rotation that looks "up" away from the surface normal - makes hte quad lie flat on the wall
                 Vector3 position = hit.point + (hit.normal * quadOffset);                                           // Calculate position of the quad - hitpoint + offset
                 instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * currentSize);    // Create the matrix (position, rotation, scale) for this instance
                 activeHitCount++;                                                                                   // Increment the counter
@@ -176,21 +184,24 @@ public class EcholocationManager : MonoBehaviour
 
         }
 
+        // Always set the arguments so incorrect values from previous calls of perform scan and kept
+        // Set the arguments for the indirect draw call
+        args[0] = (uint)quadMesh.GetIndexCount(0);  // How many vertices per mesh
+        args[1] = (uint)activeHitCount;             // How many meshes to draw total
+        args[2] = (uint)quadMesh.GetIndexStart(0);  // Start of the mesh index
+        args[3] = (uint)quadMesh.GetBaseVertex(0);  // Base vertex location
+        // 5th arg is left to default 0 (it's an offset) and is added to SV_InstanceID in the shader
+
+        argsBuffer.SetData(args); // Send arguments to the args buffer
+
         // Only upload to GPU if something was actually hit
         if (activeHitCount > 0)
         {
-            //zeroes are, respectively, source index (start reading at beginning of C# array) and destination index (start writing at the beginning of the GPU buffer)
+            // Zeroes are, respectively, source index (start reading at beginning of C# array) and destination index (start writing at the beginning of the GPU buffer)
             matrixBuffer.SetData(instanceMatrices, 0, 0, activeHitCount); // Send the matrices to the GPU buffer
-            
-            // Set the arguments for the indirect draw call
-            args[0] = (uint)quadMesh.GetIndexCount(0);  // How many vertices per mesh
-            args[1] = (uint)activeHitCount;             // How many meshes to draw total
-            args[2] = (uint)quadMesh.GetIndexStart(0);  // Start of the mesh index
-            args[3] = (uint)quadMesh.GetBaseVertex(0);  // Base vertex location
-            // 5th arg is left to default 0 (it's an offset) and is added to SV_InstanceID in the shader
-
-            argsBuffer.SetData(args); // Send argumnts to the args buffer
         }
+
+        Debug.Log("Scan fired! Hits: " + activeHitCount);
 
         // Clean up memory to prevent leaks
         commands.Dispose();
@@ -205,10 +216,11 @@ public class EcholocationManager : MonoBehaviour
         // Issue the draw command - "DrawMeshInstancedIndirect" is the most efficient way to draw millions of objects
         // Reads the count from args buffer instead of CPU telling it a number
         // In order paramters mean/are (use this shape, 0 - use the first sub-mesh, paint it with this shader, (explained below), use the argsBuffer to find how many to draw)
-        // "Bounds(Vector3.one, Vector3.one * 1000)" -  Is a safety net, normally Unity calculates the size of the object to decide if it's on screen, if it's behind you it culls it for performance
+        // "Bounds(playerCamera.position, Vector3.one * 1000)" -  Is a safety net, normally Unity calculates the size of the object to decide if it's on screen, if it's behind you it culls it for performance
         // Due to Indirect, positions are calculated on the GPU, so Unity's CPU has no idea where dots/grid are (behind or in front)
-        // Fix - create a giant, fake bounding box that is 1000 metres wide, Unity asks if this giant box is on screen and the answer is almost certainly yes, so the rest can easily be left to the GPU 
-        Graphics.DrawMeshInstancedIndirect(quadMesh, 0, scannerMaterial, new Bounds(Vector3.zero, Vector3.one * 1000), argsBuffer);
+        // Fix - create a giant, fake bounding box that is 1000 metres wide centred on and follows the player (because the Echolocation system is attached to player in the hirearchy in Unity)
+        // Unity asks if this giant box is on screen and the answer is almost certainly yes, so the rest can easily be left to the GPU 
+        Graphics.DrawMeshInstancedIndirect(quadMesh, 0, scannerMaterial, new Bounds(playerCamera.position, Vector3.one * 1000), argsBuffer);
     }
 
     // Runs when the object is deleted or the game stops
