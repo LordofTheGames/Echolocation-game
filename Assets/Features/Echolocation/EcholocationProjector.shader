@@ -159,12 +159,12 @@ Shader "Echolocation/EcholocationProjector"
                 float3 geoViewDir = normalize(_WorldSpaceCameraPos - geometryWorldPos);     // Get direction from the surface back to the camera
                 float NdotV = saturate(dot(pixelNormal, geoViewDir));                       // Calculate the angle between the surface's normal and the camera and clamp to range 0.0 (glancing angle - edge) to 1.0 (facing directly at camera)
                 float fresnelTerm = pow(1.0 - NdotV, _FresnelPower);                        // Invert NdotV (so edges become 1.0 - bright), and raise to _FresnelPower to make sharper
-                float4 highlight = fresnelTerm * _FresnelBoost * _Colour;                   // Multiply by inensity and colour (tint), to get final glow colour
+                float4 highlight = fresnelTerm * _FresnelBoost * _Color;                   // Multiply by inensity and colour (tint), to get final glow colour
 
                 // Step 7: combine everything
 
                 float spotMask = tex2D(_AlphaMask, i.uv).a;                 // Read the soft circle mask texture to trim the square edges of the quad
-                fixed4 finalCol = (patternColour * _Colour) + highlight;    // Add the grid pattern colour + Fresnel glow colour
+                fixed4 finalCol = (patternColour * _Color) + highlight;    // Add the grid pattern colour + Fresnel glow colour
                 finalCol.a *= spotMask * depthAlpha;                        // Apply transparency - fade out if either outside "spotlight" circle or too far from the "window"/quad
 
                 return finalCol;
