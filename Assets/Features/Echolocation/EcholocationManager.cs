@@ -85,7 +85,7 @@ public class EcholocationManager : MonoBehaviour
         UpdateMaterialSettings(); // Call every from so that if you change the dropdown while playing it changes instantly
 
         // Check if player pressed the corresponding button this frame - fire rays to perform scan
-        if (echolocateAction.IsPressed())
+        if (echolocateAction.WasPressedThisFrame())
         {
             PerformScan();
         }
@@ -149,10 +149,11 @@ public class EcholocationManager : MonoBehaviour
         for (int i = 0; i < raysPerScan; i++)
         {
             // Get the standard direction (always points world north)
-            Vector3 localDir = GetFibonacciSphereDirection(i, raysPerScan);
+            // Vector3 localDir = GetFibonacciSphereDirection(i, raysPerScan); // Fibonacci mode
+            Vector3 localDir = UnityEngine.Random.onUnitSphere;
 
             // Convert to camera space/rotation
-            Vector3 worldDir = playerCamera.rotation * localDir;
+            Vector3 worldDir = playerCamera.rotation * localDir; // Required by Fibonacci, and will be required by cones shapes when done
 
             // Set up the settings package
             QueryParameters queryParams = QueryParameters.Default;
