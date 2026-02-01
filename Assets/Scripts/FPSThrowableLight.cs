@@ -6,11 +6,9 @@ public class FPSThrowableLight : MonoBehaviour
 {
     [Header("Throwing settings")]
     [SerializeField] private GameObject cubePrefab;
-    [SerializeField] private GameObject lightPrefab;
     [SerializeField] private float throwForce = 20f;
     [SerializeField] private float throwHeight = 1.5f;
     [SerializeField] private float maxThrowDistance = 50f;
-    [SerializeField] private float cubeThrowSpeed = 15f;
 
     [Header("Position settings")]
     [SerializeField] private Transform cubeSpawnPoint;       
@@ -18,8 +16,7 @@ public class FPSThrowableLight : MonoBehaviour
 
     [Header("Parabolic curve settings")]
     [SerializeField] private Material trajectoryMaterial;    
-    [SerializeField] private Color trajectoryStartColor = Color.yellow;
-    [SerializeField] private Color trajectoryEndColor = Color.red;
+    [SerializeField] private Color trajectoryLineColor = new Color(1f, 0.2f, 0.2f, 1f); // bright red
     [SerializeField] private float trajectoryWidth = 0.05f;
     [SerializeField] private int trajectoryPoints = 50;       
     [SerializeField] private float predictionTime = 3f;       
@@ -72,8 +69,8 @@ public class FPSThrowableLight : MonoBehaviour
         trajectoryLine.positionCount = trajectoryPoints;
         trajectoryLine.startWidth = trajectoryWidth;
         trajectoryLine.endWidth = trajectoryWidth * 0.5f;
-        trajectoryLine.startColor = trajectoryStartColor;
-        trajectoryLine.endColor = trajectoryEndColor;
+        trajectoryLine.startColor = trajectoryLineColor;
+        trajectoryLine.endColor = trajectoryLineColor;
         trajectoryLine.material = trajectoryMaterial != null ? trajectoryMaterial :
             new Material(Shader.Find("Sprites/Default"));
         trajectoryLine.textureMode = LineTextureMode.Tile;
@@ -124,11 +121,6 @@ public class FPSThrowableLight : MonoBehaviour
         {
             StartThrowing();
         }
-
-        if (isThrowing && currentCube != null)
-        {
-            UpdateThrowing();
-        }
     }
 
     private void StartHolding()
@@ -140,6 +132,11 @@ public class FPSThrowableLight : MonoBehaviour
         {
             currentCube = Instantiate(cubePrefab, cubeSpawnPoint.position, Quaternion.identity);
             currentCube.transform.SetParent(cubeSpawnPoint);
+
+            // Keep rock kinematic while held so it follows the hand; enabled on throw
+            Rigidbody rb = currentCube.GetComponent<Rigidbody>();
+            if (rb != null)
+                rb.isKinematic = true;
 
             MeshRenderer cubeRenderer = currentCube.GetComponent<MeshRenderer>();
             if (cubeRenderer != null)
@@ -201,7 +198,7 @@ public class FPSThrowableLight : MonoBehaviour
                     trajectoryPointsList[i] = landingPosition;
                     trajectoryLine.positionCount = i + 1;
 
-                    UpdateLandingIndicator(landingPosition, hit.normal);
+                    UpdateLandingIndicator(landingPosition, hit.normal, facePlayer: false);
 
                     hitSomething = true;
                     break;
@@ -215,7 +212,7 @@ public class FPSThrowableLight : MonoBehaviour
                 trajectoryPointsList[i] = landingPosition;
                 trajectoryLine.positionCount = i + 1;
 
-                UpdateLandingIndicator(landingPosition, Vector3.up);
+                UpdateLandingIndicator(landingPosition, Vector3.up, facePlayer: true);
 
                 hitSomething = true;
                 break;
@@ -226,7 +223,8 @@ public class FPSThrowableLight : MonoBehaviour
         {
             trajectoryLine.positionCount = trajectoryPoints;
             landingPosition = trajectoryPointsList[trajectoryPointsList.Count - 1];
-            UpdateLandingIndicator(landingPosition, Vector3.up);
+            // When no surface hit, circle should face the player
+            UpdateLandingIndicator(landingPosition, Vector3.up, facePlayer: true);
         }
 
         trajectoryLine.SetPositions(trajectoryPointsList.ToArray());
@@ -242,20 +240,23 @@ public class FPSThrowableLight : MonoBehaviour
         return direction.normalized;
     }
 
-    private void UpdateLandingIndicator(Vector3 position, Vector3 normal)
+    private void UpdateLandingIndicator(Vector3 position, Vector3 normal, bool facePlayer = false)
     {
         if (landingIndicator == null) return;
 
         landingIndicator.transform.position = position + normal * 0.1f;
 
-        if (normal != Vector3.up)
+        if (facePlayer)
         {
-            landingIndicator.transform.rotation = Quaternion.LookRotation(normal);
-            landingIndicator.transform.Rotate(90f, 0f, 0f);
+            // No surface hit - make circle face the player
+            Vector3 toPlayer = (cameraTransform.position - position).normalized;
+            landingIndicator.transform.rotation = Quaternion.FromToRotation(Vector3.up, toPlayer);
         }
         else
         {
-            landingIndicator.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+            // Surface hit - orient circle to lie on the surface
+            landingIndicator.transform.rotation = Quaternion.LookRotation(normal);
+            landingIndicator.transform.Rotate(90f, 0f, 0f);
         }
 
         float distance = Vector3.Distance(position, cameraTransform.position);
@@ -267,104 +268,23 @@ public class FPSThrowableLight : MonoBehaviour
     {
         if (!isHoldingRightClick || currentCube == null || isThrowing) return;
 
-        isThrowing = true;
-
         currentCube.transform.SetParent(null);
+
+        // Enable physics and apply throw force so the rock rolls naturally
+        Rigidbody rb = currentCube.GetComponent<Rigidbody>();
+        if (rb != null)
+        {
+            rb.isKinematic = false;
+            rb.AddForce(throwDirection * throwForce, ForceMode.Impulse);
+        }
+
+        // Release reference so the rock stays in the world; next throw will spawn a new one
+        currentCube = null;
 
         trajectoryLine.enabled = false;
         landingIndicator.SetActive(false);
-    }
-
-    private void UpdateThrowing()
-    {
-        if (currentCube == null) return;
-
-        Vector3 targetPos = GetNextPointOnTrajectory();
-
-        Vector3 moveDirection = (targetPos - currentCube.transform.position).normalized;
-        float moveDistance = cubeThrowSpeed * Time.deltaTime;
-
-        currentCube.transform.position = Vector3.MoveTowards(
-            currentCube.transform.position,
-            targetPos,
-            moveDistance
-        );
-
-        currentCube.transform.Rotate(500f * Time.deltaTime, 300f * Time.deltaTime, 200f * Time.deltaTime);
-
-        float distanceToLanding = Vector3.Distance(currentCube.transform.position, landingPosition);
-        if (distanceToLanding < 0.5f)
-        {
-            CreateLightAtLanding();
-            Destroy(currentCube);
-            currentCube = null;
-
-            isThrowing = false;
-            isHoldingRightClick = false;
-        }
-    }
-
-    private Vector3 GetNextPointOnTrajectory()
-    {
-        if (trajectoryPointsList.Count == 0) return landingPosition;
-
-        int closestIndex = 0;
-        float closestDistance = float.MaxValue;
-
-        for (int i = 0; i < trajectoryPointsList.Count; i++)
-        {
-            float dist = Vector3.Distance(currentCube.transform.position, trajectoryPointsList[i]);
-            if (dist < closestDistance)
-            {
-                closestDistance = dist;
-                closestIndex = i;
-            }
-        }
-
-        int nextIndex = Mathf.Min(closestIndex + 1, trajectoryPointsList.Count - 1);
-        return trajectoryPointsList[nextIndex];
-    }
-
-    private void CreateLightAtLanding()
-    {
-        if (lightPrefab == null) return;
-
-        RaycastHit hit;
-        Vector3 spawnPos = landingPosition;
-        Quaternion spawnRot = Quaternion.identity;
-
-        if (Physics.Raycast(landingPosition + Vector3.up * 2f, Vector3.down, out hit, 5f))
-        {
-            spawnPos = hit.point + hit.normal * 0.1f;
-            spawnRot = Quaternion.LookRotation(-hit.normal);
-        }
-
-        GameObject light = Instantiate(lightPrefab, spawnPos, spawnRot);
-
-        StartCoroutine(LightSpawnEffect(light));
-    }
-
-    private System.Collections.IEnumerator LightSpawnEffect(GameObject lightObj)
-    {
-        Light pointLight = lightObj.GetComponentInChildren<Light>();
-        if (pointLight != null)
-        {
-            float originalIntensity = pointLight.intensity;
-            pointLight.intensity = 0f;
-
-            float fadeTime = 0.5f;
-            float elapsedTime = 0f;
-
-            while (elapsedTime < fadeTime)
-            {
-                elapsedTime += Time.deltaTime;
-                float progress = elapsedTime / fadeTime;
-                pointLight.intensity = Mathf.Lerp(0f, originalIntensity, progress);
-                yield return null;
-            }
-
-            pointLight.intensity = originalIntensity;
-        }
+        isThrowing = false;
+        isHoldingRightClick = false;
     }
 
     private void OnDestroy()
