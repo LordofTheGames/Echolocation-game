@@ -18,8 +18,8 @@ public class FPSThrowableLight : MonoBehaviour
     [SerializeField] private Material trajectoryMaterial;    
     [SerializeField] private Color trajectoryLineColor = new Color(1f, 0.2f, 0.2f, 1f); // bright red
     [SerializeField] private float trajectoryWidth = 0.05f;
-    [SerializeField] private int trajectoryPoints = 50;       
-    [SerializeField] private float predictionTime = 3f;       
+    [SerializeField] private float trajectoryTimeStep = 0.02f;  // 每步时间，越小线越密
+    [SerializeField] private int maxTrajectorySteps = 500;      // 最大步数，防止无限循环
 
     [Header("Indicator settings")]
     [SerializeField] private GameObject landingIndicatorPrefab; 
@@ -66,7 +66,7 @@ public class FPSThrowableLight : MonoBehaviour
         GameObject lineObj = new GameObject("TrajectoryLine");
         trajectoryLine = lineObj.AddComponent<LineRenderer>();
 
-        trajectoryLine.positionCount = trajectoryPoints;
+        trajectoryLine.positionCount = 0;
         trajectoryLine.startWidth = trajectoryWidth;
         trajectoryLine.endWidth = trajectoryWidth * 0.5f;
         trajectoryLine.startColor = trajectoryLineColor;
@@ -171,63 +171,42 @@ public class FPSThrowableLight : MonoBehaviour
 
         trajectoryPointsList.Clear();
         cubeStartPosition = currentCube.transform.position;
+        trajectoryPointsList.Add(cubeStartPosition);
 
-        float timeStep = predictionTime / trajectoryPoints;
         Vector3 currentPos = cubeStartPosition;
         Vector3 currentVel = throwDirection * throwForce;
-
         bool hitSomething = false;
 
-        for (int i = 0; i < trajectoryPoints; i++)
+        for (int i = 0; i < maxTrajectorySteps; i++)
         {
-            currentVel += Physics.gravity * timeStep;
-            currentPos += currentVel * timeStep;
+            currentVel += Physics.gravity * trajectoryTimeStep;
+            currentPos += currentVel * trajectoryTimeStep;
+
+            Vector3 lastPoint = trajectoryPointsList[trajectoryPointsList.Count - 1];
+            Vector3 rayDir = currentPos - lastPoint;
+            float rayDist = rayDir.magnitude;
+
+            RaycastHit hit;
+            if (Physics.Raycast(lastPoint, rayDir.normalized, out hit, rayDist))
+            {
+                // 射线碰到地面或墙壁，轨迹线延伸到碰撞点
+                landingPosition = hit.point;
+                trajectoryPointsList.Add(landingPosition);
+                trajectoryLine.positionCount = trajectoryPointsList.Count;
+                trajectoryLine.SetPositions(trajectoryPointsList.ToArray());
+                UpdateLandingIndicator(landingPosition, hit.normal, facePlayer: false);
+                hitSomething = true;
+                return;
+            }
 
             trajectoryPointsList.Add(currentPos);
-
-            if (i > 0)
-            {
-                Vector3 lastPoint = trajectoryPointsList[i - 1];
-                Vector3 rayDir = currentPos - lastPoint;
-                float rayDist = rayDir.magnitude;
-
-                RaycastHit hit;
-                if (Physics.Raycast(lastPoint, rayDir.normalized, out hit, rayDist))
-                {
-                    landingPosition = hit.point;
-                    trajectoryPointsList[i] = landingPosition;
-                    trajectoryLine.positionCount = i + 1;
-
-                    UpdateLandingIndicator(landingPosition, hit.normal, facePlayer: false);
-
-                    hitSomething = true;
-                    break;
-                }
-            }
-
-            float distanceFromStart = Vector3.Distance(currentPos, cameraTransform.position);
-            if (distanceFromStart > maxThrowDistance)
-            {
-                landingPosition = currentPos;
-                trajectoryPointsList[i] = landingPosition;
-                trajectoryLine.positionCount = i + 1;
-
-                UpdateLandingIndicator(landingPosition, Vector3.up, facePlayer: true);
-
-                hitSomething = true;
-                break;
-            }
         }
 
-        if (!hitSomething)
-        {
-            trajectoryLine.positionCount = trajectoryPoints;
-            landingPosition = trajectoryPointsList[trajectoryPointsList.Count - 1];
-            // When no surface hit, circle should face the player
-            UpdateLandingIndicator(landingPosition, Vector3.up, facePlayer: true);
-        }
-
+        // 未碰到任何表面（超出最大步数），显示到最后一格并让圆圈面向玩家
+        trajectoryLine.positionCount = trajectoryPointsList.Count;
         trajectoryLine.SetPositions(trajectoryPointsList.ToArray());
+        landingPosition = trajectoryPointsList[trajectoryPointsList.Count - 1];
+        UpdateLandingIndicator(landingPosition, Vector3.up, facePlayer: true);
     }
 
     private Vector3 CalculateThrowDirection()
