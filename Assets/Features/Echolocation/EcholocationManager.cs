@@ -70,7 +70,7 @@ public class EcholocationManager : MonoBehaviour
         matrixBuffer = new ComputeBuffer(raysPerScan, 64);                                                  // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
         argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments); // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
 
-        // Make sure we didn't forget to assing textures
+        // Make sure we didn't forget to assign textures
         if (softMask != null && scannerMaterial != null) 
         {
             scannerMaterial.SetTexture("_AlphaMask", softMask);
@@ -82,7 +82,7 @@ public class EcholocationManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        UpdateMaterialSettings(); // Call every from so that if you change the dropdown while playing it changes instantly
+        UpdateMaterialSettings(); // Call every frame so that if you change the dropdown while playing it changes instantly
 
         // Check if player pressed the corresponding button this frame - fire rays to perform scan
         if (echolocateAction.WasPressedThisFrame())
@@ -103,7 +103,7 @@ public class EcholocationManager : MonoBehaviour
         // If the material is missing stop immediately to prevent a crash
         if (scannerMaterial == null) return;
 
-        scannerMaterial.SetFloat("_Falloff", quadOffset + gridDepth); // set the depth limit form the quad/window - dependent on the quad offset from the wall and grid depth so offset doesn't stop it from scanning surfaces if too high
+        scannerMaterial.SetFloat("_Falloff", quadOffset + gridDepth); // Set the depth limit form the quad/window - dependent on the quad offset from the wall and grid depth so offset doesn't stop it from scanning surfaces if too high
 
         // Switch visualisation mode logic - checks which is selected
         if (currentMode == VisualMode.MeshGrid)
@@ -122,7 +122,7 @@ public class EcholocationManager : MonoBehaviour
     // Returns a Vector3 direction
     Vector3 GetFibonacciSphereDirection(int index, int totalPoints)
     {
-        float goldenRatio = (1 + Mathf.Sqrt(5)) / 2;            // Calculate and store the golden ration which is essential for the pattern
+        float goldenRatio = (1 + Mathf.Sqrt(5)) / 2;            // Calculate and store the golden ratio
         float angleIncrement = 2 * Mathf.PI * goldenRatio;      // Calculate the angle step based on the golden ratio
         float t = (float)index / totalPoints;                   // Normalised height (from 0 to 1)
         float inclination = Mathf.Acos(1 - 2 * t);              // (arccos) Calculates inclination - up/down angle
@@ -153,15 +153,14 @@ public class EcholocationManager : MonoBehaviour
             Vector3 localDir = UnityEngine.Random.onUnitSphere;
 
             // Convert to camera space/rotation
-            Vector3 worldDir = playerCamera.rotation * localDir; // Required by Fibonacci, and will be required by cones shapes when done
+            Vector3 worldDir = playerCamera.rotation * localDir; // Required by Fibonacci, and will be required by cone shapes when done
 
             // Set up the settings package
             QueryParameters queryParams = QueryParameters.Default;
             queryParams.layerMask = scanLayers;                                         // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
             queryParams.hitBackfaces = false;                                           // Dont't hit the insides of objects
 
-            Vector3 dir = GetFibonacciSphereDirection(i, raysPerScan);                  // Get the "perfect" direction for this specific ray number
-            commands[i] = new RaycastCommand(origin, worldDir, queryParams, maxDistance);    // Start at origin, go in direciton of dir, use these settings, limit distance
+            commands[i] = new RaycastCommand(origin, worldDir, queryParams, maxDistance);    // Start at origin, go in direciton of worldDir, use these settings, limit distance
         }
 
         JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
@@ -177,7 +176,7 @@ public class EcholocationManager : MonoBehaviour
             if (results[i].collider != null)
             {
                 RaycastHit hit = results[i];                                                                        // Get hit data
-                Quaternion rotation = Quaternion.LookRotation(-hit.normal);                                         // Create a rotation that looks "up" away from the surface normal - makes hte quad lie flat on the wall
+                Quaternion rotation = Quaternion.LookRotation(-hit.normal);                                         // Create a rotation that looks "up" away from the surface normal - makes the quad lie flat on the wall
                 Vector3 position = hit.point + (hit.normal * quadOffset);                                           // Calculate position of the quad - hitpoint + offset
                 instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * currentSize);    // Create the matrix (position, rotation, scale) for this instance
                 activeHitCount++;                                                                                   // Increment the counter
@@ -185,7 +184,7 @@ public class EcholocationManager : MonoBehaviour
 
         }
 
-        // Always set the arguments so incorrect values from previous calls of perform scan and kept
+        // Always set the arguments so (incorrect) values from previous calls of perform scan aren't kept
         // Set the arguments for the indirect draw call
         args[0] = (uint)quadMesh.GetIndexCount(0);  // How many vertices per mesh
         args[1] = (uint)activeHitCount;             // How many meshes to draw total
@@ -214,13 +213,13 @@ public class EcholocationManager : MonoBehaviour
     {
         scannerMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);   // Tell the material where to find the position data (the matrix buffer)
 
-        // Issue the draw command - "DrawMeshInstancedIndirect" is the most efficient way to draw millions of objects
+        // Issue the draw command - "DrawMeshInstancedIndirect" is the most efficient way to draw lots of objects
         // Reads the count from args buffer instead of CPU telling it a number
-        // In order paramters mean/are (use this shape, 0 - use the first sub-mesh, paint it with this shader, (explained below), use the argsBuffer to find how many to draw)
+        // In order parameters mean/are (use this shape, 0 - use the first sub-mesh, paint it with this shader, (explained below), use the argsBuffer to find how many to draw)
         // "Bounds(playerCamera.position, Vector3.one * 1000)" -  Is a safety net, normally Unity calculates the size of the object to decide if it's on screen, if it's behind you it culls it for performance
         // Due to Indirect, positions are calculated on the GPU, so Unity's CPU has no idea where dots/grid are (behind or in front)
-        // Fix - create a giant, fake bounding box that is 1000 metres wide centred on and follows the player (because the Echolocation system is attached to player in the hirearchy in Unity)
-        // Unity asks if this giant box is on screen and the answer is almost certainly yes, so the rest can easily be left to the GPU 
+        // Fix - create a giant, fake bounding box that is 1000 metres wide centered on and follows the player (because the Echolocation system is attached to player in the hirearchy in Unity)
+        // Unity asks if this giant box is on screen and the answer is yes, so the rest can easily be left to the GPU 
         Graphics.DrawMeshInstancedIndirect(quadMesh, 0, scannerMaterial, new Bounds(playerCamera.position, Vector3.one * 1000), argsBuffer);
     }
 
