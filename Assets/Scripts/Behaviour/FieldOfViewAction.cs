@@ -12,9 +12,12 @@ public partial class FieldOfViewAction : Action
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
     [SerializeReference] public BlackboardVariable<GameObject> FollowTarget;
     [SerializeReference] public BlackboardVariable<FieldOfView> FovScript;
+    Vector3 lastPos;
 
     protected override Status OnStart()
     {
+        lastPos = Target.Value.transform.position;
+        FollowTarget.Value = Target.Value;
         return Status.Running;
     }
 
@@ -24,9 +27,10 @@ public partial class FieldOfViewAction : Action
         if (canSee)
         {
             FollowTarget.Value = Target.Value;
+            lastPos = Target.Value.transform.position;
             return Status.Success;
         }
-        FollowTarget.Value = null;
+        FollowTarget.Value.transform.position = lastPos;
         return Status.Failure;
     }
 

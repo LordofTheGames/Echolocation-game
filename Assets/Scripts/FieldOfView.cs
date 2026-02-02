@@ -24,7 +24,6 @@ public class FieldOfView : MonoBehaviour
         {
             if (collidersInRange[i].gameObject == target)
             {
-                return true;
                 Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
                 if (Vector3.Angle(transform.forward, directionToTarget) < Angle / 2)
                 {
