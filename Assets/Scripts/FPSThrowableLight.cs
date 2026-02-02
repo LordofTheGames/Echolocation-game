@@ -9,6 +9,7 @@ public class FPSThrowableLight : MonoBehaviour
     [SerializeField] private float throwForce = 20f;
     [SerializeField] private float throwHeight = 1.5f;
     [SerializeField] private float maxThrowDistance = 50f;
+    [SerializeField] private float throwSpinSpeed = 8f;  // angular speed when thrown (like before)
 
     [Header("Position settings")]
     [SerializeField] private Transform cubeSpawnPoint;       
@@ -18,8 +19,8 @@ public class FPSThrowableLight : MonoBehaviour
     [SerializeField] private Material trajectoryMaterial;    
     [SerializeField] private Color trajectoryLineColor = new Color(1f, 0.2f, 0.2f, 1f); // bright red
     [SerializeField] private float trajectoryWidth = 0.05f;
-    [SerializeField] private float trajectoryTimeStep = 0.02f;  // 每步时间，越小线越密
-    [SerializeField] private int maxTrajectorySteps = 500;      // 最大步数，防止无限循环
+    [SerializeField] private float trajectoryTimeStep = 0.02f;  
+    [SerializeField] private int maxTrajectorySteps = 500;   
 
     [Header("Indicator settings")]
     [SerializeField] private GameObject landingIndicatorPrefab; 
@@ -71,11 +72,24 @@ public class FPSThrowableLight : MonoBehaviour
         trajectoryLine.endWidth = trajectoryWidth * 0.5f;
         trajectoryLine.startColor = trajectoryLineColor;
         trajectoryLine.endColor = trajectoryLineColor;
-        trajectoryLine.material = trajectoryMaterial != null ? trajectoryMaterial :
-            new Material(Shader.Find("Sprites/Default"));
+        Material lineMat = trajectoryMaterial != null ? trajectoryMaterial : CreateUnlitTrajectoryMaterial();
+        trajectoryLine.material = lineMat;
         trajectoryLine.textureMode = LineTextureMode.Tile;
         trajectoryLine.numCapVertices = 5;
         trajectoryLine.enabled = false;
+    }
+
+    private Material CreateUnlitTrajectoryMaterial()
+    {
+        Shader unlit = Shader.Find("Universal Render Pipeline/Unlit")
+            ?? Shader.Find("Unlit/Color")
+            ?? Shader.Find("Sprites/Default");
+        Material mat = new Material(unlit);
+        if (mat.HasProperty("_BaseColor"))
+            mat.SetColor("_BaseColor", trajectoryLineColor);
+        if (mat.HasProperty("_Color"))
+            mat.SetColor("_Color", trajectoryLineColor);
+        return mat;
     }
 
     private void CreateLandingIndicator()
@@ -133,7 +147,6 @@ public class FPSThrowableLight : MonoBehaviour
             currentCube = Instantiate(cubePrefab, cubeSpawnPoint.position, Quaternion.identity);
             currentCube.transform.SetParent(cubeSpawnPoint);
 
-            // Keep rock kinematic while held so it follows the hand; enabled on throw
             Rigidbody rb = currentCube.GetComponent<Rigidbody>();
             if (rb != null)
                 rb.isKinematic = true;
@@ -189,12 +202,11 @@ public class FPSThrowableLight : MonoBehaviour
             RaycastHit hit;
             if (Physics.Raycast(lastPoint, rayDir.normalized, out hit, rayDist))
             {
-                // 射线碰到地面或墙壁，轨迹线延伸到碰撞点
                 landingPosition = hit.point;
                 trajectoryPointsList.Add(landingPosition);
                 trajectoryLine.positionCount = trajectoryPointsList.Count;
                 trajectoryLine.SetPositions(trajectoryPointsList.ToArray());
-                UpdateLandingIndicator(landingPosition, hit.normal, facePlayer: false);
+                UpdateLandingIndicator(landingPosition, hit.normal);
                 hitSomething = true;
                 return;
             }
@@ -202,11 +214,10 @@ public class FPSThrowableLight : MonoBehaviour
             trajectoryPointsList.Add(currentPos);
         }
 
-        // 未碰到任何表面（超出最大步数），显示到最后一格并让圆圈面向玩家
         trajectoryLine.positionCount = trajectoryPointsList.Count;
         trajectoryLine.SetPositions(trajectoryPointsList.ToArray());
         landingPosition = trajectoryPointsList[trajectoryPointsList.Count - 1];
-        UpdateLandingIndicator(landingPosition, Vector3.up, facePlayer: true);
+        UpdateLandingIndicator(landingPosition, Vector3.up);
     }
 
     private Vector3 CalculateThrowDirection()
@@ -219,24 +230,13 @@ public class FPSThrowableLight : MonoBehaviour
         return direction.normalized;
     }
 
-    private void UpdateLandingIndicator(Vector3 position, Vector3 normal, bool facePlayer = false)
+    private void UpdateLandingIndicator(Vector3 position, Vector3 normal)
     {
         if (landingIndicator == null) return;
 
         landingIndicator.transform.position = position + normal * 0.1f;
-
-        if (facePlayer)
-        {
-            // No surface hit - make circle face the player
-            Vector3 toPlayer = (cameraTransform.position - position).normalized;
-            landingIndicator.transform.rotation = Quaternion.FromToRotation(Vector3.up, toPlayer);
-        }
-        else
-        {
-            // Surface hit - orient circle to lie on the surface
-            landingIndicator.transform.rotation = Quaternion.LookRotation(normal);
-            landingIndicator.transform.Rotate(90f, 0f, 0f);
-        }
+        landingIndicator.transform.rotation = Quaternion.LookRotation(normal);
+        landingIndicator.transform.Rotate(90f, 0f, 0f);
 
         float distance = Vector3.Distance(position, cameraTransform.position);
         float scale = Mathf.Lerp(0.3f, 1.5f, distance / maxThrowDistance);
@@ -249,12 +249,16 @@ public class FPSThrowableLight : MonoBehaviour
 
         currentCube.transform.SetParent(null);
 
-        // Enable physics and apply throw force so the rock rolls naturally
+        // Enable physics, add spin, and apply throw force so the rock rolls and rotates in the air
         Rigidbody rb = currentCube.GetComponent<Rigidbody>();
         if (rb != null)
         {
             rb.isKinematic = false;
             rb.AddForce(throwDirection * throwForce, ForceMode.Impulse);
+            // Spin like before: rotation in the air as you throw
+            Vector3 right = Vector3.Cross(throwDirection, Vector3.up).normalized;
+            if (right.sqrMagnitude < 0.01f) right = Vector3.Cross(throwDirection, Vector3.forward).normalized;
+            rb.angularVelocity = right * throwSpinSpeed + Vector3.up * (throwSpinSpeed * 0.5f);
         }
 
         // Release reference so the rock stays in the world; next throw will spawn a new one
