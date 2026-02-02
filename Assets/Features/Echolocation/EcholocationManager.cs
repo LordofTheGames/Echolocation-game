@@ -10,7 +10,7 @@ public class EcholocationManager : MonoBehaviour
 
     public enum VisualMode { Dots, MeshGrid };
 
-    [Header("Grid Visualisation")]
+    [Header("Visualisation Mode")]
     public VisualMode currentMode = VisualMode.Dots;
 
     [Header("Scanner Settings")]
