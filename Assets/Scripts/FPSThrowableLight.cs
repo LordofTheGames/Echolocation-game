@@ -9,15 +9,13 @@ public class FPSThrowableLight : MonoBehaviour
     [SerializeField] private float throwForce = 20f;
     [SerializeField] private float throwHeight = 1.5f;
     [SerializeField] private float maxThrowDistance = 50f;
-    [SerializeField] private float throwSpinSpeed = 8f;  // angular speed when thrown (like before)
+    [SerializeField] private float throwSpinSpeed = 3f;  // 投掷时旋转角速度，可在 Inspector 调整
 
     [Header("Position settings")]
     [SerializeField] private Transform cubeSpawnPoint;       
     [SerializeField] private Vector3 defaultSpawnOffset = new Vector3(0.3f, -0.2f, 0.5f);
 
     [Header("Parabolic curve settings")]
-    [SerializeField] private Material trajectoryMaterial;    
-    [SerializeField] private Color trajectoryLineColor = new Color(1f, 0.2f, 0.2f, 1f); // bright red
     [SerializeField] private float trajectoryWidth = 0.05f;
     [SerializeField] private float trajectoryTimeStep = 0.02f;  
     [SerializeField] private int maxTrajectorySteps = 500;   
@@ -29,23 +27,18 @@ public class FPSThrowableLight : MonoBehaviour
     private GameObject landingIndicator;         
     private LineRenderer trajectoryLine;         
     private bool isHoldingRightClick = false;    
-    private bool isThrowing = false;             
-    private Camera playerCamera;
     private Transform cameraTransform;
     private List<Vector3> trajectoryPointsList = new List<Vector3>();
     private Vector3 landingPosition;             
     private Vector3 throwDirection;              
-    private Vector3 cubeStartPosition;           
 
     InputAction throwAction;
 
     private void Start()
     {
-        playerCamera = Camera.main;
-        if (playerCamera != null)
-        {
-            cameraTransform = playerCamera.transform;
-        }
+        Camera mainCam = Camera.main;
+        if (mainCam != null)
+            cameraTransform = mainCam.transform;
 
         throwAction = InputSystem.actions.FindAction("Throw");
 
@@ -62,6 +55,8 @@ public class FPSThrowableLight : MonoBehaviour
         CreateLandingIndicator();
     }
 
+    private static readonly Color TrajectoryBrightRed = new Color(1f, 0.2f, 0.2f, 1f);
+
     private void CreateTrajectoryLine()
     {
         GameObject lineObj = new GameObject("TrajectoryLine");
@@ -70,10 +65,9 @@ public class FPSThrowableLight : MonoBehaviour
         trajectoryLine.positionCount = 0;
         trajectoryLine.startWidth = trajectoryWidth;
         trajectoryLine.endWidth = trajectoryWidth * 0.5f;
-        trajectoryLine.startColor = trajectoryLineColor;
-        trajectoryLine.endColor = trajectoryLineColor;
-        Material lineMat = trajectoryMaterial != null ? trajectoryMaterial : CreateUnlitTrajectoryMaterial();
-        trajectoryLine.material = lineMat;
+        trajectoryLine.startColor = TrajectoryBrightRed;
+        trajectoryLine.endColor = TrajectoryBrightRed;
+        trajectoryLine.material = CreateUnlitTrajectoryMaterial();
         trajectoryLine.textureMode = LineTextureMode.Tile;
         trajectoryLine.numCapVertices = 5;
         trajectoryLine.enabled = false;
@@ -85,11 +79,24 @@ public class FPSThrowableLight : MonoBehaviour
             ?? Shader.Find("Unlit/Color")
             ?? Shader.Find("Sprites/Default");
         Material mat = new Material(unlit);
-        if (mat.HasProperty("_BaseColor"))
-            mat.SetColor("_BaseColor", trajectoryLineColor);
-        if (mat.HasProperty("_Color"))
-            mat.SetColor("_Color", trajectoryLineColor);
+        if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", TrajectoryBrightRed);
+        if (mat.HasProperty("_Color")) mat.SetColor("_Color", TrajectoryBrightRed);
         return mat;
+    }
+
+    private void ForceTrajectoryLineColor()
+    {
+        if (trajectoryLine == null) return;
+        trajectoryLine.startColor = TrajectoryBrightRed;
+        trajectoryLine.endColor = TrajectoryBrightRed;
+        Material mat = trajectoryLine.material;
+        if (mat != null)
+        {
+            if (mat.HasProperty("_BaseColor"))
+                mat.SetColor("_BaseColor", TrajectoryBrightRed);
+            if (mat.HasProperty("_Color"))
+                mat.SetColor("_Color", TrajectoryBrightRed);
+        }
     }
 
     private void CreateLandingIndicator()
@@ -126,21 +133,16 @@ public class FPSThrowableLight : MonoBehaviour
             StartHolding();
         }
 
-        if (throwAction.IsPressed() && isHoldingRightClick && !isThrowing)
-        {
+        if (throwAction.IsPressed() && isHoldingRightClick)
             UpdateHolding();
-        }
 
-        if (throwAction.WasReleasedThisFrame() && isHoldingRightClick && !isThrowing)
-        {
+        if (throwAction.WasReleasedThisFrame() && isHoldingRightClick)
             StartThrowing();
-        }
     }
 
     private void StartHolding()
     {
         isHoldingRightClick = true;
-        isThrowing = false;
 
         if (cubePrefab != null && currentCube == null)
         {
@@ -180,15 +182,13 @@ public class FPSThrowableLight : MonoBehaviour
     {
         if (trajectoryLine == null || currentCube == null) return;
 
+        ForceTrajectoryLineColor();
         throwDirection = CalculateThrowDirection();
 
         trajectoryPointsList.Clear();
-        cubeStartPosition = currentCube.transform.position;
-        trajectoryPointsList.Add(cubeStartPosition);
-
-        Vector3 currentPos = cubeStartPosition;
+        Vector3 currentPos = currentCube.transform.position;
+        trajectoryPointsList.Add(currentPos);
         Vector3 currentVel = throwDirection * throwForce;
-        bool hitSomething = false;
 
         for (int i = 0; i < maxTrajectorySteps; i++)
         {
@@ -207,7 +207,6 @@ public class FPSThrowableLight : MonoBehaviour
                 trajectoryLine.positionCount = trajectoryPointsList.Count;
                 trajectoryLine.SetPositions(trajectoryPointsList.ToArray());
                 UpdateLandingIndicator(landingPosition, hit.normal);
-                hitSomething = true;
                 return;
             }
 
@@ -245,7 +244,7 @@ public class FPSThrowableLight : MonoBehaviour
 
     private void StartThrowing()
     {
-        if (!isHoldingRightClick || currentCube == null || isThrowing) return;
+        if (!isHoldingRightClick || currentCube == null) return;
 
         currentCube.transform.SetParent(null);
 
@@ -266,7 +265,6 @@ public class FPSThrowableLight : MonoBehaviour
 
         trajectoryLine.enabled = false;
         landingIndicator.SetActive(false);
-        isThrowing = false;
         isHoldingRightClick = false;
     }
 
