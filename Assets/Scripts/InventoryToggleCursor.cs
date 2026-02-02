@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class InventoryToggleCursor : MonoBehaviour
 {
@@ -9,20 +10,22 @@ public class InventoryToggleCursor : MonoBehaviour
     [SerializeField] private MonoBehaviour playerLook;
 
     private bool isOpen;
+    InputAction openInventory, closeInventory;
 
     private void Start()
     {
         SetOpen(false);
+        openInventory = InputSystem.actions.FindAction("Open Inventory");
+        closeInventory = InputSystem.actions.FindAction("Close Inventory");
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.B))
+        if (!isOpen && openInventory.WasPressedThisFrame())
         {
-            SetOpen(!isOpen);
+            SetOpen(true);
         }
-
-        if (isOpen && Input.GetKeyDown(KeyCode.Escape))
+        else if (isOpen && closeInventory.WasPressedThisFrame())
         {
             SetOpen(false);
         }
