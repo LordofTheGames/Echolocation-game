@@ -5,17 +5,17 @@ using Action = Unity.Behavior.Action;
 using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "LookAt smooth", story: "[Self] smoothly turns to [Target]", category: "Action", id: "3b071c53d53cd2fcd5e64be0de608a95")]
+[NodeDescription(name: "LookAt smooth", story: "[Agent] smoothly turns to [Target]", category: "Action", id: "3b071c53d53cd2fcd5e64be0de608a95")]
 public partial class LookAtSmoothAction : Action
 {
-    [SerializeReference] public BlackboardVariable<GameObject> Self;
+    [SerializeReference] public BlackboardVariable<GameObject> Agent;
     [SerializeReference] public BlackboardVariable<GameObject> Target;
     [SerializeReference] public BlackboardVariable<float> Speed;
     Transform selfTransform;
     Transform targetTransform;
     protected override Status OnStart()
     {
-        selfTransform = Self.Value.transform;
+        selfTransform = Agent.Value.transform;
         targetTransform = Target.Value.transform;
         return Status.Running;
     }

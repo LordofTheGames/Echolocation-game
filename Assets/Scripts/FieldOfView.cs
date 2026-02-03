@@ -3,7 +3,7 @@ using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class FieldOfView : MonoBehaviour
+public class FieldOfViewChecker : MonoBehaviour
 {
     public float Radius;
     [Range(0,360)]
@@ -11,15 +11,14 @@ public class FieldOfView : MonoBehaviour
     public float DetectionHeight;
     public LayerMask ObstructionMask;
     public bool ShowDebugVisuals;
-    private void Start()
-    {
-    }
 
-    // Returns true if Target can be seen, null otherwise
+    // Returns true if Target can be seen, false otherwise
     public bool FieldOfViewCheck(GameObject target)
     {
         int targetMask = 1 << target.layer;
+        // TODO: change this to simple distance calculation
         Collider[] collidersInRange = Physics.OverlapSphere(transform.position, Radius, targetMask);
+        if (collidersInRange.Length < 1) return false;
         for (int i = 0; i < collidersInRange.Length; i++)
         {
             if (collidersInRange[i].gameObject == target)
