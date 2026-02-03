@@ -50,7 +50,7 @@ public class RippleEffect : MonoBehaviour
         CurrRT = rt;
 
         //Wait for one frame and then execute again.
-        yield return new WaitForSeconds(0.01f);
+        yield return new WaitForSeconds(0.001f);
         StartCoroutine(ripples());
     }
 }
