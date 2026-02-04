@@ -16,7 +16,6 @@ public partial class LookAroundAction : Action
     [SerializeReference] public BlackboardVariable<float> Speed  = new BlackboardVariable<float>(1.0f);
     [SerializeReference] public BlackboardVariable<int> NumberOfRotations  = new BlackboardVariable<int>(2);
 
-    public enum LookDirection { LEFT, RIGHT }
     private enum LookPhase { ToLeft, ToRight, ToCenter }
     private LookPhase currentPhase;
     private int rotationsCompleted;
@@ -46,15 +45,12 @@ public partial class LookAroundAction : Action
 
     protected override Status OnUpdate()
     {
-
-        agentTransform.rotation = Quaternion.Slerp(agentTransform.rotation, targetRotation, Speed.Value * Time.deltaTime);
-
-        float angleRemaining = Quaternion.Angle(agentTransform.rotation, targetRotation);
-        if (angleRemaining < 1.0f) 
+        float angle = Quaternion.Angle(agentTransform.rotation, targetRotation);
+        // If we are done, start next phase or exit
+        if (angle < 0.5f) 
         {
-            // Snap exactly to target so we don't drift
+            // snap to rotation
             agentTransform.rotation = targetRotation;
-
             rotationsCompleted++;
             if (rotationsCompleted == NumberOfRotations && currentPhase != LookPhase.ToCenter)
             {
@@ -79,6 +75,12 @@ public partial class LookAroundAction : Action
                 return Status.Success;
             }
         }
+        // Calculate speed based on how far away we are.
+        // If angle is 90, speed is High. If angle is 1, speed is Low (but clamped to a minimum).
+        // This mimics Slerp but ensures we never drop below '20f' speed.
+        float dynamicSpeed = Mathf.Lerp(20f, Speed.Value * 50f, angle / 90f);
+        // Apply rotation
+        agentTransform.rotation = Quaternion.RotateTowards(agentTransform.rotation, targetRotation, dynamicSpeed * Time.deltaTime);
 
         return Status.Running;
     }

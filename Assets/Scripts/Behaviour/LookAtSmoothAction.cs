@@ -11,23 +11,41 @@ public partial class LookAtSmoothAction : Action
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
     [SerializeReference] public BlackboardVariable<GameObject> Target;
     [SerializeReference] public BlackboardVariable<float> Speed;
-    Transform selfTransform;
-    Transform targetTransform;
+
+    private Quaternion targetRotation;
+    private Transform agentTransform;
+
     protected override Status OnStart()
     {
-        selfTransform = Agent.Value.transform;
-        targetTransform = Target.Value.transform;
+        agentTransform = Agent.Value.transform;
         return Status.Running;
     }
 
     protected override Status OnUpdate()
     {
-        Quaternion rotation = Quaternion.LookRotation(targetTransform.position - selfTransform.position);
-        // Limit rotation to y-axis
-        rotation.x = 0;
-        rotation.z = 0;
-        selfTransform.rotation = Quaternion.Slerp (selfTransform.rotation, rotation, Time.deltaTime * Speed.Value);
-        return Status.Success;
+        // re-calculate rotation every frame as target may have moved
+        Vector3 direction = Target.Value.transform.position - agentTransform.position;
+        direction.y = 0; // Limit rotation to y-axis
+        if (direction != Vector3.zero) 
+            targetRotation = Quaternion.LookRotation(direction);
+        else 
+            targetRotation = agentTransform.rotation; 
+
+        float angle = Quaternion.Angle(agentTransform.rotation, targetRotation);
+        // If we are done, exit early
+        if (angle < 0.5f)
+        {
+            agentTransform.rotation = targetRotation;
+            return Status.Success;
+        }
+        // Calculate speed based on how far away we are.
+        // If angle is 90, speed is High. If angle is 1, speed is Low (but clamped to a minimum).
+        // This mimics Slerp but ensures we never drop below '20f' speed.
+        float dynamicSpeed = Mathf.Lerp(20f, Speed.Value * 50f, angle / 90f);
+        // Apply rotation
+        agentTransform.rotation = Quaternion.RotateTowards(agentTransform.rotation, targetRotation, dynamicSpeed * Time.deltaTime);
+
+        return Status.Running;
     }
 
     protected override void OnEnd()

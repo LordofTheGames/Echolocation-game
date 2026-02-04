@@ -42,9 +42,9 @@ public partial class UpdateAiSensesAction : Action
             if (FOVScripts[i].FieldOfViewCheck(Target))
             {
                 targetSeen.Value = true;
-                secondToLastLocation = lastLocation;
+                secondToLastLocation = lastLocation.Value;
                 lastLocation.Value = Target.Value.transform.position;
-                lastDirection.Value = lastLocation - secondToLastLocation;
+                lastDirection.Value = lastLocation.Value - secondToLastLocation;
                 return;
             }
         }

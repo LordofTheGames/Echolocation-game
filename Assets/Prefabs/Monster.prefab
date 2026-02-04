@@ -184,7 +184,6 @@ GameObject:
   - component: {fileID: 7377758489746828082}
   - component: {fileID: 1997102751303061440}
   - component: {fileID: 8737043143605252243}
-  - component: {fileID: 7159904465074906441}
   - component: {fileID: 7101811359498770919}
   m_Layer: 0
   m_Name: Monster
@@ -201,7 +200,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5683829060095955525}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 18.010286, y: -0.0000009536743, z: 20.77}
   m_LocalScale: {x: 0.02, y: 0.02, z: 0.02}
   m_ConstrainProportionsScale: 0
@@ -292,22 +291,6 @@ MonoBehaviour:
           m_Value1: 1858964397802573472
         Name: Player
         m_Value: {fileID: 0}
---- !u!114 &7159904465074906441
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5683829060095955525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 87e226715ac1447478f9ce8a4bcb1f08, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Target: {fileID: 0}
-  targetSeen: 0
-  lastLocation: {x: 0, y: 0, z: 0}
-  lastDirection: {x: 0, y: 0, z: 0, w: 0}
 --- !u!114 &7101811359498770919
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -322,7 +305,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Radius: 12.59
   Angle: 48.93405
-  DetectionHeight: 3.85
+  AgentEyeHeight: 3.9
+  TargetEyeHeight: 1.8
   ObstructionMask:
     serializedVersion: 2
     m_Bits: 64
