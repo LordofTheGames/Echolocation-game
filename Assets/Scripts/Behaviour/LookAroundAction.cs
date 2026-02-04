@@ -3,8 +3,6 @@ using Unity.Behavior;
 using UnityEngine;
 using Action = Unity.Behavior.Action;
 using Unity.Properties;
-using Unity.VisualScripting;
-using System.Runtime.CompilerServices;
 
 [Serializable, GeneratePropertyBag]
 [NodeDescription(name: "Look around", story: "[Agent] smoothly looks around with angle [Angle] turning [InitialDirection] first", category: "Action", id: "5826bfab915f70528e58fb058190ff82")]

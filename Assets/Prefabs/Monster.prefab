@@ -184,7 +184,6 @@ GameObject:
   - component: {fileID: 7377758489746828082}
   - component: {fileID: 1997102751303061440}
   - component: {fileID: 8737043143605252243}
-  - component: {fileID: 7101811359498770919}
   m_Layer: 0
   m_Name: Monster
   m_TagString: Untagged
@@ -207,6 +206,7 @@ Transform:
   m_Children:
   - {fileID: 6426728944453383180}
   - {fileID: 1648682234868148732}
+  - {fileID: 7096694505538610969}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!64 &7377758489746828082
@@ -269,12 +269,28 @@ MonoBehaviour:
   m_BlackboardVariableOverridesList:
   - rid: 2320555136217252090
   - rid: 2320555136217252138
+  - rid: 104681315139322730
   m_OriginalGraph: {fileID: 0}
   m_IsInitialised: 0
   m_IsStarted: 0
   references:
     version: 2
     RefIds:
+    - rid: 104681315139322730
+      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 10224547993428335536
+          m_Value1: 11643500370812136251
+        Name: Waypoints
+        m_Value:
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
     - rid: 2320555136217252090
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -291,20 +307,52 @@ MonoBehaviour:
           m_Value1: 1858964397802573472
         Name: Player
         m_Value: {fileID: 0}
---- !u!114 &7101811359498770919
+--- !u!1 &5692461991750754787
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 7096694505538610969}
+  - component: {fileID: 4131087044268279671}
+  m_Layer: 0
+  m_Name: FOV
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &7096694505538610969
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5692461991750754787}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 576453552342798947}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4131087044268279671
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5683829060095955525}
+  m_GameObject: {fileID: 5692461991750754787}
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbf0b31af0e16104c83a220d744db206, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Radius: 12.59
-  Angle: 48.93405
+  Radius: 13.6
+  Angle: 108
   AgentEyeHeight: 3.9
   TargetEyeHeight: 1.8
   ObstructionMask:

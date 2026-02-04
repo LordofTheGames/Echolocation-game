@@ -23,7 +23,7 @@ public partial class UpdateAiSensesAction : Action
     {
         if (!initialised)
         {
-            FOVScripts = Agent.Value.GetComponents<FieldOfViewChecker>();
+            FOVScripts = Agent.Value.GetComponentsInChildren<FieldOfViewChecker>();
             initialised = true;
         }
         return Status.Running;
