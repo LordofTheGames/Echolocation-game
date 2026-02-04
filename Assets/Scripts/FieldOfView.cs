@@ -14,22 +14,23 @@ public class FieldOfViewChecker : MonoBehaviour
     // Returns true if Target can be seen, false otherwise
     public bool FieldOfViewCheck(GameObject target)
     {
-        int targetMask = 1 << target.layer;
         // TODO: change this to simple distance calculation
-        Collider[] collidersInRange = Physics.OverlapSphere(transform.position, Radius, targetMask);
-        if (collidersInRange.Length < 1) return false;
-        for (int i = 0; i < collidersInRange.Length; i++)
+        // int targetMask = 1 << target.layer;
+        // Collider[] collidersInRange = Physics.OverlapSphere(transform.position, Radius, targetMask);
+        // if (collidersInRange.Length < 1) return false;
+        // for (int i = 0; i < collidersInRange.Length; i++)
+        // {
+        //     if (collidersInRange[i].gameObject == target)
+        //     {
+        if (Vector3.Distance(target.transform.position, transform.position) < Radius)
         {
-            if (collidersInRange[i].gameObject == target)
+            Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
+            if (Vector3.Angle(transform.forward, directionToTarget) < Angle / 2)
             {
-                Vector3 directionToTarget = (target.transform.position - transform.position).normalized;
-                if (Vector3.Angle(transform.forward, directionToTarget) < Angle / 2)
-                {
-                    float distanceToTarget = Vector3.Distance(transform.position, target.transform.position);
-                    bool viewObstructed = Physics.Raycast(transform.position + Vector3.up * DetectionHeight, directionToTarget, distanceToTarget, ObstructionMask);
-                    if (!viewObstructed)
-                        return true;
-                }
+                float distanceToTarget = Vector3.Distance(transform.position, target.transform.position);
+                bool viewObstructed = Physics.Raycast(transform.position + Vector3.up * DetectionHeight, directionToTarget, distanceToTarget, ObstructionMask);
+                if (!viewObstructed)
+                    return true;
             }
         }
         return false;
