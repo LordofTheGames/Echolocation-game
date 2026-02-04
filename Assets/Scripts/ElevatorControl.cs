@@ -41,6 +41,11 @@ public class ElevatorControl : MonoBehaviour
 
     private void Update()
     {
+        if (playerInTrigger && Input.GetKeyDown(KeyCode.E))
+        {
+            TogglePlatformMovement();
+        }
+
         if (isMoving)
         {
             MovePlatform();
@@ -100,6 +105,32 @@ public class ElevatorControl : MonoBehaviour
         {
             isMoving = false;
             platformTransform.position = targetPosition;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerInTrigger = true;
+
+            if (interactionUI != null)
+            {
+                interactionUI.SetActive(true);
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            playerInTrigger = false;
+
+            if (interactionUI != null)
+            {
+                interactionUI.SetActive(false);
+            }
         }
     }
 }
