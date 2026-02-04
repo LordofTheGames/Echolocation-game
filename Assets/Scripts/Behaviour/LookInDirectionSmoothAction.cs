@@ -5,12 +5,13 @@ using Action = Unity.Behavior.Action;
 using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "Look In Direction Smooth", story: "[Agent] smoothly turns to same direction as [Target]", category: "Action", id: "27fd5f65789848e253f5f65f620569ef")]
+[NodeDescription(name: "Look In Direction Smooth", story: "[Agent] smoothly turns to direction of [Vector]", category: "Action", id: "27fd5f65789848e253f5f65f620569ef")]
 public partial class LookInDirectionSmoothAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
-    [SerializeReference] public BlackboardVariable<GameObject> Target;
-    [SerializeReference] public BlackboardVariable<float> Speed;
+    [SerializeReference] public BlackboardVariable<Vector3> Vector;
+    [SerializeReference] public BlackboardVariable<float> Speed = new BlackboardVariable<float>(5.0f);
+    [SerializeReference] public BlackboardVariable<bool> LimitRotationToYAxis = new BlackboardVariable<bool>(true);
 
     protected override Status OnStart()
     {
@@ -19,7 +20,14 @@ public partial class LookInDirectionSmoothAction : Action
 
     protected override Status OnUpdate()
     {
-        Agent.Value.transform.rotation = Quaternion.Slerp(Agent.Value.transform.rotation, Target.Value.transform.rotation, Time.deltaTime * Speed);
+
+        Quaternion rotation = Quaternion.LookRotation(Vector);
+        // Limit rotation to y-axis
+        if (LimitRotationToYAxis) {
+            rotation.x = 0;
+            rotation.z = 0;
+        }
+        Agent.Value.transform.rotation = Quaternion.Slerp(Agent.Value.transform.rotation, rotation, Time.deltaTime * Speed);
         return Status.Success;
     }
 

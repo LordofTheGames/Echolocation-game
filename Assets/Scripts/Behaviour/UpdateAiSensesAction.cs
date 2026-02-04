@@ -5,7 +5,8 @@ using Action = Unity.Behavior.Action;
 using Unity.Properties;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "update ai senses", story: "Update AI Senses", category: "Action", id: "4b96d6fa266b06b15ec3a7ead8af5e72")]
+[NodeDescription(name: "update ai senses", story: "Update AI Senses", description: "Updates all the variables below (Except for Agent and Target)", category: "Action", id: "4b96d6fa266b06b15ec3a7ead8af5e72")]
+        
 public partial class UpdateAiSensesAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
@@ -30,6 +31,12 @@ public partial class UpdateAiSensesAction : Action
 
     protected override Status OnUpdate()
     {
+        updateFOV();
+        return Status.Success;
+    }
+
+    private void updateFOV()
+    {
         for (int i = 0; i < FOVScripts.Length; i++)
         {
             if (FOVScripts[i].FieldOfViewCheck(Target))
@@ -38,11 +45,10 @@ public partial class UpdateAiSensesAction : Action
                 secondToLastLocation = lastLocation;
                 lastLocation.Value = Target.Value.transform.position;
                 lastDirection.Value = lastLocation - secondToLastLocation;
-                return Status.Success;
+                return;
             }
         }
         targetSeen.Value = false;
-        return Status.Success;
     }
 
     protected override void OnEnd()
