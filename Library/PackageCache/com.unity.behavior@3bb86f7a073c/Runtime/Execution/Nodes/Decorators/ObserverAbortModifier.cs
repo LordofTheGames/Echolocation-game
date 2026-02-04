@@ -68,6 +68,8 @@ namespace Unity.Behavior
             if ((m_AbortTarget == ObserverAbortTarget.Self || m_AbortTarget == ObserverAbortTarget.Both)
                 && !ConditionUtils.CheckConditions(Conditions, RequiresAllConditions))
             {
+                // FIXME: bug was here!
+                // return Status.Running;
                 return Status.Failure;
             }
 
