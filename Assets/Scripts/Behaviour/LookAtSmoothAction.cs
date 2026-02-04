@@ -26,7 +26,7 @@ public partial class LookAtSmoothAction : Action
         // Limit rotation to y-axis
         rotation.x = 0;
         rotation.z = 0;
-        selfTransform.rotation = Quaternion.Slerp (selfTransform.rotation, rotation, Time.deltaTime * Speed);
+        selfTransform.rotation = Quaternion.Slerp (selfTransform.rotation, rotation, Time.deltaTime * Speed.Value);
         return Status.Success;
     }
 

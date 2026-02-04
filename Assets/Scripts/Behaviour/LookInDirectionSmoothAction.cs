@@ -27,7 +27,7 @@ public partial class LookInDirectionSmoothAction : Action
             rotation.x = 0;
             rotation.z = 0;
         }
-        Agent.Value.transform.rotation = Quaternion.Slerp(Agent.Value.transform.rotation, rotation, Time.deltaTime * Speed);
+        Agent.Value.transform.rotation = Quaternion.Slerp(Agent.Value.transform.rotation, rotation, Time.deltaTime * Speed.Value);
         return Status.Success;
     }
 
