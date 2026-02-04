@@ -3,7 +3,6 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 .utmp/
-/[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
 /[Bb]uild/
@@ -11,6 +10,21 @@
 /[Ll]ogs/
 /[Uu]ser[Ss]ettings/
 *.log
+
+/[Ll]ibrary/*
+!/[Ll]ibrary/PackageCache
+/[Ll]ibrary/PackageCache/*
+!/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c
+/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/*
+!/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/Runtime
+/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/Runtime/*
+!/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/Runtime/Execution
+/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/Runtime/Execution/*
+!/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/Runtime/Execution/Nodes
+/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/Runtime/Execution/Nodes/*
+!/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/Runtime/Execution/Nodes/Decorators
+/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/Runtime/Execution/Nodes/Decorators/*
+!/[Ll]ibrary/PackageCache/com.unity.behavior@3bb86f7a073c/Runtime/Execution/Nodes/Decorators/ObserverAbortModifier.cs
 
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
 *.blend1
