@@ -133,4 +133,32 @@ public class ElevatorControl : MonoBehaviour
             }
         }
     }
+
+    public void StartMoving()
+    {
+        if (!isMoving)
+        {
+            TogglePlatformMovement();
+        }
+    }
+
+    public void StopMoving()
+    {
+        isMoving = false;
+    }
+
+    public bool IsMoving()
+    {
+        return isMoving;
+    }
+
+    public bool IsAtTop()
+    {
+        return platformTransform != null && Mathf.Abs(platformTransform.position.y - maxHeight) < 0.1f;
+    }
+
+    public bool IsAtBottom()
+    {
+        return platformTransform != null && Mathf.Abs(platformTransform.position.y - minHeight) < 0.1f;
+    }
 }
