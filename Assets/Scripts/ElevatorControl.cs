@@ -38,4 +38,68 @@ public class ElevatorControl : MonoBehaviour
             interactionUI.SetActive(false);
         }
     }
+
+    private void Update()
+    {
+        if (isMoving)
+        {
+            MovePlatform();
+        }
+    }
+
+    private void TogglePlatformMovement()
+    {
+        if (isMoving)
+        {
+            isMoving = false;
+        }
+        else
+        {
+            float currentHeight = platformTransform.position.y;
+
+            if (Mathf.Abs(currentHeight - minHeight) < 0.1f)
+            {
+                isMovingUp = true;
+                targetPosition = new Vector3(
+                    platformTransform.position.x,
+                    maxHeight,
+                    platformTransform.position.z
+                );
+            }
+            else if (Mathf.Abs(currentHeight - maxHeight) < 0.1f)
+            {
+                isMovingUp = false;
+                targetPosition = new Vector3(
+                    platformTransform.position.x,
+                    minHeight,
+                    platformTransform.position.z
+                );
+            }
+            else
+            {
+                isMovingUp = !isMovingUp;
+                targetPosition = isMovingUp ?
+                    new Vector3(platformTransform.position.x, maxHeight, platformTransform.position.z) :
+                    new Vector3(platformTransform.position.x, minHeight, platformTransform.position.z);
+            }
+
+            isMoving = true;
+        }
+    }
+
+    private void MovePlatform()
+    {
+        float step = moveSpeed * Time.deltaTime;
+        platformTransform.position = Vector3.MoveTowards(
+            platformTransform.position,
+            targetPosition,
+            step
+        );
+
+        if (Vector3.Distance(platformTransform.position, targetPosition) < 0.01f)
+        {
+            isMoving = false;
+            platformTransform.position = targetPosition;
+        }
+    }
 }
