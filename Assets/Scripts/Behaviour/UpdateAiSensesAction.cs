@@ -24,6 +24,8 @@ public partial class UpdateAiSensesAction : Action
         if (!initialised)
         {
             FOVScripts = Agent.Value.GetComponentsInChildren<FieldOfViewChecker>();
+            lastLocation.Value = Agent.Value.transform.position;
+            lastDirection.Value = Agent.Value.transform.forward;
             initialised = true;
         }
         return Status.Running;
