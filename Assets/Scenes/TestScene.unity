@@ -160,7 +160,6 @@ GameObject:
   m_Component:
   - component: {fileID: 129662819}
   - component: {fileID: 129662820}
-  - component: {fileID: 129662822}
   - component: {fileID: 129662821}
   m_Layer: 0
   m_Name: Player
@@ -235,27 +234,6 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
---- !u!114 &129662822
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 129662818}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4d23aadfc2c076a4fb07e231241c7125, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  RippleSize: 5
-  RippleLifetime: 0.1
-  ripple: {fileID: 934732086}
-  WaterLayer:
-    serializedVersion: 2
-    m_Bits: 16
-  GroundLayer:
-    serializedVersion: 2
-    m_Bits: 0
 --- !u!1 &177471466
 GameObject:
   m_ObjectHideFlags: 0
@@ -3356,7 +3334,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -3746,11 +3724,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!198 &934732086 stripped
-ParticleSystem:
-  m_CorrespondingSourceObject: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-  m_PrefabInstance: {fileID: 2556826255963654823}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1012936770 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 37783e898478e2a4786943a7cf6f5a37, type: 3}
@@ -12221,10 +12194,6 @@ PrefabInstance:
     - target: {fileID: 4606061663976025302, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
       propertyPath: m_Name
       value: Water particle system
-      objectReference: {fileID: 0}
-    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: moveWithTransform
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
