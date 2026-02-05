@@ -2,7 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 
-public class FPSThrowableLight : MonoBehaviour
+public class ThrowItem : MonoBehaviour
 {
     [Header("Throwing settings")]
     [SerializeField] private GameObject cubePrefab;
