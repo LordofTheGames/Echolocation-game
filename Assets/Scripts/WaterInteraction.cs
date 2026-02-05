@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class WaterInteraction : MonoBehaviour
 {
-    [Header("Dependencies")]
     public ParticleSystem ripple;
     
     [Header("Settings")]
