@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.Audio;
 
 public class MicInput : MonoBehaviour
 {
@@ -17,10 +18,12 @@ public class MicInput : MonoBehaviour
     private int minPitchHz = 60;
     private int maxPitchHz = 500;
     private FFTWindow fftWindow = FFTWindow.BlackmanHarris;
-    private float[] spectrum;
     private int sampleRate;
 
     private AudioPitchEstimator pitchEstimator;
+    [SerializeField] private AudioMixer micMixer;
+    [SerializeField] private AudioMixerGroup micSilentGroup;
+    [SerializeField] private string micVolumeParam = "MicSilentVolume";
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -29,6 +32,9 @@ public class MicInput : MonoBehaviour
         sampleRate = AudioSettings.outputSampleRate;
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = true;
+
+        if (micSilentGroup != null)
+            audioSource.outputAudioMixerGroup = micSilentGroup;
 
         if (Microphone.devices.Length == 0){
             Debug.LogError("no microphone device");
@@ -42,13 +48,15 @@ public class MicInput : MonoBehaviour
         audioSource.Play();
 
         samples = new float[windowSize];
-        //spectrum = new float[spectrumSize];
 
         pitchEstimator = GetComponent<AudioPitchEstimator>();
         if (pitchEstimator == null)
             pitchEstimator = gameObject.AddComponent<AudioPitchEstimator>();
         pitchEstimator.frequencyMin = minPitchHz;
         pitchEstimator.frequencyMax = maxPitchHz;
+
+        if (micMixer != null && !string.IsNullOrEmpty(micVolumeParam))
+            micMixer.SetFloat(micVolumeParam, -80f);
     }
 
     // Update is called once per frame
@@ -78,45 +86,6 @@ public class MicInput : MonoBehaviour
             pitchHz = 0f;
             return;
         }
-
-    // fft 
-    //     audioSource.GetSpectrumData(spectrum, 0, fftWindow);
-
-    //     int minBin = Mathf.FloorToInt(minPitchHz * spectrumSize / (float)sampleRate);
-    //     int maxBin = Mathf.CeilToInt(maxPitchHz * spectrumSize / (float)sampleRate);
-
-    //     int half = spectrumSize / 2;
-    //     minBin = Mathf.Clamp(minBin, 1, half- 1);
-    //     maxBin = Mathf.Clamp(maxBin,minBin+ 1, half -1);
-
-    //     int best = minBin;
-    //     float bestVal = 0f;
-    //     for (int i = minBin; i <= maxBin; i++){
-    //         float v = spectrum[i];
-    //         if (v > bestVal){
-    //             bestVal = v;
-    //             best = i;
-    //         }
-    //     }
-
-    //     int from = Mathf.Max(best- 2, minBin);
-    //     int to = Mathf.Min(best+ 2, maxBin);
-
-    //     float weightedSum = 0f;
-    //     float energySum = 0f;
-
-    //     for (int i = from; i <= to; i++){
-    //         float freq = i * (float)sampleRate / spectrumSize;
-    //         float w = spectrum[i];
-    //         weightedSum += freq * w;
-    //         energySum += w;
-    //     }
-
-    //     if (energySum > 0f)
-    //         pitchHz = weightedSum / energySum;
-    //     else
-    //         pitchHz = 0f;
-
 
     // SRH
         float detected = pitchEstimator.Estimate(audioSource);
