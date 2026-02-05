@@ -160,6 +160,7 @@ GameObject:
   m_Component:
   - component: {fileID: 129662819}
   - component: {fileID: 129662820}
+  - component: {fileID: 129662822}
   - component: {fileID: 129662821}
   m_Layer: 0
   m_Name: Player
@@ -234,6 +235,25 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &129662822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129662818}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb59bac12b2819447b0b373f4cef3405, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ripple: {fileID: 1445790482}
+  waterLayer:
+    serializedVersion: 2
+    m_Bits: 16
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1 &177471466
 GameObject:
   m_ObjectHideFlags: 0
@@ -3334,7 +3354,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -10839,6 +10859,11 @@ Transform:
   - {fileID: 1723053600}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!198 &1445790482 stripped
+ParticleSystem:
+  m_CorrespondingSourceObject: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
+  m_PrefabInstance: {fileID: 2556826255963654823}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1457758994
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12194,6 +12219,18 @@ PrefabInstance:
     - target: {fileID: 4606061663976025302, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
       propertyPath: m_Name
       value: Water particle system
+      objectReference: {fileID: 0}
+    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
+      propertyPath: moveWithTransform
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
+      propertyPath: InitialModule.maxNumParticles
+      value: 1000
+      objectReference: {fileID: 0}
+    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
+      propertyPath: EmissionModule.rateOverTime.scalar
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
