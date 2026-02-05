@@ -5,23 +5,18 @@ public class WaterInteraction : MonoBehaviour
     public ParticleSystem ripple;
     
     [Header("Settings")]
-    public LayerMask waterLayer;
-    public LayerMask groundLayer;
+    public LayerMask waterLayer = LayerMask.GetMask("Water");
+    public LayerMask groundLayer = LayerMask.GetMask("Ground");
 
     private CharacterController cc;
     private Vector3 playerPos;
     private float velocityXZ;
     private bool inWater;
-    private RaycastHit isGround;
 
     void Start()
     {
         cc = GetComponent<CharacterController>();
         playerPos = transform.position;
-        
-        // Default layers if not set in inspector
-        if (waterLayer == 0) waterLayer = LayerMask.GetMask("Water");
-        if (groundLayer == 0) groundLayer = LayerMask.GetMask("Ground");
     }
 
     void Update()
@@ -29,12 +24,7 @@ public class WaterInteraction : MonoBehaviour
         // Calculate Velocity (Exactly like your original script)
         velocityXZ = Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(playerPos.x, 0, playerPos.z));
         playerPos = transform.position;
-
-        // Ripple Positioning Logic
-        if (isGround.collider) 
-            ripple.transform.position = transform.position + transform.forward;
-        else 
-            ripple.transform.position = transform.position;
+        ripple.transform.position = transform.position;
 
         // Global Shader Variable
         Shader.SetGlobalVector("_Player", transform.position);
@@ -45,16 +35,16 @@ public class WaterInteraction : MonoBehaviour
 
     void HandleWaterDetection()
     {
-        // Ground Check (from your original PlayerMovement)
-        Physics.Raycast(transform.position, Vector3.down, out isGround, 2.7f, groundLayer);
-
         // Water Check (from your original PlayerMovement)
-        float height = cc.height + cc.radius;
-        inWater = Physics.Raycast(transform.position + Vector3.up * height, Vector3.down, height * 2, waterLayer);
-
+        inWater = playerIsInWater();
         // Toggle ripple object based on water status
         if (inWater) ripple.gameObject.SetActive(true);
         else ripple.gameObject.SetActive(false);
+    }
+
+    bool playerIsInWater(){
+        float height = cc.height + cc.radius;
+        return Physics.Raycast(transform.position + Vector3.up * height, Vector3.down, height * 2, waterLayer);
     }
 
     void HandleRipples()
