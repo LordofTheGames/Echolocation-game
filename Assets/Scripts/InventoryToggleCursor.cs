@@ -2,12 +2,11 @@ using UnityEngine;
 
 public class InventoryToggleCursor : MonoBehaviour
 {
-    [Header("UI Root (Canvas/Panel)")]
     [SerializeField] private GameObject inventoryUI;
 
-    [Header("Optional: disable look when inventory is open")]
     [SerializeField] private MonoBehaviour playerLook;
 
+    [SerializeField] private RayOutlineDetector outlineDetector; 
     private bool isOpen;
 
     private void Start()
@@ -34,12 +33,16 @@ public class InventoryToggleCursor : MonoBehaviour
 
         if (inventoryUI) inventoryUI.SetActive(open);
         if (playerLook) playerLook.enabled = !open;
+        if (outlineDetector)
+            outlineDetector.SetEnabled(!open);
 
         Cursor.visible = open;
         Cursor.lockState = open ? CursorLockMode.None : CursorLockMode.Locked;
 
+        if (outlineDetector) outlineDetector.SetEnabled(!open);
         if (open) ResetAllSlotsByChildName();
     }
+
 
     private void ResetAllSlotsByChildName()
     {
