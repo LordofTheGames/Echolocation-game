@@ -1,21 +1,16 @@
 using UnityEngine;
 using Unity.Collections;        // Native collections (NativeArray) for high-performance memory management
 using Unity.Jobs;               // The job system - allows us to run code on multiple CPU cores
-using UnityEngine.InputSystem;  // Input system that makes keybinds for actions, and can have modes such as keyboard+mouse, controller, etc.
 
 public class EcholocationManager : MonoBehaviour
 {
 
     // Properties/variables (can edit in inspector windows in Unity)
 
-    public enum VisualMode { Dots, MeshGrid };
-
-    [Header("Visualisation Mode")]
-    public VisualMode currentMode = VisualMode.Dots;
-
-    [Header("Scanner Settings")]
-    public int raysPerScan = 20000;          // Number of rays fired for a single scan
-    public float maxDistance = 50f;         // Max distance rays can travel
+    [Header("Pulse Settings")]
+    public float pulseDuration = 2.0f;  // Duration of pulse that the visualisation fades over
+    public int raysPerScan = 20000;     // Number of rays fired for a single scan
+    public float maxDistance = 50f;     // Max distance rays can travel
     public LayerMask scanLayers;
 
     [Header("Visual Settings")]
@@ -24,99 +19,100 @@ public class EcholocationManager : MonoBehaviour
     public float dotScale = 0.2f;
     [Tooltip("Controls the size of the quad 'spotlight' in Grid mode.")]
     public float gridQuadSize = 5.0f;
-    [Tooltip("How far to pull the quad/'window' from the hitpoint (in metres) - higher = better for concave areas.")]
-    public float quadOffset = 0.1f;
+    [Tooltip("Offset for dots in dot mode, smaller = better, just to prevent flickering.")]
+    public float dotOffset = 0.01f;
+    [Tooltip("Offset for 'windows' in grid mode, higher = better in concave areas.")]
+    public float gridOffset = 0.5f;
     [Tooltip("How far from the quad/'window' the grid will project the grid (how far surfaces can be before the grid isn't painted on them).")]
     public float gridDepth = 10.0f;
 
     [Header("References")]
-    public Transform playerCamera;
     public Mesh quadMesh;               // Holds the 3D shape data (vertices and triangles) - we're using a simple flat quad
     public Material scannerMaterial;    // Holds the Shader and Textures
 
-    [Header("Textures")]
-    public Texture dotTexture;
-    public Texture gridTexture;
-    public Texture softMask;
-
-    
-    InputAction echolocateAction;
 
     // Hidden GPU variables
 
-    // ComputeBufferis a special list that lives in the GPU
+    // ComputeBuffer is a special list that lives in the GPU
     private ComputeBuffer argsBuffer;       // Holds arguments for drawing (how many meshes to draw)
     private ComputeBuffer matrixBuffer;     // Holds the position/rotation/scale of every single mesh
-
     // NativeArray is a high-performance list used by the job system
     private NativeArray<RaycastCommand> commands;   // The "to do list" of raycasts
     private NativeArray<RaycastHit> results;        // The results
-
     private Matrix4x4[] instanceMatrices; // Holds position data before sending it to the GPU
-
     private uint[] args = new uint[5] { 0, 0, 0, 0, 0}; // Array of 5 uints required by "DrawMeshInstancedIndirect" command
-
     private int activeHitCount = 0; // A counter to keep track of how many rays have actually hit a wall this frame
 
 
+    // Timer variables
+
+    private float spawnTime;
+    private Material instanceMaterial;
+
+
+    // Visualisation mode
+
+    private bool isGridMode = false;
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        echolocateAction = InputSystem.actions.FindAction("Echolocate");
+        // Safety checks
+
+        if (scannerMaterial == null)
+        {
+            Debug.LogError("EcholocationManager: 'Scanner Material' is missing! Please assign ScannerMat in the Inspector window.");
+            Destroy(gameObject); //Cannot work without material
+            return;
+        }
+
+        if (scannerMaterial.GetTexture("_DotTex") == null) Debug.LogError("Echolocation Manager: No Dot Texture has been assigned to the ScannerMat material!");
+        if (scannerMaterial.GetTexture("_GridTex") == null) Debug.LogError("Echolocation Manager: No Grid Texture has been assigned to the ScannerMat material!");
+
+        if (quadMesh == null)
+        {
+            Debug.Log("Echolocation manager: 'Quad Mesh' missing. Creating temporary primitive, please assign later.");
+            GameObject temp = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            quadMesh = temp.GetComponent<MeshFilter>().sharedMesh;
+            Destroy(temp);
+        }
+
+        spawnTime = Time.time;
+
+        // Clone the material - automtically inherits any textures assigned to scannerMaterial (ScannerMat)
+        // Required for individual pulses to have their own fading "schedule"
+        instanceMaterial = new Material(scannerMaterial);
+
+        // Get visualisation mode
+        float mode = scannerMaterial.GetFloat("_UseMesh");
+        isGridMode= (mode > 0.5f);
+
+        // Calculate falloff - only used in grid mode
+        float totalFalloff = gridOffset + gridDepth;
+        instanceMaterial.SetFloat("_Falloff", totalFalloff);
 
         instanceMatrices = new Matrix4x4[raysPerScan];                                                      // Intialise theh array to hold "raysPerScan" number of matrices (positions)
         matrixBuffer = new ComputeBuffer(raysPerScan, 64);                                                  // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
         argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments); // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
 
-        // Make sure we didn't forget to assign textures
-        if (softMask != null && scannerMaterial != null) 
-        {
-            scannerMaterial.SetTexture("_AlphaMask", softMask);
-        }
-
-        UpdateMaterialSettings();
+        PerformScan();
+        Destroy(gameObject, pulseDuration); // Destory this instance once the pulse duration has ended
     }
 
     // Update is called once per frame
     void Update()
     {
-        UpdateMaterialSettings(); // Call every frame so that if you change the dropdown while playing it changes instantly
+        if (activeHitCount <= 0 || instanceMaterial == null) return;
 
-        // Check if player pressed the corresponding button this frame - fire rays to perform scan
-        if (echolocateAction.WasPressedThisFrame())
-        {
-            PerformScan();
-        }
+        // Fade out over time
+        float lifePercent = (Time.time - spawnTime) / pulseDuration;
+        float currentAlpha = Mathf.Lerp(1.0f, 0.0f, lifePercent);
 
-        // If we had valid hits from a previous scan, draw them
-        if (activeHitCount > 0)
-        {
-            RenderVisuals(); // Tells the GPU to paint the scans
-        }
+        instanceMaterial.SetFloat("_GlobalVisibility", currentAlpha);
+        RenderVisuals();
     }
 
-    // Custom helper function to manage shader properties
-    void UpdateMaterialSettings()
-    {
-        // If the material is missing stop immediately to prevent a crash
-        if (scannerMaterial == null) return;
-
-        scannerMaterial.SetFloat("_Falloff", quadOffset + gridDepth); // Set the depth limit form the quad/window - dependent on the quad offset from the wall and grid depth so offset doesn't stop it from scanning surfaces if too high
-
-        // Switch visualisation mode logic - checks which is selected
-        if (currentMode == VisualMode.MeshGrid)
-        {
-            scannerMaterial.SetTexture("_MainTex", gridTexture);    // Send the grid texture to the shader
-            scannerMaterial.SetFloat("_UseMesh", 1);                // Send 1 to the "_UseMesh" toggle in the shader (1 = true/checked)
-        }
-        else // Must be dot mode
-        {
-            scannerMaterial.SetTexture("_MainTex", dotTexture); // Send the mesh grid texture to the shader
-            scannerMaterial.SetFloat("_UseMesh", 0);            // Send 0 to the "_UseMesh" toggle in the shader (0 = false/unchecked)
-        }
-    }
 
     // Custom helper to calulate ray directions that are spherically and uniformally distributed, using a Fibonacci Sphere
     // Returns a Vector3 direction
@@ -143,7 +139,7 @@ public class EcholocationManager : MonoBehaviour
         commands = new NativeArray<RaycastCommand>(raysPerScan, Allocator.TempJob); // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
         results = new NativeArray<RaycastHit>(raysPerScan, Allocator.TempJob);
 
-        Vector3 origin = playerCamera.position; // Get the current position of the player/scanner
+        Vector3 origin = transform.position; // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
 
         // Prepare raycast commands
         for (int i = 0; i < raysPerScan; i++)
@@ -153,7 +149,8 @@ public class EcholocationManager : MonoBehaviour
             Vector3 localDir = UnityEngine.Random.onUnitSphere;
 
             // Convert to camera space/rotation
-            Vector3 worldDir = playerCamera.rotation * localDir; // Required by Fibonacci, and will be required by cone shapes when done
+            //Vector3 worldDir = "rotation" * localDir; // Required by Fibonacci, and will be required by cone shapes when done
+            Vector3 worldDir = localDir;
 
             // Set up the settings package
             QueryParameters queryParams = QueryParameters.Default;
@@ -163,13 +160,13 @@ public class EcholocationManager : MonoBehaviour
             commands[i] = new RaycastCommand(origin, worldDir, queryParams, maxDistance);    // Start at origin, go in direciton of worldDir, use these settings, limit distance
         }
 
+        // Fire rays
         JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
         handle.Complete();                                                                          // Forces the main thread to wait until the job is finished 
-        activeHitCount = 0;                                                                         // Reset hit counter
 
-        float currentSize = (currentMode == VisualMode.Dots) ? dotScale : gridQuadSize; // Determine how big the visuals should be depending on mode
 
-        // See what was hit
+        // Process Hits
+        activeHitCount = 0;
         for (int i = 0; i < raysPerScan; i++)
         {
             // If the collider is not null, the ray hit something
@@ -177,8 +174,21 @@ public class EcholocationManager : MonoBehaviour
             {
                 RaycastHit hit = results[i];                                                                        // Get hit data
                 Quaternion rotation = Quaternion.LookRotation(-hit.normal);                                         // Create a rotation that looks "up" away from the surface normal - makes the quad lie flat on the wall
-                Vector3 position = hit.point + (hit.normal * quadOffset);                                           // Calculate position of the quad - hitpoint + offset
-                instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * currentSize);    // Create the matrix (position, rotation, scale) for this instance
+                
+                Vector3 position;
+                float scale;
+                if (isGridMode)
+                {
+                    position = hit.point + (hit.normal * gridOffset);   // Calculate position of the quad - hitpoint + offset
+                    scale = gridQuadSize;                               // Get scale factor for quad
+                }
+                else
+                {
+                    position = hit.point + (hit.normal * dotOffset);    // Calculate position of the quad - hitpoint + offset
+                    scale = dotScale;                                   // Get scale factor for quad
+                }
+
+                instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
                 activeHitCount++;                                                                                   // Increment the counter
             }
 
@@ -211,16 +221,18 @@ public class EcholocationManager : MonoBehaviour
     // Function that actually draws the graphics
     void RenderVisuals()
     {
-        scannerMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);   // Tell the material where to find the position data (the matrix buffer)
+        if (instanceMaterial == null || quadMesh == null) return;
+
+        instanceMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);   // Tell the material where to find the position data (the matrix buffer)
 
         // Issue the draw command - "DrawMeshInstancedIndirect" is the most efficient way to draw lots of objects
         // Reads the count from args buffer instead of CPU telling it a number
         // In order parameters mean/are (use this shape, 0 - use the first sub-mesh, paint it with this shader, (explained below), use the argsBuffer to find how many to draw)
-        // "Bounds(playerCamera.position, Vector3.one * 1000)" -  Is a safety net, normally Unity calculates the size of the object to decide if it's on screen, if it's behind you it culls it for performance
+        // "Bounds(transform.position, Vector3.one * 1000)" -  Is a safety net, normally Unity calculates the size of the object to decide if it's on screen, if it's behind you it culls it for performance
         // Due to Indirect, positions are calculated on the GPU, so Unity's CPU has no idea where dots/grid are (behind or in front)
-        // Fix - create a giant, fake bounding box that is 1000 metres wide centered on and follows the player (because the Echolocation system is attached to player in the hirearchy in Unity)
-        // Unity asks if this giant box is on screen and the answer is yes, so the rest can easily be left to the GPU 
-        Graphics.DrawMeshInstancedIndirect(quadMesh, 0, scannerMaterial, new Bounds(playerCamera.position, Vector3.one * 1000), argsBuffer);
+        // Fix - create a giant, fake bounding box that is 1000 metres wide centered on the spawn point of the rays
+        // Unity asks if this giant box is on screen, so the rest can easily be left to the GPU 
+        Graphics.DrawMeshInstancedIndirect(quadMesh, 0, instanceMaterial, new Bounds(transform.position, Vector3.one * 1000), argsBuffer);
     }
 
     // Runs when the object is deleted or the game stops

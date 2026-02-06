@@ -3,17 +3,17 @@ Shader "Echolocation/EcholocationProjector"
     // Properties of the shader that can be altered in the inspector window
     Properties
     {
-        [Header(Base Settings)]
-        _MainTex ("Texture", 2D) = "white" {}                           // Variable for dot or grid image (made in just white/transparent) - receives 2D, white is default
-        _Color ("Main Colour", Color) = (0,1,1,1)                       // Tint for applying to above image to choose colour (using american spelling :/), takes in RGBA colour - defaults to opaque cyan
+        [Header(Textures)]
+        _DotTex ("Texture", 2D) = "white" {}                            // Variable for dot image (made in just white/transparent) - receives 2D, white is default
+        _GridTex ("Texture", 2D) = "white" {}                           // Variable for grid image
         _AlphaMask ("Spotlight Mask (Soft Circle)", 2D) = "white" {}    // "Spotlight" for lighting up sections of surfaces
 
-        [Header(Grid Visualisation)]
+        [Header(Settings)]
         [Toggle] _UseMesh ("Use Mesh Grid", Float) = 0                  // Toggle (appears as checkbox - check = 1/true, no check = 0/false) - defaults to dot mode
+        _Color ("Main Colour", Color) = (0,1,1,1)                       // Tint for applying to above image to choose colour (using american spelling :/), takes in RGBA colour - defaults to opaque cyan
         _GridTiling("Mesh Grid Density", Float) = 0.2                   // Controls grid density/size of squares, higher = more denser/smaller squares
-
-        [Header(Depth and Fade)]
-        _Falloff("Depth Projection Limit", Float) = 1.5                 // Limits how "far behind" the "window" for the mesh grid visualisation we will look for object surfaces to light up
+        _GlobalVisibility ("Global Visibility", Float) = 1.0            // Starting visibility for each specific instance/pulse
+        _Falloff("Depth Projection Limit (Grid only)", Float) = 10.0    // Limits how "far behind" the "window" for the mesh grid visualisation we will look for object surfaces to light up
     }
     SubShader
     {
@@ -48,50 +48,52 @@ Shader "Echolocation/EcholocationProjector"
             {
                 float4 vertex : POSITION;       // Position of vertex, within/realtive to quad space
                 float2 uv : TEXCOORD0;          // First UV coordinate
+                UNITY_VERTEX_INPUT_INSTANCE_ID;
             };
 
             struct v2f // (Vertex to Fragment) Data to be passed from this vertex shader to the pixel/fragment shader, TEXCOORD(0-2) are used as generic empty registers to pass data here
             {
                 float4 vertex : SV_POSITION;    // Raw GPU coordinates (clip space: ranges from  -1 to 1), for the gpu to decide which and where pixels should be drawn on the screen
-                float4 scrPos : TEXCOORD0;      // Like above vertex, it's the position of pixel on the screen, but will be converted to texture coordinates (0 to 1), to be compatible with the depth texture to find how far past "windows" surfaces of objects are
+                float4 screenPos : TEXCOORD0;      // Like above vertex, it's the position of pixel on the screen, but will be converted to texture coordinates (0 to 1), to be compatible with the depth texture to find how far past "windows" surfaces of objects are
                 float3 worldPos : TEXCOORD1;    // 3D coordinate of quad in the game world
                 float2 uv : TEXCOORD2;          // UVs from the mesh grid/dot texture to draw on quad surface
+                UNITY_VERTEX_INPUT_INSTANCE_ID;
             };
 
-            StructuredBuffer<float4x4> _InstanceMatrices;   // A list containing the position, rotation, and scale of every raycast hit
-            sampler2D_float _CameraDepthTexture;            // Depth texture for working out how far away things are
-            sampler2D _MainTex;
-            float4 _MainTex_ST;                             // Scale and Translation - tiling and offset, respectively, of the texture from inspector in (x, y, z, w), (x, y) = tiling, (z, w) = offset
+            sampler2D_float _CameraDepthTexture;    // Depth texture for working out how far away things are
+            sampler2D _DotTex;
+            float4 _DotTex_ST;                      // Automatically set by Unity with dot tiling/offset
+            sampler2D _GridTex;
+            float4 _GridTex_ST;                     // Automatically set by Unity with grid tiling/offset
             sampler2D _AlphaMask;
+            float _GridTiling;
+            float4 _Color;
+            float _UseMesh;
+            float _Falloff;
+            float _GlobalVisibility;
 
-            cbuffer UnityPerMaterial 
-            {
-                float4 _Color;
-                float _UseMesh;
-                float _GridTiling;
-                float _Falloff;
-                float _FresnelPower;
-                float _FresnelBoost;
-            }
+            #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED          // Check the machine user is on is capable of GPU instancing
+                StructuredBuffer<float4x4> _InstanceMatrices;   // A list containing the position, rotation, and scale of every raycast hit
+            #endif
+
 
             // Vertex shader
             v2f vert (appdata v, uint instanceID : SV_InstanceID) // intanceID  is the ID for each instance of the quad mesh/dot - for looking up the correct position in _InstanceMatrices
             {
                 v2f o;
-                float4x4 mat = _InstanceMatrices[instanceID];
+                UNITY_SETUP_INSTANCE_ID(v); // Ensures that any built-in Unity instancing logic is correctly initialised for this vertex
 
-                // Convert local quad space to world space
-                float4 worldPos = mul(mat, v.vertex);
+                #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
+                    unity_ObjectToWorld = _InstanceMatrices[instanceID]; // Get correct matrix, unity_ObjectToWorld is a built-in variable with lots of pre-made funcitonality
+                #endif
+
+                float4 worldPos = mul(unity_ObjectToWorld, v.vertex);   // Convert local quad space to world space
                 o.worldPos = worldPos.xyz;
+                o.vertex = mul(UNITY_MATRIX_VP, worldPos);              // Convert world space to clip space
+                o.screenPos = ComputeScreenPos(o.vertex);                  // Calculate screen position for depth lookup
 
-                // Convert world space to clip space
-                o.vertex = mul(UNITY_MATRIX_VP, worldPos);
-
-                // Calculate screen position for depth lookup
-                o.scrPos = ComputeScreenPos(o.vertex);
-                
-                
-                o.uv = v.uv;
+                float4 activeST = lerp(_DotTex_ST, _GridTex_ST, _UseMesh);  // Get tiling/offset depending on mode
+                o.uv = v.uv * activeST.xy + activeST.zw;                    // Apply any tiling/offset - we won't use but is good practice
 
                 return o;
             }
@@ -100,37 +102,37 @@ Shader "Echolocation/EcholocationProjector"
             // fixed4 means it returns a colour, SV_TARGET tells Unity to paint this colour on the screen
             fixed4 frag (v2f i) : SV_Target
             {
-
-                // Step 1: read the depth buffer
-
-                float2 screenUV = i.scrPos.xy / i.scrPos.w;                                 // Get screen position and divide by w to account for perspective - screenUV is coord (0,0) bttom left to (1,1) top right
-                float rawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenUV);       // Use that position to look up depthe texture (1 is close, 0 is far - is non-linear)
-                float linearDepth = LinearEyeDepth(rawDepth);                               // Convert from non-linear to "real-world" units, e.g. linearDepth = 10, means 10 metres from camera
-
-                // Step 2: get word position of surface behind the "window"
-
-                float3 viewRay = i.worldPos - _WorldSpaceCameraPos;                         // Calculate vector from the camera to the quad's flat surface 
-                float3 viewDir = normalize(viewRay);                                        // Normalise to get just the direction
-                float3 geometryWorldPos = _WorldSpaceCameraPos + (viewDir * linearDepth);    // Calulate position of geometry/object behind this pixel - start from the camera and move along the direction to the quad for the distance to the object behind it
-
-                // Step 3: calculate normal on surface of the object
-
-                float3 ddxPos = ddx(geometryWorldPos);                                      // How much does the world position change if I move 1 pixel to the right
-                float3 ddyPos = ddy(geometryWorldPos);                                      // How much does the world position change if I move 1 pixel down
-                float3 pixelNormal = normalize(cross(ddxPos, ddyPos));                      // Cross product of right and down gives the forward vector (the normal)
-
-                // Step 4: restrict by depth limit (falloff)
-
-                float dist = distance(geometryWorldPos, i.worldPos);                        // Calculate distacne from the quad/window to the surface behind it
-                float depthAlpha = 1.0 - smoothstep(0.0, _Falloff, dist);                   // Smoothstep(min, max, value) returns value between 0.0 (at/below min) and 1.0 (at/above max), and inverse for a fading effect further from the window
-                if (depthAlpha <= 0.01) discard;                                            // If pixel is invisible stop calculating immediately to save/optimise GPU power
-
-                // Step 5: pattern mapping (draw the grid/dots)
-
-                fixed4 patternColour;
+                fixed4 col;
 
                 if (_UseMesh > 0.5) // Use greater than for safety to avoid errors due to floats, e.g. when it should be 0.0, it's actually 0.000001 and is interpreted as true incorrectly
                 {
+                    // Step 1: read the depth buffer
+
+                    float2 screenUV = i.screenPos.xy / i.screenPos.w;                                 // Get screen position and divide by w to account for perspective - screenUV is coord (0,0) bttom left to (1,1) top right
+                    float rawDepth = SAMPLE_DEPTH_TEXTURE(_CameraDepthTexture, screenUV);       // Use that position to look up depthe texture (1 is close, 0 is far - is non-linear)
+                    float linearDepth = LinearEyeDepth(rawDepth);                               // Convert from non-linear to "real-world" units, e.g. linearDepth = 10, means 10 metres from camera
+
+                    // Step 2: get word position of surface behind the "window"
+
+                    float3 viewRay = i.worldPos - _WorldSpaceCameraPos;                         // Calculate vector from the camera to the quad's flat surface 
+                    float3 viewDir = normalize(viewRay);                                        // Normalise to get just the direction
+
+                    float rayLength = linearDepth / dot(viewDir, unity_CameraForward);          // Adjust depth to account for ray angle to prevent "swimming" on screen edges
+
+                    float3 geometryWorldPos = _WorldSpaceCameraPos + (viewDir * rayLength);     // Calulate position of geometry/object behind this pixel - start from the camera and move along the direction to the quad for the distance to the object behind it
+
+                    // Step 3: calculate normal on surface of the object
+
+                    float3 ddxPos = ddx(geometryWorldPos);                                      // How much does the world position change if I move 1 pixel to the right
+                    float3 ddyPos = ddy(geometryWorldPos);                                      // How much does the world position change if I move 1 pixel down
+                    float3 pixelNormal = normalize(cross(ddxPos, ddyPos));                      // Cross product of right and down gives the forward vector (the normal)
+
+                    // Step 4: restrict by depth limit (falloff)
+
+                    float dist = distance(geometryWorldPos, i.worldPos);                        // Calculate distacne from the quad/window to the surface behind it
+                    float depthAlpha = 1.0 - smoothstep(0.0, _Falloff, dist);                   // Smoothstep(min, max, value) returns value between 0.0 (at/below min) and 1.0 (at/above max), and inverse for a fading effect further from the window
+                    if (depthAlpha <= 0.01) discard;                                            // If pixel is invisible stop calculating immediately to save/optimise GPU power
+
                     // Using Triplanar Mapping for mesh grid
 
                     float3 weights = abs(pixelNormal);                          // Find which "direction" (front, side, or top) has the most impact
@@ -144,27 +146,27 @@ Shader "Echolocation/EcholocationProjector"
                     float2 uvSide = geometryWorldPos.zy * _GridTiling;
 
                     // Sample the texture for each
-                    fixed4 colFront = tex2D(_MainTex, uvFront);
-                    fixed4 colTop = tex2D(_MainTex, uvTop);
-                    fixed4 colSide = tex2D(_MainTex, uvSide);
+                    fixed4 colFront = tex2D(_GridTex, uvFront);
+                    fixed4 colTop = tex2D(_GridTex, uvTop);
+                    fixed4 colSide = tex2D(_GridTex, uvSide);
 
                     // Combine the three samples using the weights  
-                    patternColour = colSide * weights.x + colTop * weights.y + colFront * weights.z;
+                    col = colSide * weights.x + colTop * weights.y + colFront * weights.z;
+
+                    // Apply spot mask
+                    float spotMask = tex2D(_AlphaMask, i.uv).a;         // Read the soft circle mask texture to trim the square edges of the quad
+                    col *= _Color;                                      // Apply colour/tint
+                    col.a *= depthAlpha * spotMask * _GlobalVisibility; // Combine all effects - including fading effect
                 }
                 else
                 {
                     // Using normal Flat Mapping for dots mode
-
-                    patternColour = tex2D(_MainTex, i.uv); // Use Quad's standard UV to keep dot perfectly round in the centre
+                    col = tex2D(_DotTex, i.uv);     // Use Quad's standard UV to keep dot perfectly round in the centre
+                    col *= _Color;                  // Apply colour/tint
+                    col.a *= _GlobalVisibility;     // Apply fading effect
                 }
 
-                // Step 6: combine everything
-
-                float spotMask = tex2D(_AlphaMask, i.uv).a;     // Read the soft circle mask texture to trim the square edges of the quad
-                fixed4 finalCol = patternColour * _Color;       // Add the grid pattern colour
-                finalCol.a *= depthAlpha * spotMask;            // Apply transparency - fade out if either outside "spotlight" circle or too far from the "window"/quad
-
-                return finalCol;
+                return col;
             }
             ENDCG // End of "C for Graphics Program"
         }
