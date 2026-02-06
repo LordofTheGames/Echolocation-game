@@ -4,59 +4,55 @@ public class WaterInteraction : MonoBehaviour
 {
     public ParticleSystem ripple;
     public LayerMask waterLayer;
-    public float stepDistance;
-    public float footSpacing; 
+    public float stepDistance = 0.5f;
+    public float footSpacing = 0.3f;
+    public float forwardOffset = 0.1f; 
 
-    public float rippleSize;
-    public float rippleLifetime;
+    public float rippleSize = 1f;
+    public float rippleLifetime = 2f;
 
     private CharacterController cc;
     private Vector3 lastPos;
     private float distanceTraveled;
     private bool inWater;
-    private bool wasGrounded;
     private bool isRightFoot;
     private RaycastHit waterHit;
 
     void Start()
     {
         cc = GetComponent<CharacterController>();
+        lastPos = transform.position;
     }
 
     void Update()
     {
+        CheckWater();
         Vector3 currentPos = transform.position;
         float moveStep = Vector3.Distance(new Vector3(currentPos.x, 0, currentPos.z), new Vector3(lastPos.x, 0, lastPos.z));
-        lastPos = currentPos;
-
-        CheckWater();
-        if (!wasGrounded && cc.isGrounded && inWater)
-        {
-            CreateFootstep(); 
-            distanceTraveled = 0;
-        }
 
         if (cc.isGrounded && inWater)
         {
-            if (moveStep > 0.001f) 
+            if (moveStep > 0.001f)
             {
                 distanceTraveled += moveStep;
+
                 if (distanceTraveled >= stepDistance)
                 {
-                    CreateFootstep();
-                    distanceTraveled = 0; 
+                    float overflow = distanceTraveled - stepDistance;
+                    float ratio = 1.0f - (overflow / moveStep);
+                    Vector3 exactStepPos = Vector3.Lerp(lastPos, currentPos, ratio);
+
+                    CreateFootstep(exactStepPos);
+                    distanceTraveled = 0;
                 }
-            }
-            else
-            {
-                distanceTraveled = stepDistance;
             }
         }
         else
         {
-            distanceTraveled = stepDistance;
+            distanceTraveled = 0; 
         }
-        wasGrounded = cc.isGrounded;
+
+        lastPos = currentPos;
         Shader.SetGlobalVector("_Player", transform.position);
     }
 
@@ -69,7 +65,7 @@ public class WaterInteraction : MonoBehaviour
             ripple.gameObject.SetActive(inWater);
     }
 
-    void CreateFootstep()
+    void CreateFootstep(Vector3 triggerPos)
     {
         float sideDir;
         if (isRightFoot)
@@ -81,19 +77,18 @@ public class WaterInteraction : MonoBehaviour
             sideDir = -1f; 
         }
 
-        Vector3 offset = transform.right * (footSpacing * 0.5f) * sideDir;
-        Vector3 spawnPos = transform.position + offset;
+        Vector3 sideOffset = transform.right * (footSpacing * 0.5f) * sideDir;
+        Vector3 fwdOffset = transform.forward * forwardOffset;
+        Vector3 spawnPos = triggerPos + sideOffset + fwdOffset;
         
-        if (waterHit.collider != null) spawnPos.y = waterHit.point.y;
+        if (waterHit.collider != null) spawnPos.y = waterHit.point.y + 0.01f;
 
         var emitParams = new ParticleSystem.EmitParams
         {
             position = spawnPos,
-            velocity = Vector3.zero,
             startSize = rippleSize,
             startLifetime = rippleLifetime,
-            startColor = Color.white,
-            rotation3D = Vector3.zero
+            startColor = Color.white
         };
 
         ripple.Emit(emitParams, 1);
