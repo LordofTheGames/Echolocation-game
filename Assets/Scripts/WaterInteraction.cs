@@ -3,88 +3,100 @@ using UnityEngine;
 public class WaterInteraction : MonoBehaviour
 {
     public ParticleSystem ripple;
-    
-    [Header("Settings")]
-    public LayerMask waterLayer = LayerMask.GetMask("Water");
-    public LayerMask groundLayer = LayerMask.GetMask("Ground");
+    public LayerMask waterLayer;
+    public float stepDistance;
+    public float footSpacing; 
+
+    public float rippleSize;
+    public float rippleLifetime;
 
     private CharacterController cc;
-    private Vector3 playerPos;
-    private float velocityXZ;
+    private Vector3 lastPos;
+    private float distanceTraveled;
     private bool inWater;
+    private bool wasGrounded;
+    private bool isRightFoot;
+    private RaycastHit waterHit;
 
     void Start()
     {
         cc = GetComponent<CharacterController>();
-        playerPos = transform.position;
     }
 
     void Update()
     {
-        // Calculate Velocity (Exactly like your original script)
-        velocityXZ = Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(playerPos.x, 0, playerPos.z));
-        playerPos = transform.position;
-        ripple.transform.position = transform.position;
+        Vector3 currentPos = transform.position;
+        float moveStep = Vector3.Distance(new Vector3(currentPos.x, 0, currentPos.z), new Vector3(lastPos.x, 0, lastPos.z));
+        lastPos = currentPos;
 
-        // Global Shader Variable
+        CheckWater();
+        if (!wasGrounded && cc.isGrounded && inWater)
+        {
+            CreateFootstep(); 
+            distanceTraveled = 0;
+        }
+
+        if (cc.isGrounded && inWater)
+        {
+            if (moveStep > 0.001f) 
+            {
+                distanceTraveled += moveStep;
+                if (distanceTraveled >= stepDistance)
+                {
+                    CreateFootstep();
+                    distanceTraveled = 0; 
+                }
+            }
+            else
+            {
+                distanceTraveled = stepDistance;
+            }
+        }
+        else
+        {
+            distanceTraveled = stepDistance;
+        }
+        wasGrounded = cc.isGrounded;
         Shader.SetGlobalVector("_Player", transform.position);
-
-        HandleWaterDetection();
-        HandleRipples();
     }
 
-    void HandleWaterDetection()
+    void CheckWater()
     {
-        // Water Check (from your original PlayerMovement)
-        inWater = playerIsInWater();
-        // Toggle ripple object based on water status
-        if (inWater) ripple.gameObject.SetActive(true);
-        else ripple.gameObject.SetActive(false);
+        float startHeight = cc.height * 0.5f;
+        inWater = Physics.Raycast(transform.position + Vector3.up * startHeight, Vector3.down, out waterHit, cc.height * 2.5f, waterLayer, QueryTriggerInteraction.Collide);
+        
+        if (ripple.gameObject.activeSelf != inWater) 
+            ripple.gameObject.SetActive(inWater);
     }
 
-    bool playerIsInWater(){
-        float height = cc.height + cc.radius;
-        return Physics.Raycast(transform.position + Vector3.up * height, Vector3.down, height * 2, waterLayer);
-    }
-
-    void HandleRipples()
+    void CreateFootstep()
     {
-        // Re-implementing your OnTriggerStay logic here for movement-based ripples
-        if (inWater && velocityXZ > 0.025f && Time.renderedFrameCount % 3 == 0)
+        float sideDir;
+        if (isRightFoot)
         {
-            int y = (int)transform.eulerAngles.y;
-            CreateRipple(y - 100, y + 100, 3, 5f, 2.65f, 3f);
+            sideDir = 1f; 
         }
-    }
-
-    // Your exact CreateRipple method
-    void CreateRipple(int Start, int End, int Delta, float Speed, float Size, float Lifetime)
-    {
-        Vector3 forward = ripple.transform.eulerAngles;
-        forward.y = Start;
-        ripple.transform.eulerAngles = forward;
-
-        for (int i = Start; i < End; i += Delta)
+        else
         {
-            ripple.Emit(transform.position + ripple.transform.forward * 1.15f, ripple.transform.forward * Speed, Size, Lifetime, Color.white);
-            ripple.transform.Rotate(Vector3.up * Delta, Space.World);
+            sideDir = -1f; 
         }
-    }
 
-    // Trigger logic (Exactly like your original script)
-    private void OnTriggerEnter(Collider other)
-    {
-        if (((1 << other.gameObject.layer) & waterLayer) != 0)
-        {
-            ripple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
-        }
-    }
+        Vector3 offset = transform.right * (footSpacing * 0.5f) * sideDir;
+        Vector3 spawnPos = transform.position + offset;
+        
+        if (waterHit.collider != null) spawnPos.y = waterHit.point.y;
 
-    private void OnTriggerExit(Collider other)
-    {
-        if (((1 << other.gameObject.layer) & waterLayer) != 0)
+        var emitParams = new ParticleSystem.EmitParams
         {
-            ripple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
-        }
+            position = spawnPos,
+            velocity = Vector3.zero,
+            startSize = rippleSize,
+            startLifetime = rippleLifetime,
+            startColor = Color.white,
+            rotation3D = Vector3.zero
+        };
+
+        ripple.Emit(emitParams, 1);
+        isRightFoot = !isRightFoot;
     }
 }
