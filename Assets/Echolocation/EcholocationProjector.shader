@@ -4,8 +4,8 @@ Shader "Echolocation/EcholocationProjector"
     Properties
     {
         [Header(Textures)]
-        _DotTex ("Texture", 2D) = "white" {}                            // Variable for dot image (made in just white/transparent) - receives 2D, white is default
-        _GridTex ("Texture", 2D) = "white" {}                           // Variable for grid image
+        _DotTex ("Dot Texture", 2D) = "white" {}                        // Variable for dot image (made in just white/transparent) - receives 2D, white is default
+        _GridTex ("Grid Texture", 2D) = "white" {}                      // Variable for grid image
         _AlphaMask ("Spotlight Mask (Soft Circle)", 2D) = "white" {}    // "Spotlight" for lighting up sections of surfaces
 
         [Header(Settings)]
@@ -48,7 +48,7 @@ Shader "Echolocation/EcholocationProjector"
             {
                 float4 vertex : POSITION;       // Position of vertex, within/realtive to quad space
                 float2 uv : TEXCOORD0;          // First UV coordinate
-                UNITY_VERTEX_INPUT_INSTANCE_ID;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             struct v2f // (Vertex to Fragment) Data to be passed from this vertex shader to the pixel/fragment shader, TEXCOORD(0-2) are used as generic empty registers to pass data here
@@ -57,7 +57,7 @@ Shader "Echolocation/EcholocationProjector"
                 float4 screenPos : TEXCOORD0;      // Like above vertex, it's the position of pixel on the screen, but will be converted to texture coordinates (0 to 1), to be compatible with the depth texture to find how far past "windows" surfaces of objects are
                 float3 worldPos : TEXCOORD1;    // 3D coordinate of quad in the game world
                 float2 uv : TEXCOORD2;          // UVs from the mesh grid/dot texture to draw on quad surface
-                UNITY_VERTEX_INPUT_INSTANCE_ID;
+                UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
             sampler2D_float _CameraDepthTexture;    // Depth texture for working out how far away things are
@@ -117,7 +117,8 @@ Shader "Echolocation/EcholocationProjector"
                     float3 viewRay = i.worldPos - _WorldSpaceCameraPos;                         // Calculate vector from the camera to the quad's flat surface 
                     float3 viewDir = normalize(viewRay);                                        // Normalise to get just the direction
 
-                    float rayLength = linearDepth / dot(viewDir, unity_CameraForward);          // Adjust depth to account for ray angle to prevent "swimming" on screen edges
+                    float3 cameraForward = -float3(UNITY_MATRIX_V._m20, UNITY_MATRIX_V._m21, UNITY_MATRIX_V._m22);  // Calculate camera forward vector
+                    float rayLength = linearDepth / dot(viewDir, cameraForward);                                    // Adjust depth to account for ray angle to prevent "swimming" on screen edges
 
                     float3 geometryWorldPos = _WorldSpaceCameraPos + (viewDir * rayLength);     // Calulate position of geometry/object behind this pixel - start from the camera and move along the direction to the quad for the distance to the object behind it
 
