@@ -3388,6 +3388,7 @@ GameObject:
   m_Component:
   - component: {fileID: 672139628}
   - component: {fileID: 672139627}
+  - component: {fileID: 672139629}
   m_Layer: 0
   m_Name: MicInput
   m_TagString: Untagged
@@ -3409,8 +3410,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   loudness: 0
   pitchHz: 0
+  swiftF0: {fileID: 672139629}
   micMixer: {fileID: 24100000, guid: e56de6b96c67d49d9a54b3cb1385ab95, type: 2}
   micSilentGroup: {fileID: -2925617134929553557, guid: e56de6b96c67d49d9a54b3cb1385ab95, type: 2}
+  micVolumeParam: MicSilentVolume
 --- !u!4 &672139628
 Transform:
   m_ObjectHideFlags: 0
@@ -3426,6 +3429,19 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &672139629
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 672139626}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8de948fc6b92343d8b10c0f5da057c76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  modelPath: Model/model.onnx
 --- !u!43 &813922639
 Mesh:
   m_ObjectHideFlags: 0

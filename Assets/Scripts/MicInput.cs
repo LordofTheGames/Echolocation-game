@@ -13,14 +13,10 @@ public class MicInput : MonoBehaviour
     private float[] samples;
 
     public float pitchHz;
-
-    private int spectrumSize = 2048;
-    private int minPitchHz = 60;
-    private int maxPitchHz = 500;
-    private FFTWindow fftWindow = FFTWindow.BlackmanHarris;
+    public SwiftF0Runner swiftF0;
+    
     private int sampleRate;
 
-    private AudioPitchEstimator pitchEstimator;
     [SerializeField] private AudioMixer micMixer;
     [SerializeField] private AudioMixerGroup micSilentGroup;
     [SerializeField] private string micVolumeParam = "MicSilentVolume";
@@ -48,12 +44,6 @@ public class MicInput : MonoBehaviour
         audioSource.Play();
 
         samples = new float[windowSize];
-
-        pitchEstimator = GetComponent<AudioPitchEstimator>();
-        if (pitchEstimator == null)
-            pitchEstimator = gameObject.AddComponent<AudioPitchEstimator>();
-        pitchEstimator.frequencyMin = minPitchHz;
-        pitchEstimator.frequencyMax = maxPitchHz;
 
         if (micMixer != null && !string.IsNullOrEmpty(micVolumeParam))
             micMixer.SetFloat(micVolumeParam, -80f);
@@ -86,10 +76,12 @@ public class MicInput : MonoBehaviour
             pitchHz = 0f;
             return;
         }
-
-    // SRH
-        float detected = pitchEstimator.Estimate(audioSource);
-        pitchHz = detected;
+        
+        if (swiftF0 != null){
+            pitchHz = swiftF0.Run(samples);
+        } else{
+            pitchHz = 0f;
+        }
     }
 
     void OnDisable()
