@@ -83,6 +83,7 @@ public class EcholocationManager : MonoBehaviour
         // Clone the material - automtically inherits any textures assigned to scannerMaterial (ScannerMat)
         // Required for individual pulses to have their own fading "schedule"
         instanceMaterial = new Material(scannerMaterial);
+        instanceMaterial.enableInstancing = true; // Force turn on instancing
 
         // Get visualisation mode
         float mode = scannerMaterial.GetFloat("_UseMesh");

@@ -34,6 +34,7 @@ Shader "Echolocation/EcholocationProjector"
         // Can be used by developer for example to stop rendering if a players computer is struggling
         LOD 100
 
+
         // Actual instruction steps - one pass per vertex in quad
         Pass
         {
@@ -41,6 +42,7 @@ Shader "Echolocation/EcholocationProjector"
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing    // Tells the compiler to generate a special version of this shader that supports GPU Instancing - so that a window for each of the thousands of rays can by made efficiently in parallel
+            #pragma instancing_options procedural:setup
 
             #include "UnityCG.cginc"
 
@@ -76,12 +78,19 @@ Shader "Echolocation/EcholocationProjector"
                 StructuredBuffer<float4x4> _InstanceMatrices;   // A list containing the position, rotation, and scale of every raycast hit
             #endif
 
+            void setup()
+            {
+                #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED 
+                #endif
+            }
+
 
             // Vertex shader
             v2f vert (appdata v, uint instanceID : SV_InstanceID) // intanceID  is the ID for each instance of the quad mesh/dot - for looking up the correct position in _InstanceMatrices
             {
                 v2f o;
                 UNITY_SETUP_INSTANCE_ID(v); // Ensures that any built-in Unity instancing logic is correctly initialised for this vertex
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
 
                 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
                     unity_ObjectToWorld = _InstanceMatrices[instanceID]; // Get correct matrix, unity_ObjectToWorld is a built-in variable with lots of pre-made funcitonality
