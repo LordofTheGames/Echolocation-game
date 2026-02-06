@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public class ElevatorPlatformControl : MonoBehaviour
+public class LiftControl : MonoBehaviour
 {
     public Transform Lift;
-    [Header("Platform Settings")]
+    [Header("Lift Settings")]
     [SerializeField] private float maxHeight = 10f;
     [SerializeField] private float minHeight = 0f;
     [SerializeField] private bool startAtBottom = true;
