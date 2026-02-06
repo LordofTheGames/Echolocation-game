@@ -22,6 +22,8 @@ Shader "Echolocation/EcholocationProjector"
         // "IgnoreProjector"="True" - protection against legacy unity projectors to stop them painting on top of this echolocation projector
         Tags { "Queue"="Transparent" "RenderType"="Transparent" "IgnoreProjector"="True" }
 
+        Cull Off // Stop Unity culling dots/visualisation when looking at them from the back
+
         // Do not save this object's depth to the depth buffer, since it is a window for projection and not an in game physical object
         ZWrite Off
 
