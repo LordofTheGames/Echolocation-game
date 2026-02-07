@@ -185,21 +185,15 @@ public class EcholocationManager : MonoBehaviour
                 // You can uniformly distribute rays within a cone without clumping at the centre/pole
                 // And then you can convert to the space of the "direction" of the cone
 
-                // Hybrid logic: uniformity = 0 means random angle to calculate z so more clumped, uniformity = 1 means random height so uniformly distributed
-                // Interpolate between the heights given using uniformity factor, biases one the other, making it more/less clumped
-
                 float halfAngleRad = (scanAngle / 2f) * Mathf.Deg2Rad;      // Split angle to half on either side of line and convert to radians
                 float minZ = Mathf.Cos(halfAngleRad);                       // Get the height corresponding to the angle of the cone on the sphere
 
-                float rng = UnityEngine.Random.value;                       // Random between 0 and 1, used for both factors
+                float exponent = Mathf.Lerp(8.0f, 1.0f, scanUniformity);    // How clumped the rays should be
 
-                float biasedRng = rng * rng * rng;
-                float angle = biasedRng * halfAngleRad;                           // Randomly pick angle using biased rng
-                float zClumped = Mathf.Cos(angle);                          // Calculate height using angle
+                float rng = UnityEngine.Random.value;                       // Random value 0 to 1
+                float biasedT = Mathf.Pow(rng, 1.0f / exponent);            // Warp random value using exponent, root effect for smooth hill like distribution
 
-                float zUniform = Mathf.Lerp(minZ, 1f, rng);                 // Randomly pick a height/ring in range to the pole/end of unit line, using rng
-
-                float z = Mathf.Lerp(zClumped, zUniform, scanUniformity);   // Use scanUniformity to bias
+                float z = Mathf.Lerp(minZ, 1.0f, biasedT);                  // Uniformity = 1 means exponent = 1 means 1 / exponent = 1 means even distribution, higher exponent/lower uniformity means more clumped
 
                 float radiusAtHeight = Mathf.Sqrt(1f - z * z);              // Get the radius of the ring at that point
                 float phi = UnityEngine.Random.Range(0f, 2f * Mathf.PI);    // Randomly pick an angle around the ring (polar coordinates)
