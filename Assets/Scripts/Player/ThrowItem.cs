@@ -8,7 +8,7 @@ public class ThrowItem : MonoBehaviour
     [SerializeField] private GameObject cubePrefab;
     [SerializeField] private float throwForce = 20f;
     [SerializeField] private float throwHeight = 1.5f;
-    [SerializeField] private float maxThrowDistance = 50f;
+    [SerializeField] private float landingIndicatorSize = 1f;
     [SerializeField] private float throwSpinSpeed = 3f;  // 投掷时旋转角速度，可在 Inspector 调整
 
     [Header("Position settings")]
@@ -33,6 +33,7 @@ public class ThrowItem : MonoBehaviour
     private Vector3 throwDirection;              
 
     InputAction throwAction;
+    InputAction changeThrowDistance;
 
     private void Start()
     {
@@ -41,6 +42,7 @@ public class ThrowItem : MonoBehaviour
             cameraTransform = mainCam.transform;
 
         throwAction = InputSystem.actions.FindAction("Throw");
+        changeThrowDistance = InputSystem.actions.FindAction("Change throw distance");
 
         if (cubeSpawnPoint == null)
         {
@@ -129,15 +131,16 @@ public class ThrowItem : MonoBehaviour
     private void Update()
     {
         if (throwAction.WasPressedThisFrame())
-        {
             StartHolding();
-        }
 
         if (throwAction.IsPressed() && isHoldingRightClick)
             UpdateHolding();
 
         if (throwAction.WasReleasedThisFrame() && isHoldingRightClick)
             StartThrowing();
+
+        if (throwAction.IsPressed())
+            throwForce += changeThrowDistance.ReadValue<Vector2>().y * 0.5f;
     }
 
     private void StartHolding()
@@ -238,7 +241,7 @@ public class ThrowItem : MonoBehaviour
         landingIndicator.transform.Rotate(90f, 0f, 0f);
 
         float distance = Vector3.Distance(position, cameraTransform.position);
-        float scale = Mathf.Lerp(0.3f, 1.5f, distance / maxThrowDistance);
+        float scale = Mathf.Lerp(0.3f, 1.5f, distance * landingIndicatorSize / 50);
         landingIndicator.transform.localScale = new Vector3(scale, 0.05f, scale);
     }
 
