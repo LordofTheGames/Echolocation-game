@@ -55,6 +55,11 @@ public class EcholocationManager : MonoBehaviour
     private bool isGridMode = false;
 
 
+    // Scan direction and angle of project (from line to cone to sphere, ranging 0 to 360 degrees)
+    private Vector3 scanDirection = Vector3.forward;
+    private float scanAngle = 360f; // Defaults to sphere
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -133,6 +138,15 @@ public class EcholocationManager : MonoBehaviour
         return new Vector3(x, y, z);
     }
 
+    public void SetupScan(Vector3 direction, float angle)
+    {
+        // Check to prevent LookRotation(0,0,0) errors
+        if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
+
+        scanDirection = direction;
+        scanAngle = angle;
+    }
+
     // Fires the rays
     void PerformScan()
     {
@@ -145,13 +159,48 @@ public class EcholocationManager : MonoBehaviour
         // Prepare raycast commands
         for (int i = 0; i < raysPerScan; i++)
         {
-            // Get the standard direction (always points world north)
-            // Vector3 localDir = GetFibonacciSphereDirection(i, raysPerScan); // Fibonacci mode
-            Vector3 localDir = UnityEngine.Random.onUnitSphere;
+            Vector3 worldDir;
 
-            // Convert to camera space/rotation
-            //Vector3 worldDir = "rotation" * localDir; // Required by Fibonacci, and will be required by cone shapes when done
-            Vector3 worldDir = localDir;
+            if (scanAngle >= 360f)
+            {
+                worldDir = UnityEngine.Random.onUnitSphere;
+            }
+            else
+            {
+                // Uniform cone distribution math - using Archimedes theorem
+                // Any slice of a sphere with the same height, has the same surface area on the "crust" of the sphere
+                // Therefore if you imagine those heights getting really small ~ 0, it produces a circular ring on the sphere's surface
+                // If you uniformly pick  heights/rings, all of which have the same surface area, and uniformly pick points on the rings
+                // You will uniformly distribute points an the surface of the sphere
+                // And if you limit the height to be picked along a line from the sphere's centre, say 1 at surface of a unit sphere, to 0.866 
+                // Where the "width" of the sphere at that point corresponds to a 60 degree cone
+                // You can uniformly distribute rays within a cone without clumping at the centre/pole
+                // And then you can convert to the space of the "direction" of the cone
+
+                float halfAngleRad = (scanAngle / 2f) * Mathf.Deg2Rad;      // Split angle to half on either side of line and convert to radians
+                float minZ = Mathf.Cos(halfAngleRad);                       // Get the height corresponding to the angle of the cone on the sphere
+                float z = UnityEngine.Random.Range(minZ, 1f);               // Randomly pick a height/ring from above to the pole/end of unit line
+                float radiusAtHeight = Mathf.Sqrt(1f - z * z);              // Get the radius of the ring at that point
+                float phi = UnityEngine.Random.Range(0f, 2f * Mathf.PI);    // Randomly pick an angle around the ring (polar coordinates)
+
+                // Convert to cartesian
+                Vector3 localDir = new Vector3(
+                    radiusAtHeight * Mathf.Cos(phi),
+                    radiusAtHeight * Mathf.Sin(phi),
+                    z
+                );
+
+                // Rotate to direction specified (prevent LookRotation(0,0,0) errors)
+                if (scanDirection != Vector3.forward)
+                {
+                    Quaternion lookRot = Quaternion.LookRotation(scanDirection);
+                    worldDir = lookRot * localDir;
+                }
+                else
+                {
+                    worldDir = localDir;
+                }
+            }
 
             // Set up the settings package
             QueryParameters queryParams = QueryParameters.Default;
