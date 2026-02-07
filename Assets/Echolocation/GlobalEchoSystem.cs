@@ -32,18 +32,18 @@ public class GlobalEchoSystem : MonoBehaviour
     [Header("Settings")]
     public GameObject echoSystemPrefab; // Drag EcholocationSystem.prefab here in inspector window
 
-    public static void Ping(Vector3 position) // Default overload that use spherical rays
+    public static void Ping(Vector3 position, GameObject sourceObject) // Default overload that use spherical rays
     {
-        Ping(position, Vector3.forward, 360f, 1.0f, 20000);
+        Ping(position, Vector3.forward, 360f, 1.0f, 20000, sourceObject);
     }
 
     // Takes in an angle between 0 and 360 degrees for shape of projection, and direction for direction to project in  
-    public static void Ping(Vector3 position, Vector3 direction, float angle, float uniformity, int numRays) // Can add things later like: shape of projection + rotation, loudness, pitch, num rays (if not dependent on other things), etc.
+    public static void Ping(Vector3 position, Vector3 direction, float angle, float uniformity, int numRays, GameObject sourceObject = null) // Can add things later like: shape of projection + rotation, loudness, pitch, num rays (if not dependent on other things), etc.
     {
         // Safety check for existence of GlobalEchoSystem and EcholocationSystem.prefab (via GlobalEchoManager GameObject) 
         if (Instance != null && Instance.echoSystemPrefab != null)
         {
-            Instance.SpawnPulse(position, direction, angle, uniformity, numRays);
+            Instance.SpawnPulse(position, direction, angle, uniformity, numRays, sourceObject);
         }
         else
         {
@@ -52,7 +52,7 @@ public class GlobalEchoSystem : MonoBehaviour
     }
 
     // Takes in an angle between 0 and 360 degrees for shape of projection, and direction for direction to project in  
-    void SpawnPulse(Vector3 position, Vector3 direction, float angle, float uniformity, int numRays)
+    void SpawnPulse(Vector3 position, Vector3 direction, float angle, float uniformity, int numRays, GameObject sourceObject)
     {
         GameObject pulse = Instantiate(echoSystemPrefab, position, Quaternion.identity); // Create (Instantiate) an instance of the EcholocationSystem.prefab at position, with rotation ... (identity means no rotation)
 
@@ -68,7 +68,7 @@ public class GlobalEchoSystem : MonoBehaviour
 
         if (manager != null)
         {
-            manager.SetupScan(direction, angle, uniformity, numRays);
+            manager.SetupScan(direction, angle, uniformity, numRays, sourceObject);
         }
     }
 }

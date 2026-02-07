@@ -17,7 +17,7 @@ public class TempCubeEcholocate : MonoBehaviour
 
             Vector3 spawnPoint = contact.point + (contact.normal * pingOffset); // Offset along normal to the surface
 
-            GlobalEchoSystem.Ping(spawnPoint); // Ping the echolocation system with the point of contact
+            GlobalEchoSystem.Ping(spawnPoint, gameObject); // Ping the echolocation system with the point of contact and object that spawned it
 
             hasPinged = true;
 

@@ -64,6 +64,9 @@ public class EcholocationManager : MonoBehaviour
     private float scanUniformity = 1.0f; 
 
 
+    // Stop the rays colliding with the object that spawns them
+    private GameObject objectToIgnore;  
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -144,7 +147,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000)
+    public void SetupScan(Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, GameObject ignoreMe = null)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -153,11 +156,22 @@ public class EcholocationManager : MonoBehaviour
         scanAngle = angle;
         scanUniformity = Mathf.Clamp01(uniformity);     // Make sure is in valid range
         raysPerScan = Mathf.Clamp(numRays, 0, 20000);   // Make sure is in (currently chosen) valid range
+        objectToIgnore = ignoreMe;
     }
 
     // Fires the rays
     void PerformScan()
     {
+        int originalLayer = 0;
+        bool hidden = false;
+
+        if (objectToIgnore != null)
+        {
+            originalLayer = objectToIgnore.layer;
+            objectToIgnore.layer = 2; // Built in ignore raycast layer
+            hidden = true;
+        }
+
         // Create temporary memory for the job
         commands = new NativeArray<RaycastCommand>(raysPerScan, Allocator.TempJob); // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
         results = new NativeArray<RaycastHit>(raysPerScan, Allocator.TempJob);
@@ -229,6 +243,11 @@ public class EcholocationManager : MonoBehaviour
         JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
         handle.Complete();                                                                          // Forces the main thread to wait until the job is finished 
 
+        // Reset the object to its original layer once raycasts have been completed
+        if (hidden && objectToIgnore != null)
+        {
+            objectToIgnore.layer = originalLayer;
+        }
 
         // Process Hits
         activeHitCount = 0;
