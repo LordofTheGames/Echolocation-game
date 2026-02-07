@@ -9,7 +9,8 @@ public enum WaterRippleType
 public class WaterInteraction : MonoBehaviour
 {
     public WaterRippleType waterRippleType = WaterRippleType.Footsteps;
-    public ParticleSystem ripple;
+    public ParticleSystem StepsRipplePrefab;
+    public ParticleSystem WadeRipplePrefab;
     public float stepDistance = 0.5f;
     public float footSpacing = 0.3f;
     public float forwardOffset = 0.1f; 
@@ -17,6 +18,8 @@ public class WaterInteraction : MonoBehaviour
     public float rippleSize = 1f;
     public float rippleLifetime = 2f;
 
+    private ParticleSystem StepsRipple;
+    private ParticleSystem WadeRipple;
     private CharacterController cc;
     private Vector3 lastPos;
     private float distanceTraveled;
@@ -33,14 +36,10 @@ public class WaterInteraction : MonoBehaviour
     {
         cc = GetComponent<CharacterController>();
         waterLayer = LayerMask.GetMask("Water");
-        if (waterRippleType == WaterRippleType.Footsteps)
-        {
-            lastPos = transform.position;
-        }
-        else if (waterRippleType == WaterRippleType.Wade)
-        {
-            playerPos = transform.position;
-        }
+        lastPos = transform.position;
+        playerPos = transform.position;
+        WadeRipple = Instantiate(WadeRipplePrefab);
+        StepsRipple = Instantiate(StepsRipplePrefab);
     }
 
     void Update()
@@ -81,7 +80,7 @@ public class WaterInteraction : MonoBehaviour
             // Calculate Velocity (Exactly like your original script)
             velocityXZ = Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(playerPos.x, 0, playerPos.z));
             playerPos = transform.position;
-            ripple.transform.position = transform.position;
+            WadeRipple.transform.position = transform.position;
 
             // Global Shader Variable
             Shader.SetGlobalVector("_Player", transform.position);
@@ -95,14 +94,14 @@ public class WaterInteraction : MonoBehaviour
     {
         inWater = playerIsInWater();
         if (waterRippleType == WaterRippleType.Footsteps){
-            if (ripple.gameObject.activeSelf != inWater) 
-                ripple.gameObject.SetActive(inWater);
+            if (StepsRipple.gameObject.activeSelf != inWater) 
+                StepsRipple.gameObject.SetActive(inWater);
         }
         else if (waterRippleType == WaterRippleType.Wade)
         {
             // Toggle ripple object based on water status
-            if (inWater) ripple.gameObject.SetActive(true);
-            else ripple.gameObject.SetActive(false);
+            if (inWater) WadeRipple.gameObject.SetActive(true);
+            else WadeRipple.gameObject.SetActive(false);
         }
     }
 
@@ -123,8 +122,13 @@ public class WaterInteraction : MonoBehaviour
             sideDir = -1f; 
         }
 
+        Vector3 position = transform.position;
+        Vector3 currentPos = new Vector3(position.x, 0, position.z);
+        Vector3 prevPos = new Vector3(lastPos.x, 0, lastPos.z);
+        Vector3 diff = currentPos - prevPos;
+        Vector3 fwdOffset = Vector3.Normalize(diff) * forwardOffset;
+
         Vector3 sideOffset = transform.right * (footSpacing * 0.5f) * sideDir;
-        Vector3 fwdOffset = transform.forward * forwardOffset;
         Vector3 spawnPos = triggerPos + sideOffset + fwdOffset;
         
         if (waterHit.collider != null) spawnPos.y = waterHit.point.y + 0.01f;
@@ -137,7 +141,7 @@ public class WaterInteraction : MonoBehaviour
             startColor = Color.white
         };
 
-        ripple.Emit(emitParams, 1);
+        StepsRipple.Emit(emitParams, 1);
         isRightFoot = !isRightFoot;
     }
     
@@ -155,23 +159,14 @@ public class WaterInteraction : MonoBehaviour
     void CreateRipple(int Start, int End, int Delta, float Speed, float Size, float Lifetime)
     {
         if (waterRippleType == WaterRippleType.Wade){
-            Vector3 forward = ripple.transform.eulerAngles;
+            Vector3 forward = WadeRipple.transform.eulerAngles;
             forward.y = Start;
-            ripple.transform.eulerAngles = forward;
+            WadeRipple.transform.eulerAngles = forward;
 
             for (int i = Start; i < End; i += Delta)
             {
-                var emitParams = new ParticleSystem.EmitParams
-                {
-                    position = transform.position + ripple.transform.forward * 1.15f,
-                    velocity = ripple.transform.forward * Speed,
-                    startSize = Size,
-                    startLifetime = Lifetime,
-                    startColor = Color.white
-                };
-                ripple.Emit(emitParams, 1);
-
-                ripple.transform.Rotate(Vector3.up * Delta, Space.World);
+                WadeRipple.Emit(transform.position + WadeRipple.transform.forward * 1.15f, WadeRipple.transform.forward * Speed, Size, Lifetime, Color.white);
+                WadeRipple.transform.Rotate(Vector3.up * Delta, Space.World);
             }
         }
     }
@@ -181,15 +176,7 @@ public class WaterInteraction : MonoBehaviour
         if (waterRippleType == WaterRippleType.Wade){
             if (((1 << other.gameObject.layer) & waterLayer) != 0)
             {
-                var emitParams = new ParticleSystem.EmitParams
-                {
-                    position = transform.position,
-                    velocity = Vector3.zero,
-                    startSize = 5,
-                    startLifetime = 0.1f,
-                    startColor = Color.white
-                };
-                ripple.Emit(emitParams, 1);
+                WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
             }
         }
     }
@@ -199,15 +186,7 @@ public class WaterInteraction : MonoBehaviour
         if (waterRippleType == WaterRippleType.Wade){
             if (((1 << other.gameObject.layer) & waterLayer) != 0)
             {
-                var emitParams = new ParticleSystem.EmitParams
-                {
-                    position = transform.position,
-                    velocity = Vector3.zero,
-                    startSize = 5,
-                    startLifetime = 0.1f,
-                    startColor = Color.white
-                };
-                ripple.Emit(emitParams, 1);
+                WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
             }
         }
     }

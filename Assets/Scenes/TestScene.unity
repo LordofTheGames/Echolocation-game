@@ -25,7 +25,7 @@ RenderSettings:
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
   m_AmbientIntensity: 1
   m_AmbientMode: 0
-  m_SubtractiveShadowColor: {r: 0.66460484, g: 0.87398654, b: 0.9716981, a: 1}
+  m_SubtractiveShadowColor: {r: 0, g: 0, b: 0, a: 1}
   m_SkyboxMaterial: {fileID: 10304, guid: 0000000000000000f000000000000000, type: 0}
   m_HaloStrength: 0.5
   m_FlareStrength: 1
@@ -186,8 +186,6 @@ Transform:
   - {fileID: 330585546}
   - {fileID: 2086842869}
   - {fileID: 96528584}
-  - {fileID: 1696315650}
-  - {fileID: 1661259153}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &129662820
@@ -248,14 +246,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb59bac12b2819447b0b373f4cef3405, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  waterRippleType: 1
-  ripple: {fileID: 8389308920234909956, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-  waterLayer:
-    serializedVersion: 2
-    m_Bits: 16
+  waterRippleType: 0
+  StepsRipplePrefab: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
+  WadeRipplePrefab: {fileID: 8389308920234909956, guid: 283f519f9280de64f9bfb9b4ac2ae3cb, type: 3}
   stepDistance: 3
-  footSpacing: 2
-  forwardOffset: 0.98
+  footSpacing: 1
+  forwardOffset: 2.3
   rippleSize: 1.5
   rippleLifetime: 0.5
 --- !u!1 &177471466
@@ -10812,73 +10808,6 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1012936774}
   m_SourcePrefab: {fileID: 100100000, guid: 37783e898478e2a4786943a7cf6f5a37, type: 3}
---- !u!1001 &1661259152
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 129662819}
-    m_Modifications:
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: -90
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4606061663976025302, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-      propertyPath: m_Name
-      value: Water particle system 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
---- !u!4 &1661259153 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1157159267962876077, guid: d6806536ce7b9d142bd232d633cbba85, type: 3}
-  m_PrefabInstance: {fileID: 1661259152}
-  m_PrefabAsset: {fileID: 0}
---- !u!4 &1696315650 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-  m_PrefabInstance: {fileID: 1785229119}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1723053594
 GameObject:
   m_ObjectHideFlags: 0
@@ -11854,91 +11783,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1333403882}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1001 &1785229119
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 129662819}
-    m_Modifications:
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -0.9
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0.7071068
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: -90
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1157159267962876077, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4606061663976025302, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_Name
-      value: Water particle system
-      objectReference: {fileID: 0}
-    - target: {fileID: 4606061663976025302, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: SizeModule.enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: ColorModule.enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: SizeModule.curve.maxCurve.m_Curve.Array.data[0].time
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: SizeModule.curve.maxCurve.m_Curve.Array.data[1].time
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: SizeModule.curve.maxCurve.m_Curve.Array.data[0].value
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
-      propertyPath: SizeModule.curve.maxCurve.m_Curve.Array.data[1].value
-      value: 1
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
 --- !u!1 &2086842868
 GameObject:
   m_ObjectHideFlags: 0
