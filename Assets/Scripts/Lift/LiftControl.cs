@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class LiftControl : MonoBehaviour
 {
@@ -6,7 +7,7 @@ public class LiftControl : MonoBehaviour
     [SerializeField] private float maxHeight = 10f;
     [SerializeField] private float minHeight = 0f;
     [SerializeField] private bool startAtBottom = true;
-    public float duration = 3.0f; // Takes 3 seconds to finish
+    [SerializeField] private float duration = 3.0f; // Takes 3 seconds to finish
 
     private Transform LiftBody;
     private float elapsedTime = 0;
@@ -15,9 +16,11 @@ public class LiftControl : MonoBehaviour
     private Vector3 endPos;
     private CharacterController playerController = null;
     private RayOutlineDetector outlineScript;
+    private InputAction interactAction;
 
     private void Start()
     {
+        interactAction = InputSystem.actions.FindAction("Interact");
         LiftBody = transform.parent.GetChild(0);
         startPos = LiftBody.position;
         startPos.y += minHeight;
@@ -47,7 +50,7 @@ public class LiftControl : MonoBehaviour
 
     private void Update()
     {
-        if (playerController != null && !moving && Input.GetKeyDown(KeyCode.E))
+        if (playerController != null && !moving && interactAction.WasPressedThisFrame())
         {
             outlineScript.ignoreLiftChain = true;
             moving = true;
