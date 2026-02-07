@@ -13,6 +13,9 @@ public class TempEcholocationTrigger : MonoBehaviour
     [Header("Number of Rays")]
     public int numRays = 4000;
 
+    [Header("Angle of projection (0 = line, 60 = cone, 360 = sphere)")]
+    public float angle = 60f;
+
     private InputAction echolocateAction;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -31,7 +34,7 @@ public class TempEcholocationTrigger : MonoBehaviour
     {
         if (echolocateAction != null && echolocateAction.WasPressedThisFrame())
         {
-            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, 60f, uniformity, numRays);
+            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays);
         }
     }
 }
