@@ -1,7 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class RayOutlineDetector : MonoBehaviour
+public class DetectObjectOutline : MonoBehaviour
 {
     [SerializeField] private Camera cam;
     // maximum distance the ray can reach
@@ -15,15 +16,18 @@ public class RayOutlineDetector : MonoBehaviour
 
     private OutlineTarget current;
     private float lastValidHitTime;
+    private InputAction interactAction;
+
     private void Awake()
     {
         if (!cam) cam = Camera.main;
         if (pickupPanel) pickupPanel.SetActive(false);
+        interactAction = InputSystem.actions.FindAction("Interact");
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E) && current != null)
+        if (interactAction.WasPressedThisFrame() && current != null)
         {
             if (pickupPanel) pickupPanel.SetActive(false);
             current.SetOutlined(false);
