@@ -30,7 +30,7 @@ public class WaterInteraction : MonoBehaviour
         Vector3 currentPos = transform.position;
         float moveStep = Vector3.Distance(new Vector3(currentPos.x, 0, currentPos.z), new Vector3(lastPos.x, 0, lastPos.z));
 
-        if (cc.isGrounded && inWater)
+        if (inWater)
         {
             if (moveStep > 0.001f)
             {
@@ -58,11 +58,14 @@ public class WaterInteraction : MonoBehaviour
 
     void CheckWater()
     {
-        float startHeight = cc.height * 0.5f;
-        inWater = Physics.Raycast(transform.position + Vector3.up * startHeight, Vector3.down, out waterHit, cc.height * 2.5f, waterLayer, QueryTriggerInteraction.Collide);
-        
+        inWater = playerIsInWater();
         if (ripple.gameObject.activeSelf != inWater) 
             ripple.gameObject.SetActive(inWater);
+    }
+
+    bool playerIsInWater(){
+        float height = cc.height + cc.radius;
+        return Physics.Raycast(transform.position + Vector3.up * height, Vector3.down, height * 2, waterLayer);
     }
 
     void CreateFootstep(Vector3 triggerPos)
