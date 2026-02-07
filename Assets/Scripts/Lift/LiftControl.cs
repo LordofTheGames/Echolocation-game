@@ -2,24 +2,29 @@ using UnityEngine;
 
 public class LiftControl : MonoBehaviour
 {
-    public Transform Lift;
     [Header("Lift Settings")]
     [SerializeField] private float maxHeight = 10f;
     [SerializeField] private float minHeight = 0f;
     [SerializeField] private bool startAtBottom = true;
     public float duration = 3.0f; // Takes 3 seconds to finish
+
+    private Transform LiftBody;
     private float elapsedTime = 0;
     private bool moving = false;
     private Vector3 startPos;
     private Vector3 endPos;
     private CharacterController playerController = null;
+    private RayOutlineDetector outlineScript;
 
     private void Start()
     {
-       startPos = Lift.transform.position;
-       startPos.y += minHeight;
-       endPos = Lift.transform.position;
-       endPos.y += maxHeight;
+        LiftBody = transform.parent.GetChild(0);
+        startPos = LiftBody.position;
+        startPos.y += minHeight;
+        endPos = LiftBody.position;
+        endPos.y += maxHeight;
+        outlineScript = GameObject.FindGameObjectWithTag("Player").GetComponent<RayOutlineDetector>();
+        outlineScript.ignoreLiftChain = true;
     }
 
     private void OnTriggerEnter(Collider other)
@@ -27,6 +32,7 @@ public class LiftControl : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerController = other.GetComponent<CharacterController>();
+            outlineScript.ignoreLiftChain = false;
         }
     }
 
@@ -35,6 +41,7 @@ public class LiftControl : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             playerController = null;
+            outlineScript.ignoreLiftChain = true;
         }
     }
 
@@ -42,6 +49,7 @@ public class LiftControl : MonoBehaviour
     {
         if (playerController != null && !moving && Input.GetKeyDown(KeyCode.E))
         {
+            outlineScript.ignoreLiftChain = true;
             moving = true;
             elapsedTime = 0;
         }
@@ -57,21 +65,26 @@ public class LiftControl : MonoBehaviour
                     newPos = Vector3.Lerp(startPos, endPos, t);
                 else 
                     newPos = Vector3.Lerp(endPos, startPos, t);
-                Vector3 platformMovement = newPos - Lift.position;
-                Lift.position = newPos;
-                if (playerController != null)
-                {
-                    playerController.Move(platformMovement);
-                }
+                Vector3 platformMovement = newPos - LiftBody.position;
+                LiftBody.position = newPos;
+                this.transform.position = newPos; // move controller as well - just not lift chain!
+                if (playerController != null) playerController.Move(platformMovement);
             }
             else
             {
                 if (startAtBottom)
-                    Lift.position = endPos;
+                {
+                    LiftBody.position = endPos;
+                    this.transform.position = endPos;
+                }
                 else
-                    Lift.position = startPos;
+                {
+                    LiftBody.position = startPos;
+                    this.transform.position = startPos;
+                }
                 moving = false;
                 startAtBottom = !startAtBottom;
+                outlineScript.ignoreLiftChain = false;
             }
     }
 }

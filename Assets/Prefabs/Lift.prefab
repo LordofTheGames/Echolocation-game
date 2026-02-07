@@ -31,6 +31,7 @@ Transform:
   m_Children:
   - {fileID: 886258977231943099}
   - {fileID: 628074932064048790}
+  - {fileID: 5960057829363618784}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1606357371228257668
@@ -45,7 +46,8 @@ GameObject:
   - component: {fileID: 8351551261662312378}
   - component: {fileID: 8082660599347428744}
   - component: {fileID: 1070393538559778310}
-  m_Layer: 0
+  - component: {fileID: 7598067552820639970}
+  m_Layer: 8
   m_Name: Lift chain
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -143,6 +145,19 @@ CapsuleCollider:
   m_Height: 2
   m_Direction: 1
   m_Center: {x: 0.000000059604645, y: 0, z: -0.00000008940697}
+--- !u!114 &7598067552820639970
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1606357371228257668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d63b9ade7f4384acbb49c10317bd1500, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  outlinedLayerName: Outlined Object
 --- !u!1 &2754647898494996829
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,7 +299,6 @@ Transform:
   - {fileID: 3090802410404015600}
   - {fileID: 1686755349267153513}
   - {fileID: 6455910673812003263}
-  - {fileID: 5960057829363618784}
   m_Father: {fileID: 8788316896497151588}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3956250290471312043
@@ -407,7 +421,7 @@ GameObject:
   - component: {fileID: 59440540370846682}
   - component: {fileID: 2868850543380839767}
   m_Layer: 0
-  m_Name: Trigger
+  m_Name: Controller
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -421,12 +435,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5673913079913846270}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.793, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -2.3422737, y: 0.39818978, z: 1.3701744}
   m_LocalScale: {x: 4.8837066, y: 5.664667, z: 4.5227027}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 886258977231943099}
+  m_Father: {fileID: 8788316896497151588}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!65 &59440540370846682
 BoxCollider:
@@ -462,7 +476,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Lift: {fileID: 886258977231943099}
-  maxHeight: 10
+  PlayerIsInLift: 0
+  maxHeight: 9
   minHeight: 0
   startAtBottom: 1
   duration: 3
