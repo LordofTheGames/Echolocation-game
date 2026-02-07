@@ -7,6 +7,12 @@ public class TempEcholocationTrigger : MonoBehaviour
     [Header("Pulse Origins")]
     public Transform cameraTransform; // Assign main camera here
 
+    [Header("Echo Projection Uniformity (0 = clumped, 1 = uniform)")]
+    public float uniformity = 1.0f;
+
+    [Header("Number of Rays")]
+    public int numRays = 4000;
+
     private InputAction echolocateAction;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -25,7 +31,7 @@ public class TempEcholocationTrigger : MonoBehaviour
     {
         if (echolocateAction != null && echolocateAction.WasPressedThisFrame())
         {
-            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, 60f);
+            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, 60f, uniformity, numRays);
         }
     }
 }

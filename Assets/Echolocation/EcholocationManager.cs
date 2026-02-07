@@ -59,6 +59,11 @@ public class EcholocationManager : MonoBehaviour
     private Vector3 scanDirection = Vector3.forward;
     private float scanAngle = 360f; // Defaults to sphere
 
+    // How "clumped" rays are around line of direction, 1 is not at all/uniformly distributed across cone/sphere, 0 is naturally clumped around centre
+    // Allows for customization, sound in cone in direction would naturally be more clumped along central line
+    private float scanUniformity = 1.0f; 
+
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -138,13 +143,16 @@ public class EcholocationManager : MonoBehaviour
         return new Vector3(x, y, z);
     }
 
-    public void SetupScan(Vector3 direction, float angle)
+    // Defaults to uniform rays
+    public void SetupScan(Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
 
-        scanDirection = direction;
+        scanDirection = direction.normalized;
         scanAngle = angle;
+        scanUniformity = Mathf.Clamp01(uniformity);     // Make sure is in valid range
+        raysPerScan = Mathf.Clamp(numRays, 0, 20000);   // Make sure is in (currently chosen) valid range
     }
 
     // Fires the rays
@@ -155,7 +163,7 @@ public class EcholocationManager : MonoBehaviour
         results = new NativeArray<RaycastHit>(raysPerScan, Allocator.TempJob);
 
         Vector3 origin = transform.position; // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
-
+ 
         // Prepare raycast commands
         for (int i = 0; i < raysPerScan; i++)
         {
@@ -177,9 +185,22 @@ public class EcholocationManager : MonoBehaviour
                 // You can uniformly distribute rays within a cone without clumping at the centre/pole
                 // And then you can convert to the space of the "direction" of the cone
 
+                // Hybrid logic: uniformity = 0 means random angle to calculate z so more clumped, uniformity = 1 means random height so uniformly distributed
+                // Interpolate between the heights given using uniformity factor, biases one the other, making it more/less clumped
+
                 float halfAngleRad = (scanAngle / 2f) * Mathf.Deg2Rad;      // Split angle to half on either side of line and convert to radians
                 float minZ = Mathf.Cos(halfAngleRad);                       // Get the height corresponding to the angle of the cone on the sphere
-                float z = UnityEngine.Random.Range(minZ, 1f);               // Randomly pick a height/ring from above to the pole/end of unit line
+
+                float rng = UnityEngine.Random.value;                       // Random between 0 and 1, used for both factors
+
+                float biasedRng = rng * rng * rng;
+                float angle = biasedRng * halfAngleRad;                           // Randomly pick angle using biased rng
+                float zClumped = Mathf.Cos(angle);                          // Calculate height using angle
+
+                float zUniform = Mathf.Lerp(minZ, 1f, rng);                 // Randomly pick a height/ring in range to the pole/end of unit line, using rng
+
+                float z = Mathf.Lerp(zClumped, zUniform, scanUniformity);   // Use scanUniformity to bias
+
                 float radiusAtHeight = Mathf.Sqrt(1f - z * z);              // Get the radius of the ring at that point
                 float phi = UnityEngine.Random.Range(0f, 2f * Mathf.PI);    // Randomly pick an angle around the ring (polar coordinates)
 
