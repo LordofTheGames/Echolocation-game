@@ -25,7 +25,7 @@ public class TempEcholocationTrigger : MonoBehaviour
     {
         if (echolocateAction != null && echolocateAction.WasPressedThisFrame())
         {
-            GlobalEchoSystem.Ping(cameraTransform.position);
+            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, 60f);
         }
     }
 }
