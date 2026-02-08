@@ -7,7 +7,7 @@ public class InventoryToggleCursor : MonoBehaviour
 
     [SerializeField] private MonoBehaviour playerLook;
 
-    [SerializeField] private RayOutlineDetector outlineDetector; 
+    [SerializeField] private DetectObjectOutline outlineDetector; 
     private bool isOpen;
     InputAction openInventory, closeInventory;
 
