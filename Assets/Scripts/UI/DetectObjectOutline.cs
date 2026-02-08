@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using NUnit.Framework.Internal.Commands;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,16 +15,19 @@ public class DetectObjectOutline : MonoBehaviour
 
     [SerializeField] private LayerMask interactMask = ~0; 
     [SerializeField] private GameObject pickupPanel; 
+    [SerializeField] private GameObject pullPanel; 
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
     private float lastValidHitTime;
     private InputAction interactAction;
+    private GameObject currentPanel;
 
     private void Awake()
     {
-        if (!cam) cam = Camera.main;
         if (pickupPanel) pickupPanel.SetActive(false);
+        if (pullPanel) pullPanel.SetActive(false);
+        currentPanel = pickupPanel;
         interactAction = InputSystem.actions.FindAction("Interact");
     }
 
@@ -31,7 +35,7 @@ public class DetectObjectOutline : MonoBehaviour
     {
         if (interactAction.WasPressedThisFrame() && current != null)
         {
-            if (pickupPanel) pickupPanel.SetActive(false);
+            currentPanel.SetActive(false);
             current.SetOutlined(false);
 
             var pickup = current.GetComponent<PickupItem>();
@@ -39,9 +43,7 @@ public class DetectObjectOutline : MonoBehaviour
             if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
 
             if (pickup != null)
-            {
                 pickup.Interact(); 
-            }
 
             current = null;
             return; 
@@ -52,6 +54,13 @@ public class DetectObjectOutline : MonoBehaviour
         OutlineTarget best = FindBestTarget(ray);
 
         if (best != null)
+        {
+            if (best.gameObject.name == "Lift chain")
+                currentPanel = pullPanel;
+            else currentPanel = pickupPanel;
+        }
+
+        if (best != null)
             lastValidHitTime = Time.time;
         // if lost hit, keep old target for a short time
         if (best == null && current != null && Time.time - lastValidHitTime < loseDelay)
@@ -59,14 +68,14 @@ public class DetectObjectOutline : MonoBehaviour
 
         if (best == current)
         {
-            if (pickupPanel) pickupPanel.SetActive(current != null);
+            currentPanel.SetActive(current != null);
             return;
         }
         if (current) current.SetOutlined(false);
         current = best;
         if (current) current.SetOutlined(true);
 
-        if (pickupPanel) pickupPanel.SetActive(current != null);
+        currentPanel.SetActive(current != null);
     }
 
         
@@ -89,7 +98,7 @@ public class DetectObjectOutline : MonoBehaviour
             // flag is set/unset in the LiftControl script attatched to the Controller child of the Lift GameObject
             if (col.gameObject.name == "Lift chain" && ignoreLiftChain)
                 continue;
-
+            
             var t = col.GetComponentInParent<OutlineTarget>();
             if (!t) continue;
 
