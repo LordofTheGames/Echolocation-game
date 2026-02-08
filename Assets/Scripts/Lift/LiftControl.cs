@@ -15,7 +15,7 @@ public class LiftControl : MonoBehaviour
     private Vector3 startPos;
     private Vector3 endPos;
     private CharacterController playerController = null;
-    private RayOutlineDetector outlineScript;
+    private DetectObjectOutline outlineScript;
     private InputAction interactAction;
 
     private void Start()
@@ -26,7 +26,7 @@ public class LiftControl : MonoBehaviour
         startPos.y += minHeight;
         endPos = LiftBody.position;
         endPos.y += maxHeight;
-        outlineScript = GameObject.FindGameObjectWithTag("Player").GetComponent<RayOutlineDetector>();
+        outlineScript = GameObject.FindGameObjectWithTag("Player").GetComponent<DetectObjectOutline>();
         outlineScript.ignoreLiftChain = true;
     }
 
