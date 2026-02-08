@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class RayOutlineDetector : MonoBehaviour
@@ -12,6 +13,7 @@ public class RayOutlineDetector : MonoBehaviour
 
     [SerializeField] private LayerMask interactMask = ~0; 
     [SerializeField] private GameObject pickupPanel; 
+    public bool ignoreLiftChain;
 
     private OutlineTarget current;
     private float lastValidHitTime;
@@ -77,6 +79,12 @@ public class RayOutlineDetector : MonoBehaviour
         {
             var col = hits[i].collider;
             if (!col) continue;
+
+            // don't outline lift chain if flag set to true 
+            // (stops chain being outlined when lift is in motion or when player is outside lift)
+            // flag is set/unset in the LiftControl script attatched to the Controller child of the Lift GameObject
+            if (col.gameObject.name == "Lift chain" && ignoreLiftChain)
+                continue;
 
             var t = col.GetComponentInParent<OutlineTarget>();
             if (!t) continue;
