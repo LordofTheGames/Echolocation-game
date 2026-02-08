@@ -11,12 +11,12 @@ public class WaterInteraction : MonoBehaviour
     public WaterRippleType waterRippleType = WaterRippleType.Footsteps;
     public ParticleSystem StepsRipplePrefab;
     public ParticleSystem WadeRipplePrefab;
-    public float stepDistance = 0.5f;
-    public float footSpacing = 0.3f;
-    public float forwardOffset = 0.1f; 
+    public float stepDistance = 3f;
+    public float footSpacing = 1f;
+    public float forwardOffset = 2.3f; 
 
-    public float rippleSize = 1f;
-    public float rippleLifetime = 2f;
+    public float rippleSize = 1.5f;
+    public float rippleLifetime = 0.5f;
 
     private ParticleSystem StepsRipple;
     private ParticleSystem WadeRipple;
