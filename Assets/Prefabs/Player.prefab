@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 8770924567412556683}
   - component: {fileID: 5289160769305181739}
   - component: {fileID: 8355040946990241687}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -99,7 +99,7 @@ GameObject:
   - component: {fileID: 7477274071433539147}
   - component: {fileID: 2147149018246509755}
   - component: {fileID: 3677165169037684896}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
@@ -250,9 +250,13 @@ GameObject:
   - component: {fileID: 3853411543216132462}
   - component: {fileID: 6022567831833219258}
   - component: {fileID: 6415922210037909487}
-  m_Layer: 0
+  - component: {fileID: 3275837314705130536}
+  - component: {fileID: 2083444333531579490}
+  - component: {fileID: 7900835251262604122}
+  - component: {fileID: 6448768869653819886}
+  m_Layer: 7
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -274,6 +278,7 @@ Transform:
   - {fileID: 2099696623943395477}
   - {fileID: 7770523898133361850}
   - {fileID: 8179629045468587835}
+  - {fileID: 6246126513533856795}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &6022567831833219258
@@ -289,7 +294,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 16
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -322,6 +327,86 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &3275837314705130536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d35c1e48c2fd815469a0bccb202328a5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cubePrefab: {fileID: 3724625305731320972, guid: 545df75989fe9d44e98440bdd26f1aac, type: 3}
+  throwForce: 15
+  throwHeight: 0.5
+  landingIndicatorSize: 1
+  throwSpinSpeed: 3
+  cubeSpawnPoint: {fileID: 6246126513533856795}
+  defaultSpawnOffset: {x: 0, y: 0, z: 0}
+  trajectoryWidth: 0.05
+  trajectoryTimeStep: 0.02
+  maxTrajectorySteps: 500
+  landingIndicatorPrefab: {fileID: 0}
+--- !u!114 &2083444333531579490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b694b817dc81a1c45b689931addb728e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cameraTransform: {fileID: 2099696623943395477}
+  uniformity: 1
+  numRays: 20000
+  angle: 360
+--- !u!114 &7900835251262604122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8a62e17aae3434785b8e4c162800e0f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cam: {fileID: 7774423660450900798}
+  maxDistance: 30
+  sphereRadius: 0.28
+  loseDelay: 0.12
+  interactMask:
+    serializedVersion: 2
+    m_Bits: 265
+  pickupPanel: {fileID: 0}
+  ignoreLiftChain: 0
+--- !u!114 &6448768869653819886
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fb59bac12b2819447b0b373f4cef3405, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  waterRippleType: 0
+  StepsRipplePrefab: {fileID: 8389308920234909956, guid: c11ac15389740b748b09fa9bec2b4606, type: 3}
+  WadeRipplePrefab: {fileID: 8389308920234909956, guid: 283f519f9280de64f9bfb9b4ac2ae3cb, type: 3}
+  stepDistance: 3
+  footSpacing: 1
+  forwardOffset: 2.3
+  rippleSize: 1.5
+  rippleLifetime: 0.5
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0
@@ -331,7 +416,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8179629045468587835}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: GroundCheck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -364,7 +449,7 @@ GameObject:
   - component: {fileID: 7770523898133361850}
   - component: {fileID: 4330546464607904839}
   - component: {fileID: 7087405417642931384}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Spot Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -474,3 +559,34 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &7369626182328258183
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6246126513533856795}
+  m_Layer: 7
+  m_Name: throw point
+  m_TagString: Untagged
+  m_Icon: {fileID: 2488908585195742037, guid: 0000000000000000d000000000000000, type: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6246126513533856795
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7369626182328258183}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.8249998, y: 0.09800005, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3853411543216132462}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

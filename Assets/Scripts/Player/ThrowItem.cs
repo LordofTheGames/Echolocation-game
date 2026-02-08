@@ -6,14 +6,14 @@ public class ThrowItem : MonoBehaviour
 {
     [Header("Throwing settings")]
     [SerializeField] private GameObject cubePrefab;
-    [SerializeField] private float throwForce = 20f;
-    [SerializeField] private float throwHeight = 1.5f;
+    [SerializeField] private float throwForce = 15f;
+    [SerializeField] private float throwHeight = 0.5f;
     [SerializeField] private float landingIndicatorSize = 1f;
     [SerializeField] private float throwSpinSpeed = 3f;  // 投掷时旋转角速度，可在 Inspector 调整
 
     [Header("Position settings")]
     [SerializeField] private Transform cubeSpawnPoint;       
-    [SerializeField] private Vector3 defaultSpawnOffset = new Vector3(0.3f, -0.2f, 0.5f);
+    [SerializeField] private Vector3 defaultSpawnOffset = Vector3.zero;
 
     [Header("Parabolic curve settings")]
     [SerializeField] private float trajectoryWidth = 0.05f;
