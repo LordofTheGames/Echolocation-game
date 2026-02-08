@@ -251,7 +251,7 @@ MonoBehaviour:
   cubePrefab: {fileID: 3724625305731320972, guid: 545df75989fe9d44e98440bdd26f1aac, type: 3}
   throwForce: 15
   throwHeight: 0.5
-  landingIndicatorSize: 1
+  maxThrowDistance: 10
   throwSpinSpeed: 3
   cubeSpawnPoint: {fileID: 462428314}
   defaultSpawnOffset: {x: 0, y: 0, z: 0}
@@ -12010,6 +12010,63 @@ Light:
   m_LightUnit: 1
   m_LuxAtDistance: 1
   m_EnableSpotReflector: 1
+--- !u!1001 &5383166619494392160
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2590462235064922124, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_Name
+      value: MicInput
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.4593349
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7029943999103824546, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -12017,5 +12074,4 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 410087041}
   - {fileID: 1333403882}
-  - {fileID: 129662819}
-  - {fileID: 1289936343}
+  - {fileID: 5383166619494392160}

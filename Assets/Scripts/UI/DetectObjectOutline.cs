@@ -1,7 +1,9 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class RayOutlineDetector : MonoBehaviour
+public class DetectObjectOutline : MonoBehaviour
 {
     [SerializeField] private Camera cam;
     // maximum distance the ray can reach
@@ -12,18 +14,22 @@ public class RayOutlineDetector : MonoBehaviour
 
     [SerializeField] private LayerMask interactMask = ~0; 
     [SerializeField] private GameObject pickupPanel; 
+    public bool ignoreLiftChain;
 
     private OutlineTarget current;
     private float lastValidHitTime;
+    private InputAction interactAction;
+
     private void Awake()
     {
         if (!cam) cam = Camera.main;
         if (pickupPanel) pickupPanel.SetActive(false);
+        interactAction = InputSystem.actions.FindAction("Interact");
     }
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E) && current != null)
+        if (interactAction.WasPressedThisFrame() && current != null)
         {
             if (pickupPanel) pickupPanel.SetActive(false);
             current.SetOutlined(false);
@@ -77,6 +83,12 @@ public class RayOutlineDetector : MonoBehaviour
         {
             var col = hits[i].collider;
             if (!col) continue;
+
+            // don't outline lift chain if flag set to true 
+            // (stops chain being outlined when lift is in motion or when player is outside lift)
+            // flag is set/unset in the LiftControl script attatched to the Controller child of the Lift GameObject
+            if (col.gameObject.name == "Lift chain" && ignoreLiftChain)
+                continue;
 
             var t = col.GetComponentInParent<OutlineTarget>();
             if (!t) continue;
