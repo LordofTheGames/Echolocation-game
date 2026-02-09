@@ -6,7 +6,7 @@ using Microsoft.ML.OnnxRuntime.Tensors;
 
 public class SwiftF0Runner : MonoBehaviour
 {
-    public string modelPath = "Model/model.onnx";
+    public string modelPath = "MicAudioModel/model.onnx";
 
     private InferenceSession session;
     private string inputName;
