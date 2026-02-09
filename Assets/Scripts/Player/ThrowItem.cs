@@ -17,7 +17,7 @@ public class ThrowItem : MonoBehaviour
     [SerializeField] private float throwForce = 15f;
     [SerializeField] private float throwHeight = 0.5f;
     [SerializeField] private float landingIndicatorSize = 1f;
-    [SerializeField] private float throwSpinSpeed = 3f;  // 投掷时旋转角速度，可在 Inspector 调整
+    [SerializeField] private float throwSpinSpeed = 3f;  
 
     [Header("Position settings")]
     [SerializeField] private Transform cubeSpawnPoint;
@@ -34,6 +34,7 @@ public class ThrowItem : MonoBehaviour
     // private GameObject currentCube;       
     private GameObject currentObj;
     private GameObject landingIndicator;
+    
     private LineRenderer trajectoryLine;
     private bool isHoldingRightClick = false;
     private Transform cameraTransform;
