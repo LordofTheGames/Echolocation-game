@@ -4,36 +4,46 @@ using UnityEngine.InputSystem;
 
 public class ThrowItem : MonoBehaviour
 {
+    [System.Serializable]
+    public struct ItemPrefab
+    {
+        public ItemType type;
+        public GameObject prefab;
+    }
+
+    [SerializeField] private ItemPrefab[] itemPrefabs;
     [Header("Throwing settings")]
-    [SerializeField] private GameObject cubePrefab;
+    // [SerializeField] private GameObject cubePrefab;
     [SerializeField] private float throwForce = 15f;
     [SerializeField] private float throwHeight = 0.5f;
     [SerializeField] private float landingIndicatorSize = 1f;
     [SerializeField] private float throwSpinSpeed = 3f;  // 投掷时旋转角速度，可在 Inspector 调整
 
     [Header("Position settings")]
-    [SerializeField] private Transform cubeSpawnPoint;       
+    [SerializeField] private Transform cubeSpawnPoint;
     [SerializeField] private Vector3 defaultSpawnOffset = Vector3.zero;
 
     [Header("Parabolic curve settings")]
     [SerializeField] private float trajectoryWidth = 0.05f;
-    [SerializeField] private float trajectoryTimeStep = 0.02f;  
-    [SerializeField] private int maxTrajectorySteps = 500;   
+    [SerializeField] private float trajectoryTimeStep = 0.02f;
+    [SerializeField] private int maxTrajectorySteps = 500;
 
     [Header("Indicator settings")]
-    [SerializeField] private GameObject landingIndicatorPrefab; 
+    [SerializeField] private GameObject landingIndicatorPrefab;
 
-    private GameObject currentCube;              
-    private GameObject landingIndicator;         
-    private LineRenderer trajectoryLine;         
-    private bool isHoldingRightClick = false;    
+    // private GameObject currentCube;       
+    private GameObject currentObj;
+    private GameObject landingIndicator;
+    private LineRenderer trajectoryLine;
+    private bool isHoldingRightClick = false;
     private Transform cameraTransform;
     private List<Vector3> trajectoryPointsList = new List<Vector3>();
-    private Vector3 landingPosition;             
-    private Vector3 throwDirection;              
+    private Vector3 landingPosition;
+    private Vector3 throwDirection;
 
     InputAction throwAction;
     InputAction changeThrowDistance;
+    private ItemType holdingType;
 
     private void Start()
     {
@@ -46,7 +56,8 @@ public class ThrowItem : MonoBehaviour
 
         if (cubeSpawnPoint == null)
         {
-            GameObject spawnPointObj = new GameObject("CubeSpawnPoint");
+            // GameObject spawnPointObj = new GameObject("CubeSpawnPoint");
+            GameObject spawnPointObj = new GameObject("ThrowSpawnPoint");
             spawnPointObj.transform.SetParent(cameraTransform);
             spawnPointObj.transform.localPosition = defaultSpawnOffset;
             cubeSpawnPoint = spawnPointObj.transform;
@@ -55,6 +66,9 @@ public class ThrowItem : MonoBehaviour
         CreateTrajectoryLine();
 
         CreateLandingIndicator();
+
+        trajectoryLine.enabled = false;
+        landingIndicator.SetActive(false);
     }
 
     private static readonly Color TrajectoryBrightRed = new Color(1f, 0.2f, 0.2f, 1f);
@@ -130,33 +144,64 @@ public class ThrowItem : MonoBehaviour
 
     private void Update()
     {
+        if (throwAction == null) return;
         if (throwAction.WasPressedThisFrame())
             StartHolding();
 
         if (throwAction.IsPressed() && isHoldingRightClick)
+
             UpdateHolding();
 
         if (throwAction.WasReleasedThisFrame() && isHoldingRightClick)
             StartThrowing();
 
-        if (throwAction.IsPressed())
+        // if (throwAction.IsPressed())
+        //     throwForce += changeThrowDistance.ReadValue<Vector2>().y * 0.5f;
+        if (throwAction.IsPressed() && changeThrowDistance != null)
             throwForce += changeThrowDistance.ReadValue<Vector2>().y * 0.5f;
     }
 
+    private bool CanThrowSelected(out ItemType selected)
+    {
+        selected = default;
+
+        if (InventoryManager.Instance == null) return false;
+
+        selected = InventoryManager.Instance.Selected;
+        return InventoryManager.Instance.GetCount(selected) > 0;
+    }
+
+    private GameObject GetPrefab(ItemType type)
+    {
+        for (int i = 0; i < itemPrefabs.Length; i++)
+        {
+            if (itemPrefabs[i].type == type)
+                return itemPrefabs[i].prefab;
+        }
+        return null;
+    }
     private void StartHolding()
     {
+        if (!CanThrowSelected(out holdingType))
+        return;
+
+        GameObject prefab = GetPrefab(holdingType);
+        if (prefab == null)
+        {
+        return;
+        }
         isHoldingRightClick = true;
 
-        if (cubePrefab != null && currentCube == null)
+        if (currentObj == null)
         {
-            currentCube = Instantiate(cubePrefab, cubeSpawnPoint.position, Quaternion.identity);
-            currentCube.transform.SetParent(cubeSpawnPoint);
+            currentObj = Instantiate(prefab, cubeSpawnPoint.position, Quaternion.identity);
+            currentObj.transform.SetParent(cubeSpawnPoint);
 
-            Rigidbody rb = currentCube.GetComponent<Rigidbody>();
+            Rigidbody rb = currentObj.GetComponent<Rigidbody>();
             if (rb != null)
                 rb.isKinematic = true;
 
-            MeshRenderer cubeRenderer = currentCube.GetComponent<MeshRenderer>();
+            MeshRenderer cubeRenderer = currentObj.GetComponent<MeshRenderer>();
             if (cubeRenderer != null)
             {
                 Material cubeMat = cubeRenderer.material;
@@ -172,10 +217,10 @@ public class ThrowItem : MonoBehaviour
 
     private void UpdateHolding()
     {
-        if (currentCube != null)
+        if (currentObj != null)
         {
-            currentCube.transform.position = cubeSpawnPoint.position;
-            currentCube.transform.rotation = cubeSpawnPoint.rotation;
+            currentObj.transform.position = cubeSpawnPoint.position;
+            currentObj.transform.rotation = cubeSpawnPoint.rotation;
         }
 
         UpdateTrajectory();
@@ -183,13 +228,13 @@ public class ThrowItem : MonoBehaviour
 
     private void UpdateTrajectory()
     {
-        if (trajectoryLine == null || currentCube == null) return;
+        if (trajectoryLine == null || currentObj == null) return;
 
         ForceTrajectoryLineColor();
         throwDirection = CalculateThrowDirection();
 
         trajectoryPointsList.Clear();
-        Vector3 currentPos = currentCube.transform.position;
+        Vector3 currentPos = currentObj.transform.position;
         trajectoryPointsList.Add(currentPos);
         Vector3 currentVel = throwDirection * throwForce;
 
@@ -202,8 +247,8 @@ public class ThrowItem : MonoBehaviour
             Vector3 rayDir = currentPos - lastPoint;
             float rayDist = rayDir.magnitude;
 
-            RaycastHit hit;
-            if (Physics.Raycast(lastPoint, rayDir.normalized, out hit, rayDist))
+            // RaycastHit hit;
+            if (Physics.Raycast(lastPoint, rayDir.normalized, out RaycastHit hit, rayDist))
             {
                 landingPosition = hit.point;
                 trajectoryPointsList.Add(landingPosition);
@@ -234,7 +279,7 @@ public class ThrowItem : MonoBehaviour
 
     private void UpdateLandingIndicator(Vector3 position, Vector3 normal)
     {
-        if (landingIndicator == null) return;
+        if (landingIndicator == null || cameraTransform == null) return;
 
         landingIndicator.transform.position = position + normal * 0.1f;
         landingIndicator.transform.rotation = Quaternion.LookRotation(normal);
@@ -247,55 +292,100 @@ public class ThrowItem : MonoBehaviour
 
     private void StartThrowing()
     {
-        if (!isHoldingRightClick || currentCube == null) return;
+        // if (!isHoldingRightClick || currentCube == null) return;
+        if (!isHoldingRightClick || currentObj == null) return;
 
-        currentCube.transform.SetParent(null);
+        throwDirection = CalculateThrowDirection();
 
-        // Enable physics, add spin, and apply throw force so the rock rolls and rotates in the air
-        Rigidbody rb = currentCube.GetComponent<Rigidbody>();
-        if (rb != null)
+        if (InventoryManager.Instance == null || !InventoryManager.Instance.TryConsume(holdingType, 1))
         {
-            rb.isKinematic = false;
-            rb.AddForce(throwDirection * throwForce, ForceMode.Impulse);
-            // Spin like before: rotation in the air as you throw
-            Vector3 right = Vector3.Cross(throwDirection, Vector3.up).normalized;
-            if (right.sqrMagnitude < 0.01f) right = Vector3.Cross(throwDirection, Vector3.forward).normalized;
-            rb.angularVelocity = right * throwSpinSpeed + Vector3.up * (throwSpinSpeed * 0.5f);
+            CancelHolding(); // no item -> cancel
+            return;
         }
 
-        // Release reference so the rock stays in the world; next throw will spawn a new one
-        currentCube = null;
+        currentObj.transform.SetParent(null);
 
-        trajectoryLine.enabled = false;
-        landingIndicator.SetActive(false);
+        // Enable physics, add spin, and apply throw force so the rock rolls and rotates in the air
+        Rigidbody rb = currentObj.GetComponent<Rigidbody>();
+            if (rb == null) rb = currentObj.GetComponentInChildren<Rigidbody>(true);
+
+    if (rb == null)
+    {
+        Debug.LogError("[ThrowItem] Throw failed: Rigidbody not found on object/root children.");
+        CancelHolding();
+        return;
+    }
+
+    if (cameraTransform != null)
+        rb.position = cameraTransform.position + cameraTransform.forward * 0.8f;
+
+    rb.isKinematic = false;
+    rb.useGravity = true;
+
+    rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
+    rb.interpolation = RigidbodyInterpolation.Interpolate;
+
+    rb.linearVelocity = Vector3.zero;
+    rb.angularVelocity = Vector3.zero;
+
+    rb.AddForce(throwDirection * throwForce, ForceMode.Impulse);
+
+    Vector3 right = Vector3.Cross(throwDirection, Vector3.up).normalized;
+    if (right.sqrMagnitude < 0.01f) right = Vector3.Cross(throwDirection, Vector3.forward).normalized;
+    rb.angularVelocity = right * throwSpinSpeed + Vector3.up * (throwSpinSpeed * 0.5f);
+
+    currentObj = null;
+
+    trajectoryLine.enabled = false;
+    landingIndicator.SetActive(false);
+    isHoldingRightClick = false;
+}
+        // if (rb != null)
+        // {
+        //     rb.isKinematic = false;
+        //     rb.AddForce(throwDirection * throwForce, ForceMode.Impulse);
+        //     // Spin like before: rotation in the air as you throw
+        //     Vector3 right = Vector3.Cross(throwDirection, Vector3.up).normalized;
+        //     if (right.sqrMagnitude < 0.01f) right = Vector3.Cross(throwDirection, Vector3.forward).normalized;
+        //     rb.angularVelocity = right * throwSpinSpeed + Vector3.up * (throwSpinSpeed * 0.5f);
+        // }
+
+        // // Release reference so the rock stays in the world; next throw will spawn a new one
+        // currentObj = null;
+
+        // trajectoryLine.enabled = false;
+        // landingIndicator.SetActive(false);
+        // isHoldingRightClick = false;
+    
+
+    private void CancelHolding()
+    {
+        if (currentObj != null)
+        {
+            Destroy(currentObj);
+            currentObj = null;
+        }
+
+        if (trajectoryLine != null) trajectoryLine.enabled = false;
+
+        if (landingIndicator != null) landingIndicator.SetActive(false);
+
         isHoldingRightClick = false;
     }
 
+    // private void OnDrawGizmosSelected()
+    // {
+    //     if (cubeSpawnPoint != null)
+    //     {
+    //         Gizmos.color = Color.green;
+    //         Gizmos.DrawWireSphere(cubeSpawnPoint.position, 0.1f);
+    //         Gizmos.DrawLine(cubeSpawnPoint.position, cubeSpawnPoint.position + cubeSpawnPoint.forward * 0.3f);
+    //     }
+    // }
     private void OnDestroy()
     {
-        if (currentCube != null)
-        {
-            Destroy(currentCube);
-        }
-
-        if (trajectoryLine != null)
-        {
-            Destroy(trajectoryLine.gameObject);
-        }
-
-        if (landingIndicator != null)
-        {
-            Destroy(landingIndicator);
-        }
-    }
-
-    private void OnDrawGizmosSelected()
-    {
-        if (cubeSpawnPoint != null)
-        {
-            Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(cubeSpawnPoint.position, 0.1f);
-            Gizmos.DrawLine(cubeSpawnPoint.position, cubeSpawnPoint.position + cubeSpawnPoint.forward * 0.3f);
-        }
+        if (currentObj != null) Destroy(currentObj);
+        if (trajectoryLine != null) Destroy(trajectoryLine.gameObject);
+        if (landingIndicator != null) Destroy(landingIndicator);
     }
 }
