@@ -274,6 +274,20 @@ public class EcholocationManager : MonoBehaviour
 
                 instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
                 activeHitCount++;                                                                                   // Increment the counter
+            
+                // Get the thing the ray hit and its INoiseSensitive interface component
+                INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
+
+                // If sensitiveTarget is not null, the object has an implemntation of INoiseSensitive and requires knowledge from the rays hitting it
+                if (sensitiveTarget != null)
+                {
+                    // Identify the source, if objectToIgnore (the object that spawned the rays) is null, us the scanner itself - this.transform
+                    Transform sourceTransform = (objectToIgnore != null) ? objectToIgnore.transform : this.transform;
+
+                    // Tell the sensitive target (the Monster) the source that made a noise that hit it, to use for investigating if it passes a certain threshold of noise (number of rays)
+                    sensitiveTarget.OnHeardScan(sourceTransform);
+                }
+            
             }
 
         }
