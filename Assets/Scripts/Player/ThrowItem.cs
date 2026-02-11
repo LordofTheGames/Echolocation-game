@@ -34,7 +34,7 @@ public class ThrowItem : MonoBehaviour
 
     InputAction throwAction;
     InputAction changeThrowDistance;
-
+    [SerializeField] private PlayerMovement playerMovement;
     private void Start()
     {
         Camera mainCam = Camera.main;
@@ -191,7 +191,7 @@ public class ThrowItem : MonoBehaviour
         trajectoryPointsList.Clear();
         Vector3 currentPos = currentCube.transform.position;
         trajectoryPointsList.Add(currentPos);
-        Vector3 currentVel = throwDirection * throwForce;
+        Vector3 currentVel = playerMovement.MoveVelocity + throwDirection * throwForce;
 
         for (int i = 0; i < maxTrajectorySteps; i++)
         {
@@ -256,7 +256,9 @@ public class ThrowItem : MonoBehaviour
         if (rb != null)
         {
             rb.isKinematic = false;
-            rb.AddForce(throwDirection * throwForce, ForceMode.Impulse);
+            Vector3 throwVelocity = throwDirection * throwForce;
+            rb.linearVelocity = playerMovement.MoveVelocity + throwVelocity;
+            
             // Spin like before: rotation in the air as you throw
             Vector3 right = Vector3.Cross(throwDirection, Vector3.up).normalized;
             if (right.sqrMagnitude < 0.01f) right = Vector3.Cross(throwDirection, Vector3.forward).normalized;

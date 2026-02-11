@@ -21,6 +21,7 @@ public class PlayerMovement : MonoBehaviour
     InputAction moveAction;
     InputAction jumpAction;
     InputAction scrollAction;
+    public Vector3 MoveVelocity;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -50,6 +51,8 @@ public class PlayerMovement : MonoBehaviour
 
         Vector2 moveValue = moveAction.ReadValue<Vector2>();
         Vector3 move = transform.right * moveValue.x + transform.forward * moveValue.y;
+        MoveVelocity = move * speed;
+
         controller.Move(speed * Time.deltaTime * move);
 
         if (jumpAction.IsPressed() && isGrounded)
