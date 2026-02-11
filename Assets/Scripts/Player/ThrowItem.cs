@@ -13,7 +13,6 @@ public class ThrowItem : MonoBehaviour
 
     [SerializeField] private ItemPrefab[] itemPrefabs;
     [Header("Throwing settings")]
-    // [SerializeField] private GameObject cubePrefab;
     [SerializeField] private float throwForce = 15f;
     [SerializeField] private float throwHeight = 0.5f;
     [SerializeField] private float landingIndicatorSize = 1f;
@@ -21,7 +20,7 @@ public class ThrowItem : MonoBehaviour
 
     [Header("Position settings")]
     [SerializeField] private Transform cubeSpawnPoint;
-    [SerializeField] private Vector3 defaultSpawnOffset = Vector3.zero;
+    [SerializeField] private Vector3 defaultSpawnOffset = new Vector3(0f, -0.2f, 0.7f);
 
     [Header("Parabolic curve settings")]
     [SerializeField] private float trajectoryWidth = 0.05f;
@@ -31,7 +30,6 @@ public class ThrowItem : MonoBehaviour
     [Header("Indicator settings")]
     [SerializeField] private GameObject landingIndicatorPrefab;
 
-    // private GameObject currentCube;       
     private GameObject currentObj;
     private GameObject landingIndicator;
     
@@ -57,7 +55,6 @@ public class ThrowItem : MonoBehaviour
 
         if (cubeSpawnPoint == null)
         {
-            // GameObject spawnPointObj = new GameObject("CubeSpawnPoint");
             GameObject spawnPointObj = new GameObject("ThrowSpawnPoint");
             spawnPointObj.transform.SetParent(cameraTransform);
             spawnPointObj.transform.localPosition = defaultSpawnOffset;
@@ -191,12 +188,15 @@ public class ThrowItem : MonoBehaviour
         {
         return;
         }
+        
         isHoldingRightClick = true;
 
         if (currentObj == null)
         {
             currentObj = Instantiate(prefab, cubeSpawnPoint.position, Quaternion.identity);
             currentObj.transform.SetParent(cubeSpawnPoint);
+
+            
 
             Rigidbody rb = currentObj.GetComponent<Rigidbody>();
             if (rb != null)
@@ -248,7 +248,6 @@ public class ThrowItem : MonoBehaviour
             Vector3 rayDir = currentPos - lastPoint;
             float rayDist = rayDir.magnitude;
 
-            // RaycastHit hit;
             if (Physics.Raycast(lastPoint, rayDir.normalized, out RaycastHit hit, rayDist))
             {
                 landingPosition = hit.point;
@@ -293,7 +292,6 @@ public class ThrowItem : MonoBehaviour
 
     private void StartThrowing()
     {
-        // if (!isHoldingRightClick || currentCube == null) return;
         if (!isHoldingRightClick || currentObj == null) return;
 
         throwDirection = CalculateThrowDirection();
@@ -305,6 +303,11 @@ public class ThrowItem : MonoBehaviour
         }
 
         currentObj.transform.SetParent(null);
+        var echo = currentObj.GetComponent<CollisionEcho>();
+        if (echo == null) echo = currentObj.GetComponentInChildren<CollisionEcho>(true);
+        if (echo != null) echo.Arm();
+
+        
 
         // Enable physics, add spin, and apply throw force so the rock rolls and rotates in the air
         Rigidbody rb = currentObj.GetComponent<Rigidbody>();
@@ -341,22 +344,6 @@ public class ThrowItem : MonoBehaviour
     landingIndicator.SetActive(false);
     isHoldingRightClick = false;
 }
-        // if (rb != null)
-        // {
-        //     rb.isKinematic = false;
-        //     rb.AddForce(throwDirection * throwForce, ForceMode.Impulse);
-        //     // Spin like before: rotation in the air as you throw
-        //     Vector3 right = Vector3.Cross(throwDirection, Vector3.up).normalized;
-        //     if (right.sqrMagnitude < 0.01f) right = Vector3.Cross(throwDirection, Vector3.forward).normalized;
-        //     rb.angularVelocity = right * throwSpinSpeed + Vector3.up * (throwSpinSpeed * 0.5f);
-        // }
-
-        // // Release reference so the rock stays in the world; next throw will spawn a new one
-        // currentObj = null;
-
-        // trajectoryLine.enabled = false;
-        // landingIndicator.SetActive(false);
-        // isHoldingRightClick = false;
     
 
     private void CancelHolding()
@@ -373,16 +360,6 @@ public class ThrowItem : MonoBehaviour
 
         isHoldingRightClick = false;
     }
-
-    // private void OnDrawGizmosSelected()
-    // {
-    //     if (cubeSpawnPoint != null)
-    //     {
-    //         Gizmos.color = Color.green;
-    //         Gizmos.DrawWireSphere(cubeSpawnPoint.position, 0.1f);
-    //         Gizmos.DrawLine(cubeSpawnPoint.position, cubeSpawnPoint.position + cubeSpawnPoint.forward * 0.3f);
-    //     }
-    // }
     private void OnDestroy()
     {
         if (currentObj != null) Destroy(currentObj);
