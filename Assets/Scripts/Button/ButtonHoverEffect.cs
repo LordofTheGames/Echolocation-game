@@ -82,25 +82,27 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
 
     private void PlayClickSound()
     {
-        if (clickSound == null)
+        if (clickSound != null)
         {
-            return;
-        }
-        
-        if (audioSource == null)
-        {
-            audioSource = GetComponent<AudioSource>();
             if (audioSource == null)
             {
-                audioSource = gameObject.AddComponent<AudioSource>();
-                audioSource.playOnAwake = false;
-                audioSource.spatialBlend = 0f;
+                audioSource = GetComponent<AudioSource>();
+                if (audioSource == null)
+                {
+                    audioSource = gameObject.AddComponent<AudioSource>();
+                    audioSource.playOnAwake = false;
+                    audioSource.spatialBlend = 0f;
+                }
+            }
+            
+            if (audioSource != null)
+            {
+                audioSource.PlayOneShot(clickSound, clickSoundVolume);
             }
         }
-        
-        if (audioSource != null)
+        else if (SoundManager.Instance != null)
         {
-            audioSource.PlayOneShot(clickSound, clickSoundVolume);
+            SoundManager.Instance.PlayButtonClickSound(null, clickSoundVolume);
         }
     }
 

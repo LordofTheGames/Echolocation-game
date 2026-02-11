@@ -11,10 +11,20 @@ public class GameOverUI : MonoBehaviour
 
     public void OnRestartClicked()
     {
-        SceneManager.LoadScene("MVP");
+        Invoke(nameof(LoadGameScene), 0.5f);
     }
 
     public void OnExitClicked()
+    {
+        Invoke(nameof(LoadMainMenu), 0.5f);
+    }
+
+    private void LoadGameScene()
+    {
+        SceneManager.LoadScene("MVP");
+    }
+
+    private void LoadMainMenu()
     {
         SceneManager.LoadScene("MainMenu");
     }
