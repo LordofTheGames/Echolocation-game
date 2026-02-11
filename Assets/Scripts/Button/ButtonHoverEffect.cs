@@ -2,18 +2,22 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections;
 
-public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
 {
     [Header("Hover Effect Settings")]
-    [Tooltip("Scale multiplier on hover")]
     [SerializeField] private float hoverScale = 1.2f;
     
-    [Tooltip("Animation duration in seconds")]
     [SerializeField] private float animationDuration = 0.2f;
+    
+    [Header("Click Sound Settings")]
+    [SerializeField] private AudioClip clickSound;
+    
+    [SerializeField] [Range(0f, 1f)] private float clickSoundVolume = 1f;
     
     private Vector3 originalScale;
     private RectTransform rectTransform;
     private Coroutine scaleCoroutine;
+    private AudioSource audioSource;
 
     private void Awake()
     {
@@ -25,6 +29,23 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
         else
         {
             originalScale = transform.localScale;
+        }
+        
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.volume = clickSoundVolume;
+            audioSource.spatialBlend = 0f;
+        }
+    }
+    
+    private void Start()
+    {
+        if (audioSource != null)
+        {
+            audioSource.volume = clickSoundVolume;
         }
     }
 
@@ -47,6 +68,40 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
         }
 
         scaleCoroutine = StartCoroutine(ScaleTo(originalScale));
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        PlayClickSound();
+    }
+    
+    public void TestClickSound()
+    {
+        PlayClickSound();
+    }
+
+    private void PlayClickSound()
+    {
+        if (clickSound == null)
+        {
+            return;
+        }
+        
+        if (audioSource == null)
+        {
+            audioSource = GetComponent<AudioSource>();
+            if (audioSource == null)
+            {
+                audioSource = gameObject.AddComponent<AudioSource>();
+                audioSource.playOnAwake = false;
+                audioSource.spatialBlend = 0f;
+            }
+        }
+        
+        if (audioSource != null)
+        {
+            audioSource.PlayOneShot(clickSound, clickSoundVolume);
+        }
     }
 
     private IEnumerator ScaleTo(Vector3 targetScale)
