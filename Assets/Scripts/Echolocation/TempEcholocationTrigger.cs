@@ -32,9 +32,9 @@ public class TempEcholocationTrigger : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (echolocateAction != null && echolocateAction.WasPressedThisFrame())
-        {
-            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays);
-        }
+        // if (echolocateAction != null && echolocateAction.WasPressedThisFrame())
+        // {
+        //     GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays);
+        // }
     }
 }
