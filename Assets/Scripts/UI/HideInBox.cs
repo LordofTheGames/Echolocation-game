@@ -4,7 +4,8 @@ public class HideInBox : MonoBehaviour
 {
     [Header("Setup")]
     [SerializeField] private Camera boxViewCamera;    
-    [SerializeField] private Transform boxAnchor;     
+    [SerializeField] private Transform boxAnchor;    
+    [SerializeField] private float exitDistance = 1.5f; 
     
     [Header("Rotation Limits")]
     [SerializeField] private float horizontalLimit = 45f;
@@ -48,11 +49,17 @@ public class HideInBox : MonoBehaviour
     {
         isHiding = false;
 
-        // Re-enable player main cam
+        Vector3 exitDirection = boxAnchor.forward;
+
+        exitDirection.y = 0; 
+        exitDirection.Normalize();
+
+        Vector3 exitPosition = boxAnchor.position + (exitDirection * exitDistance);
+        playerRef.transform.position = exitPosition;
+        playerRef.transform.rotation = Quaternion.LookRotation(exitDirection);
+
         boxViewCamera.gameObject.SetActive(false);
         playerMainCamera.gameObject.SetActive(true);
-
-        // should re-enable player movement
         if(playerRef.TryGetComponent(out CharacterController cc)) cc.enabled = true;
 
         playerRef = null;
@@ -61,6 +68,12 @@ public class HideInBox : MonoBehaviour
     private void Update()
     {
         if (!isHiding) return;
+
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            ExitBox();
+            return;
+        }
 
         float mouseX = Input.GetAxis("Mouse X") * sensitivity;
         float mouseY = Input.GetAxis("Mouse Y") * sensitivity;

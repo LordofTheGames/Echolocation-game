@@ -14,29 +14,31 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private float loseDelay = 0.12f;
 
     [SerializeField] private LayerMask interactMask = ~0; 
-    [SerializeField] private GameObject pickupPanel; 
-    [SerializeField] private GameObject pullPanel; 
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
     private float lastValidHitTime;
     private InputAction interactAction;
+    [SerializeField] private GameObject pullPanel;
+    [SerializeField] private GameObject pickupPanel;
+    [SerializeField] private GameObject hidePanel;
     private GameObject currentPanel;
 
     private void Awake()
     {
+        interactAction = InputSystem.actions.FindAction("Interact");
         if (pickupPanel) pickupPanel.SetActive(false);
+        if (hidePanel) hidePanel.SetActive(false);
         if (pullPanel) pullPanel.SetActive(false);
         currentPanel = pickupPanel;
-        interactAction = InputSystem.actions.FindAction("Interact");
     }
 
     private void Update()
     {
         if (interactAction.WasPressedThisFrame() && current != null)
         {
-            var pickup = current.GetComponentInParent<PickupItem>(); 
-            var hide = current.GetComponentInParent<HideInBox>();
+            PickupItem pickup = current.GetComponentInParent<PickupItem>(); 
+            HideInBox hide = current.GetComponentInParent<HideInBox>();
 
             if (pickup != null)
             {
@@ -52,35 +54,41 @@ public class DetectObjectOutline : MonoBehaviour
 
             return; 
         }
-                // create a ray from the center of the screen
         var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
-
         OutlineTarget best = FindBestTarget(ray);
 
         if (best != null)
-        {
-            if (best.gameObject.name == "Lift chain")
-                currentPanel = pullPanel;
-            else currentPanel = pickupPanel;
-        }
-
-        if (best != null)
             lastValidHitTime = Time.time;
-        // if lost hit, keep old target for a short time
+
         if (best == null && current != null && Time.time - lastValidHitTime < loseDelay)
             best = current;
 
-        if (best == current)
+        if (best != current)
         {
-            currentPanel.SetActive(current != null);
-            return;
-        }
-        if (current) current.SetOutlined(false);
-        current = best;
-        if (current) current.SetOutlined(true);
+            if (current) current.SetOutlined(false);
+            DisableAllPanels();
 
-        currentPanel.SetActive(current != null);
+            current = best;
+
+            if (current != null)
+            {
+                current.SetOutlined(true);
+
+                if (current.gameObject.name == "Lift chain")
+                    pullPanel.SetActive(true);
+                else if (current.gameObject.name == "Hide Trigger")
+                    hidePanel.SetActive(true);
+                else
+                    pickupPanel.SetActive(true);
+            }
+        }
     }
+private void DisableAllPanels()
+{
+    if (pullPanel) pullPanel.SetActive(false);
+    if (pickupPanel) pickupPanel.SetActive(false);
+    if (hidePanel) hidePanel.SetActive(false);
+}
 
         
     private OutlineTarget FindBestTarget(Ray ray)
@@ -139,6 +147,6 @@ public class DetectObjectOutline : MonoBehaviour
         if (current) current.SetOutlined(false);
         current = null;
 
-        if (pickupPanel) pickupPanel.SetActive(false);
+        if (currentPanel) currentPanel.SetActive(false);
     }
 }

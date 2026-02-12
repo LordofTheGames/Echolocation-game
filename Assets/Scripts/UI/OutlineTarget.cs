@@ -3,7 +3,6 @@ using UnityEngine;
 public class OutlineTarget : MonoBehaviour
 {
     [SerializeField] private string outlinedLayerName = "Outlined Object";
-
     private int outlinedLayer;
     private int originalLayer;
 
