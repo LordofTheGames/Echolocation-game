@@ -5,10 +5,18 @@ public class MicToEcholocation : MonoBehaviour
     public MicInput mic;
     public Transform cameraTransform;
 
-    private float interval = 0.5f;
     private int maxRays = 20000;
     private int minRays = 100;
     private float timer;
+
+    [Header("Detection Interval")]
+    public float interval = 0.2f;
+
+    [Header("Angle (0-360)")]
+    public float angle = 200f;
+
+    [Header("Uniformity (0-1)")]
+    public float uniformity = 0.3f;
 
     // Update is called once per frame
     void Update()
@@ -20,6 +28,6 @@ public class MicToEcholocation : MonoBehaviour
 
         int rays = Mathf.RoundToInt(mic.loudness * maxRays);
         rays = Mathf.Clamp(rays, minRays, maxRays);
-        GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, 120f, 1f, rays);
+        GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, 200f, 0.3f, rays);
     }
 }
