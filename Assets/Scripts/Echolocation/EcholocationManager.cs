@@ -147,7 +147,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, GameObject ignoreMe = null)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -168,7 +168,7 @@ public class EcholocationManager : MonoBehaviour
         if (objectToIgnore != null)
         {
             originalLayer = objectToIgnore.layer;
-            objectToIgnore.layer = 2; // Built in ignore raycast layer
+            objectToIgnore.layer = 9; // Custom Ignore Echolocation layer
             hidden = true;
         }
 

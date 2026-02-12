@@ -32,7 +32,7 @@ public class CollisionEcho : MonoBehaviour
         ContactPoint contact = collision.contacts[0]; // Get contact point
         Vector3 spawnPoint = contact.point + (contact.normal * pingOffset); // Offset along normal to the surface
 
-        GlobalEchoSystem.Ping(spawnPoint, gameObject); // Ping the echolocation system with the point of contact and object that spawned it
+        GlobalEchoSystem.Ping(gameObject, spawnPoint); // Ping the echolocation system with the point of contact and object that spawned it
         currentPings++;
 
         if (currentPings >= maxPings)
