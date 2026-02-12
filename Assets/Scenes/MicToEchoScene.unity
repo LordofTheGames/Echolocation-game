@@ -11343,7 +11343,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultClickSound: {fileID: 8300000, guid: a279028c71dd8c840a0ff3d38a422e7a, type: 2}
   defaultClickVolume: 1
-  autoGenerateIfEmpty: 1
 --- !u!4 &1489832790
 Transform:
   m_ObjectHideFlags: 0
@@ -12678,6 +12677,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+--- !u!114 &1998086073 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1399522599958283154, guid: 2bf1c3e8817119348a06a1f625c08a09, type: 3}
+  m_PrefabInstance: {fileID: 1998086072}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78e32ca18de4242aba8a49150268ea57, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &2033399856
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12988,7 +12998,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5235627052445221193, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2106793542126640622}
   m_SourcePrefab: {fileID: 100100000, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
 --- !u!1 &2106793542126640619 stripped
 GameObject:
@@ -13006,6 +13019,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a62e17aae3434785b8e4c162800e0f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &2106793542126640621 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2099696623943395477, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+  m_PrefabInstance: {fileID: 2106793542126640618}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &2106793542126640622
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2106793542126640619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb3637d5fa7a48d89d461f39dcfcff8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mic: {fileID: 1998086073}
+  cameraTransform: {fileID: 2106793542126640621}
+  interval: 0.2
+  angle: 200
+  uniformity: 0.3
 --- !u!65 &2187642508281452926
 BoxCollider:
   m_ObjectHideFlags: 0
