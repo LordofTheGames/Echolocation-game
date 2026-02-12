@@ -2,7 +2,16 @@ using UnityEngine;
 
 public class PickupItem : MonoBehaviour
 {
-    public void Interact() { 
+    [SerializeField] private ItemType itemType = ItemType.Rock;
+    [SerializeField] private int amount = 1;
+
+    public void Interact()
+    {
+        if (InventoryManager.Instance != null)
+        {
+            InventoryManager.Instance.Add(itemType, amount);
+        }
+
         gameObject.SetActive(false);
     }
 }
