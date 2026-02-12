@@ -35,20 +35,24 @@ public class DetectObjectOutline : MonoBehaviour
     {
         if (interactAction.WasPressedThisFrame() && current != null)
         {
-            currentPanel.SetActive(false);
-            current.SetOutlined(false);
-
-            var pickup = current.GetComponent<PickupItem>();
-            if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
-            if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
+            var pickup = current.GetComponentInParent<PickupItem>(); 
+            var hide = current.GetComponentInParent<HideInBox>();
 
             if (pickup != null)
+            {
+                currentPanel.SetActive(false);
+                current.SetOutlined(false);
                 pickup.Interact(); 
+                current = null;
+            }
+            else if (hide != null)
+            {
+                hide.Interact(this.gameObject); 
+            }
 
-            current = null;
             return; 
         }
-        // create a ray from the center of the screen
+                // create a ray from the center of the screen
         var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
         OutlineTarget best = FindBestTarget(ray);
