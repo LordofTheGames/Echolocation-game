@@ -4,6 +4,7 @@ using UnityEngine;
 using Action = Unity.Behavior.Action;
 using Unity.Properties;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 #nullable enable annotations
 
 [Serializable, GeneratePropertyBag]
@@ -11,6 +12,7 @@ using System.Collections.Generic;
         
 public partial class UpdateAiSensesAction : Action
 {
+
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
     [SerializeReference] public BlackboardVariable<GameObject> Target;
     // --- Seeing variables ---
@@ -20,16 +22,18 @@ public partial class UpdateAiSensesAction : Action
     FieldOfViewChecker[] FOVScripts;
     Vector3 secondToLastLocation;
     // --- Hearing variables ---
-    [SerializeReference] public BlackboardVariable<bool> heardSound;
-    [SerializeReference] public BlackboardVariable<Vector3> soundLocation;
+    [SerializeReference] public BlackboardVariable<Vector3> currentSoundLocation;
+    [SerializeReference] public BlackboardVariable<float> currentSoundVolume;
+    [SerializeReference] public BlackboardVariable<bool> newSoundToInvestigate;
+    [SerializeReference] public BlackboardVariable<Vector3> newSoundLocation;
+    [SerializeReference] public BlackboardVariable<float> newSoundVolume;
+    [SerializeReference] public BlackboardVariable<float> maxSoundDistance;
     HearingChecker hearingScript;
-    Dictionary<Transform, List<float>> suspicionTracks = new Dictionary<Transform, List<float>>();
     // TODO: replace this with per-sound-type values
     // TODO: also, these are to be used when we have ray collisions with monster working!
     // int raysToTrigger = 50;        
     // float memoryDuration = 1.0f;   
-    [SerializeReference] public BlackboardVariable<int> maxDistance;
-    [SerializeReference] public BlackboardVariable<int> volumeThreshold;
+    // Dictionary<Transform, List<float>> suspicionTracks = new Dictionary<Transform, List<float>>();
 
     bool initialised = false;
 
@@ -38,9 +42,11 @@ public partial class UpdateAiSensesAction : Action
         if (!initialised)
         {
             FOVScripts = Agent.Value.GetComponentsInChildren<FieldOfViewChecker>();
-            hearingScript = Agent.Value.GetComponentInChildren<HearingChecker>();
             lastLocation.Value = Agent.Value.transform.position;
             lastDirection.Value = Agent.Value.transform.forward;
+            hearingScript = Agent.Value.GetComponentInChildren<HearingChecker>();
+            currentSoundLocation.Value = Agent.Value.transform.position;
+            currentSoundVolume.Value = 0;
             initialised = true;
         }
         return Status.Running;
@@ -49,7 +55,7 @@ public partial class UpdateAiSensesAction : Action
     protected override Status OnUpdate()
     {
         updateFOV();
-        updateHearing();
+        // updateHearing();
         return Status.Success;
     }
 
@@ -71,24 +77,17 @@ public partial class UpdateAiSensesAction : Action
 
     private void updateHearing()
     {
-        Transform? source = hearingScript.HearingCheck();
-        if (source == null) return;
-        
-        // A. Do I already know about this object?
-        if (!suspicionTracks.ContainsKey(source))
-            suspicionTracks.Add(source, new List<float>());
-
-        // B. Add a new "memory" of being hit right now
-        suspicionTracks[source].Add(Time.time);
-
-        // C. Check Suspicion Level for THIS SPECIFIC object
-        int suspicionLevel = suspicionTracks[source].Count;
-
-        if (suspicionLevel >= raysToTrigger)
+        SoundData? source = hearingScript.HearingCheck();
+        if (source.HasValue)
         {
-            heardSound.Value = true;
-            soundLocation.Value = source.position;
-        }
+            float distance = Vector3.Distance(source.Value.transform.position, Agent.Value.transform.position);
+            if (distance <= maxSoundDistance)
+            {
+                newSoundToInvestigate.Value = true;
+                newSoundLocation.Value = source.Value.transform.position;
+                newSoundVolume.Value = source.Value.volume / distance;
+            }
+        } 
     }
 
     protected override void OnEnd()
