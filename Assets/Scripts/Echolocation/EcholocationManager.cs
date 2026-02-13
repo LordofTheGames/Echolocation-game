@@ -1,6 +1,7 @@
 using UnityEngine;
-using Unity.Collections;        // Native collections (NativeArray) for high-performance memory management
-using Unity.Jobs;               // The job system - allows us to run code on multiple CPU cores
+using Unity.Collections;            // Native collections (NativeArray) for high-performance memory management
+using Unity.Jobs;                   // The job system - allows us to run code on multiple CPU cores
+using System.Collections.Generic;   // For use of dictionary
 
 public class EcholocationManager : MonoBehaviour
 {
@@ -12,6 +13,10 @@ public class EcholocationManager : MonoBehaviour
     public int raysPerScan = 20000;     // Number of rays fired for a single scan
     public float maxDistance = 50f;     // Max distance rays can travel
     public LayerMask scanLayers;
+
+    [Header("Reflection Settings")]
+    [Tooltip("Maximum number of times sound rays will bounce before stopping")]
+    public int maxBounces = 2;
 
     [Header("Visual Settings")]
     // Tooltip adds pop-up info when hovering mouse over the variable in the inspector
@@ -68,6 +73,10 @@ public class EcholocationManager : MonoBehaviour
     private GameObject objectToIgnore;  
 
 
+    // Layer memory - to restore object+children's layers, after setting to IgnoreRaycast layer on first pulse, and reset before first reflections
+    private Dictionary<Transform, int> layerMemory = new Dictionary<Transform, int>();
+
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -106,8 +115,11 @@ public class EcholocationManager : MonoBehaviour
         float totalFalloff = gridOffset + gridDepth;
         instanceMaterial.SetFloat("_Falloff", totalFalloff);
 
-        instanceMatrices = new Matrix4x4[raysPerScan];                                                      // Intialise theh array to hold "raysPerScan" number of matrices (positions)
-        matrixBuffer = new ComputeBuffer(raysPerScan, 64);                                                  // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
+        long totalMaxHits = (long) raysPerScan * (maxBounces + 1);                                          // Calculate max number of rays/hits, including initial pulse and subsequent reflections
+        int safeBufferSize = (int)Mathf.Min(totalMaxHits, 1000000);                                         // Prevenet a single pulse event from taking up to much VRAM
+
+        instanceMatrices = new Matrix4x4[safeBufferSize];                                                      // Intialise theh array to hold "raysPerScan" number of matrices (positions)
+        matrixBuffer = new ComputeBuffer(safeBufferSize, 64);                                                  // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
         argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments); // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
 
         PerformScan();
@@ -147,7 +159,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float volume = 10f, GameObject ignoreMe = null)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float volume = 10f)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -155,7 +167,7 @@ public class EcholocationManager : MonoBehaviour
         scanDirection = direction.normalized;
         scanAngle = angle;
         scanUniformity = Mathf.Clamp01(uniformity);     // Make sure is in valid range
-        raysPerScan = Mathf.Clamp(numRays, 0, 20000);   // Make sure is in (currently chosen) valid range
+        raysPerScan = Mathf.Clamp(numRays, 0, 100000);   // Make sure is in (currently chosen) valid range
         objectToIgnore = ignoreMe;
         // TODO: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
@@ -163,28 +175,72 @@ public class EcholocationManager : MonoBehaviour
         sensitiveTarget.OnHeardScan(transform, volume);
     }
 
+
+
+    // Hide and restore object that spawns the rays and itss children in hirearchy functions
+    void HideAndSave(GameObject obj, int tempLayer)
+    {
+        layerMemory.Clear(); // Clear any stored layerMemrory, should be empty
+        RecursiveHide(obj.transform, tempLayer);
+    }
+
+    void RecursiveHide(Transform t, int tempLayer)
+    {
+        // Save original layer if we havent seen this object before
+        if (!layerMemory.ContainsKey(t))
+        {
+            layerMemory.Add(t, t.gameObject.layer);
+        }
+
+        t.gameObject.layer = tempLayer; // Temp change to layer 2/ignore raycast layer
+
+        // Call for all children of the object
+        foreach (Transform child in t)
+        {
+            RecursiveHide(child, tempLayer);
+        }        
+    }
+
+    void RestoreLayers()
+    {
+        foreach (var kvp in layerMemory)                // Get each key-value pair in layer memory
+        {
+            if (kvp.Key != null)                        // Safety check
+            {
+                kvp.Key.gameObject.layer = kvp.Value;   // Restore original layers
+            }
+        }
+
+        layerMemory.Clear();                            // Clear dictionary when done
+    }
+
+
+
     // Fires the rays
     void PerformScan()
     {
-        int originalLayer = 0;
-        bool hidden = false;
+
+        GameObject sourceObj = (objectToIgnore != null) ? objectToIgnore : this.gameObject;
 
         if (objectToIgnore != null)
         {
-            originalLayer = objectToIgnore.layer;
-            objectToIgnore.layer = 2; // Built in ignore raycast layer
-            hidden = true;
+            HideAndSave(sourceObj, 9);  // Layer 9 is the custom Ignore Echolocation layer
+            Physics.SyncTransforms();   // Force any layer changes to be applied now
         }
 
         // Create temporary memory for the job
-        commands = new NativeArray<RaycastCommand>(raysPerScan, Allocator.TempJob); // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
-        results = new NativeArray<RaycastHit>(raysPerScan, Allocator.TempJob);
+        NativeList<Vector3> rayOrigins = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);   // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
+        NativeList<Vector3> rayDirections = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);
+        NativeList<float> rayRanges = new NativeList<float>(raysPerScan, Allocator.TempJob);
 
-        Vector3 origin = transform.position; // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
+        Vector3 startOrigin = transform.position; // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
  
-        // Prepare raycast commands
+        // Prepare first layer of raycasts
         for (int i = 0; i < raysPerScan; i++)
         {
+            rayOrigins.Add(startOrigin);    // Initial fire before reflections have the same origin
+            rayRanges.Add(maxDistance);     // And start with the same max distance to travel
+            
             Vector3 worldDir;
 
             if (scanAngle >= 360f)
@@ -235,67 +291,131 @@ public class EcholocationManager : MonoBehaviour
                 }
             }
 
-            // Set up the settings package
-            QueryParameters queryParams = QueryParameters.Default;
-            queryParams.layerMask = scanLayers;                                         // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
-            queryParams.hitBackfaces = false;                                           // Dont't hit the insides of objects
-
-            commands[i] = new RaycastCommand(origin, worldDir, queryParams, maxDistance);    // Start at origin, go in direciton of worldDir, use these settings, limit distance
+            rayDirections.Add(worldDir);    // Add world direction for this ray
         }
 
-        // Fire rays
-        JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
-        handle.Complete();                                                                          // Forces the main thread to wait until the job is finished 
 
-        // Reset the object to its original layer once raycasts have been completed
-        if (hidden && objectToIgnore != null)
-        {
-            objectToIgnore.layer = originalLayer;
-        }
+        // Reflection loop
 
-        // Process Hits
         activeHitCount = 0;
-        for (int i = 0; i < raysPerScan; i++)
+
+        for (int bounce = 0; bounce <= maxBounces; bounce++)
         {
-            // If the collider is not null, the ray hit something
-            if (results[i].collider != null)
+            int rayCount = rayOrigins.Length;   // Initialise to current number of rays in "generation
+            if (rayCount == 0) break;           // Stop if none remaining
+
+            // Prepare job memory
+            commands = new NativeArray<RaycastCommand>(rayCount, Allocator.TempJob); 
+            results = new NativeArray<RaycastHit>(rayCount, Allocator.TempJob);
+
+            // Prepare commands for all current rays
+            for (int i = 0; i < rayCount; i++)
             {
-                RaycastHit hit = results[i];                                                                        // Get hit data
-                Quaternion rotation = Quaternion.LookRotation(-hit.normal);                                         // Create a rotation that looks "up" away from the surface normal - makes the quad lie flat on the wall
-                
-                Vector3 position;
-                float scale;
-                if (isGridMode)
-                {
-                    position = hit.point + (hit.normal * gridOffset);   // Calculate position of the quad - hitpoint + offset
-                    scale = gridQuadSize;                               // Get scale factor for quad
-                }
-                else
-                {
-                    position = hit.point + (hit.normal * dotOffset);    // Calculate position of the quad - hitpoint + offset
-                    scale = dotScale;                                   // Get scale factor for quad
-                }
+                // Set up the settings package
+                QueryParameters queryParams = QueryParameters.Default;
+                queryParams.layerMask = scanLayers;                                         // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
+                queryParams.hitBackfaces = false;                                           // Dont't hit the insides of objects
 
-                instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
-                activeHitCount++;                                                                                   // Increment the counter
-            
-                // TODO: add this when we have multiple ray bounces working
-                // // Get the thing the ray hit and its INoiseSensitive interface component
-                // INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
-
-                // // If sensitiveTarget is not null, the object has an implemntation of INoiseSensitive and requires knowledge from the rays hitting it
-                // if (sensitiveTarget != null)
-                // {
-                //     // Identify the source, if objectToIgnore (the object that spawned the rays) is null, us the scanner itself - this.transform
-                //     Transform sourceTransform = (objectToIgnore != null) ? objectToIgnore.transform : this.transform;
-
-                //     // Tell the sensitive target (the Monster) the source that made a noise that hit it, to use for investigating if it passes a certain threshold of noise (number of rays)
-                //     sensitiveTarget.OnHeardScan(sourceTransform);
-                // }
-            
+                commands[i] = new RaycastCommand(rayOrigins[i], rayDirections[i], queryParams, rayRanges[i]);    // Start at ray origin, go in direciton of ray, use these settings, limit distance to remaining from max distance
             }
 
+            // Fire rays
+            JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
+            handle.Complete();                                                                          // Forces the main thread to wait until the job is finished 
+
+            // Reset object+children layers after initial projections (so reflections can hit it)
+            if (bounce == 0 && objectToIgnore != null)
+            {
+                RestoreLayers();
+            }
+
+            // Lists for next bounce
+            NativeList<Vector3> nextOrigins = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);   
+            NativeList<Vector3> nextDirections = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);
+            NativeList<float> nextRanges = new NativeList<float>(raysPerScan, Allocator.TempJob);
+
+
+
+            // Process Hits
+            for (int i = 0; i < rayCount; i++)
+            {
+                // If the collider is not null, the ray hit something
+                if (results[i].collider != null)
+                {
+                    RaycastHit hit = results[i];    // Get hit data
+
+
+                    // NOTE: if you don't want reflected rays to be visualised change the if to if (bounce == 0)
+                    // ALSO: update the total max hit thing to reduce buffer size
+
+                    if (activeHitCount < instanceMatrices.Length)   // Safety check, currently has more than enough space so should have no problems
+                    {
+                        Quaternion rotation = Quaternion.LookRotation(-hit.normal); // Create a rotation that looks "up" away from the surface normal - makes the quad lie flat on the wall
+                    
+                        Vector3 position;
+                        float scale;
+                        if (isGridMode)
+                        {
+                            position = hit.point + (hit.normal * gridOffset);   // Calculate position of the quad - hitpoint + offset
+                            scale = gridQuadSize;                               // Get scale factor for quad
+                        }
+                        else
+                        {
+                            position = hit.point + (hit.normal * dotOffset);    // Calculate position of the quad - hitpoint + offset
+                            scale = dotScale;                                   // Get scale factor for quad
+                        }
+
+                        instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
+                        activeHitCount++;                                                                                   // Increment the counter
+                    }
+                    
+                    // TODO: add this when we have multiple ray bounces working
+                    // INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
+                    // if (sensitiveTarget != null) // If the thing hit (the monster) has an implementaion of INoiseSensitive (not null) then it wants this info so send
+                    //{
+                    //  sensitiveTarget.OnHeardScan(sourceObj.transform); // Send the original source object even after reflections 
+                    //}
+
+                    // Calculate reflections
+                    if (bounce < maxBounces)
+                    {
+                        float distanceTravelled = hit.distance;
+                        float remainingRange = rayRanges[i] - distanceTravelled; // Calculate remaining distance
+
+                        // Only bounce if range left
+                        if (remainingRange > 0f)
+                        {
+                            Vector3 incomingDir = rayDirections[i];
+                            Vector3 reflectedDir = Vector3.Reflect(incomingDir, hit.normal);
+
+                            // Add to next batch of rays
+                            nextOrigins.Add(hit.point + (hit.normal * 0.01f)); // Add offset to spawn point to prevent self collision
+                            nextDirections.Add(reflectedDir);
+                            nextRanges.Add(remainingRange);
+                        }
+                    }
+                }
+            }
+
+            // Cleanup current "generation"
+            commands.Dispose();
+            results.Dispose();
+            rayOrigins.Dispose();
+            rayDirections.Dispose();
+            rayRanges.Dispose();
+
+            // Swap to next generations
+            rayOrigins = nextOrigins;
+            rayDirections = nextDirections;
+            rayRanges = nextRanges;
         }
+
+
+        // Final cleanup
+        rayOrigins.Dispose();
+        rayDirections.Dispose();
+        rayRanges.Dispose();
+        
 
         // Always set the arguments so (incorrect) values from previous calls of perform scan aren't kept
         // Set the arguments for the indirect draw call
@@ -315,10 +435,6 @@ public class EcholocationManager : MonoBehaviour
         }
 
         Debug.Log("Scan fired! Hits: " + activeHitCount);
-
-        // Clean up memory to prevent leaks
-        commands.Dispose();
-        results.Dispose();
     }
 
     // Function that actually draws the graphics

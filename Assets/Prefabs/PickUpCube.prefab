@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1982019031069565542}
   - component: {fileID: 5123099592883278624}
   - component: {fileID: 2152692725770023348}
+  - component: {fileID: 2923229647522562153}
   m_Layer: 8
   m_Name: PickUpCube
   m_TagString: Untagged
@@ -136,6 +137,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78ae7c92667aa407e8835dfc115f1016, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  itemType: 0
+  amount: 1
 --- !u!54 &2152692725770023348
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -163,3 +166,16 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &2923229647522562153
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1918452383466067301}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7595d5ebee36557458718156b8690a97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  pingOffset: 0.3

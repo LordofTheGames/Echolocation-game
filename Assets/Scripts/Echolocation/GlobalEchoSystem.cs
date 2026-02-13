@@ -32,18 +32,23 @@ public class GlobalEchoSystem : MonoBehaviour
     [Header("Settings")]
     public GameObject echoSystemPrefab; // Drag EcholocationSystem.prefab here in inspector window
 
-    public static void Ping(Vector3 position, GameObject sourceObject) // Default overload that use spherical rays
+    public static void Ping(GameObject sourceObject, Vector3 position) // Default overload that use spherical rays
     {
-        Ping(position, Vector3.forward, 360f, 1.0f, 20000, 100f, sourceObject);
+        Ping(sourceObject, position, Vector3.forward, 360f, 1.0f, 20000, 100f);
     }
 
-    // Takes in an angle between 0 and 360 degrees for shape of projection, and direction for direction to project in  
-    public static void Ping(Vector3 position, Vector3 direction, float angle, float uniformity, int numRays, float volume, GameObject sourceObject = null) // Can add things later like: shape of projection + rotation, loudness, pitch, num rays (if not dependent on other things), etc.
+    // sourceObject: the object spawning the ray that should be ignored on first projection to prevent self-collision, can be hit on reflections. If you really don't want it for whatever reson, pass in "null".
+    // position: the position to spawn the rays at
+    // direction: the direction to project the rays in/around
+    // angle: (takes a value 0-360 degrees) the angle around direction to spawn rays within, e.g. 0 = along the line, 60 = a cone around the line, 360 = a complete sphere
+    // uniformity: (takes a value 0-1) how clumped around the directino line rays should be, 0 = clumped completely, 1 = completely uniform. 1 used for spheres for uniform projection in all directions, for cones etc. clumped = 0 gives a more realistic sound effect (sound dies out futher from main direction)
+    // numRays: number of rays to spawn
+    public static void Ping(GameObject sourceObject, Vector3 position, Vector3 direction, float angle, float uniformity, int numRays, float volume) // Can add things later like: shape of projection + rotation, loudness, pitch, num rays (if not dependent on other things), etc.
     {
         // Safety check for existence of GlobalEchoSystem and EcholocationSystem.prefab (via GlobalEchoManager GameObject) 
         if (Instance != null && Instance.echoSystemPrefab != null)
         {
-            Instance.SpawnPulse(position, direction, angle, uniformity, numRays, volume, sourceObject);
+            Instance.SpawnPulse(sourceObject, position, direction, angle, uniformity, numRays, volume);
         }
         else
         {
@@ -52,7 +57,7 @@ public class GlobalEchoSystem : MonoBehaviour
     }
 
     // Takes in an angle between 0 and 360 degrees for shape of projection, and direction for direction to project in  
-    void SpawnPulse(Vector3 position, Vector3 direction, float angle, float uniformity, int numRays, float volume, GameObject sourceObject)
+    void SpawnPulse(GameObject sourceObject, Vector3 position, Vector3 direction, float angle, float uniformity, int numRays, float volume)
     {
         GameObject pulse = Instantiate(echoSystemPrefab, position, Quaternion.identity); // Create (Instantiate) an instance of the EcholocationSystem.prefab at position, with rotation ... (identity means no rotation)
 
@@ -68,7 +73,7 @@ public class GlobalEchoSystem : MonoBehaviour
 
         if (manager != null)
         {
-            manager.SetupScan(direction, angle, uniformity, numRays, volume, sourceObject);
+            manager.SetupScan(sourceObject, direction, angle, uniformity, numRays, volume);
         }
     }
 }
