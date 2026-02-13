@@ -14,14 +14,28 @@ public class PlayerMovement : MonoBehaviour
 
     Vector3 velocity;
     bool isGrounded;
-    InputAction moveAction;
-    InputAction jumpAction;
+    Vector2 moveInput;  // Stores WASD input
+    
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void OnMove(InputAction.CallbackContext context)
     {
-        moveAction = InputSystem.actions.FindAction("Move");
-        jumpAction = InputSystem.actions.FindAction("Jump"); 
+        moveInput = context.ReadValue<Vector2>();
+    }
+
+    public void OnJump(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            Jump();
+        }
+    }
+
+    void Jump()
+    {
+        if (isGrounded)
+        {
+            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+        }
     }
 
     // Update is called once per frame
@@ -34,14 +48,9 @@ public class PlayerMovement : MonoBehaviour
             velocity.y = 0f;
         }
 
-        Vector2 moveValue = moveAction.ReadValue<Vector2>();
-        Vector3 move = transform.right * moveValue.x + transform.forward * moveValue.y;
+        Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         controller.Move(speed * Time.deltaTime * move);
 
-        if (jumpAction.IsPressed() && isGrounded)
-        {
-            velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-        }
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
     }

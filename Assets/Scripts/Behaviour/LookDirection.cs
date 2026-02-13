@@ -5,5 +5,6 @@ using Unity.Behavior;
 public enum LookDirection
 {
 	LEFT,
-	RIGHT
+	RIGHT,
+	RANDOM
 }

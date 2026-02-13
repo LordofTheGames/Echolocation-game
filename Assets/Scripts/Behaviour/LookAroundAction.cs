@@ -27,6 +27,11 @@ public partial class LookAroundAction : Action
         rotationsCompleted = 0;
         agentTransform = Agent.Value.transform;
         centerRotation = agentTransform.rotation;
+        if (InitialDirection == LookDirection.RANDOM)
+        {
+            // pick random direction (between 0 and 1)
+            InitialDirection.Value = (LookDirection) new System.Random().Next(0, 2);
+        }
 
         if (InitialDirection == LookDirection.LEFT) 
         {

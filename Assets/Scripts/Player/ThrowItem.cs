@@ -39,19 +39,16 @@ public class ThrowItem : MonoBehaviour
     private List<Vector3> trajectoryPointsList = new List<Vector3>();
     private Vector3 landingPosition;
     private Vector3 throwDirection;
-
-    InputAction throwAction;
-    InputAction changeThrowDistance;
     private ItemType holdingType;
+
+    private float scrollInput;
+
 
     private void Start()
     {
         Camera mainCam = Camera.main;
         if (mainCam != null)
             cameraTransform = mainCam.transform;
-
-        throwAction = InputSystem.actions.FindAction("Throw");
-        changeThrowDistance = InputSystem.actions.FindAction("Change throw distance");
 
         if (cubeSpawnPoint == null)
         {
@@ -67,6 +64,37 @@ public class ThrowItem : MonoBehaviour
 
         trajectoryLine.enabled = false;
         landingIndicator.SetActive(false);
+    }
+
+    public void OnThrow(InputAction.CallbackContext context)
+    {
+        if (context.started)
+        {
+            StartHolding();
+        }
+        else if (context.canceled)
+        {
+            StartThrowing();
+        }
+    }
+
+    public void OnChangeThrowDistance(InputAction.CallbackContext context)
+    {
+        scrollInput = context.ReadValue<Vector2>().y;
+    }
+
+    private void Update()
+    {
+        if (isHoldingRightClick)
+        {
+            UpdateHolding();
+
+            if (Mathf.Abs(scrollInput) > 0.01f)
+            {
+                throwForce += scrollInput * 0.5f;
+                scrollInput = 0f; // Reset to prevent infinite adding
+            }
+        }
     }
 
     private static readonly Color TrajectoryBrightRed = new Color(1f, 0.2f, 0.2f, 1f);
@@ -138,25 +166,6 @@ public class ThrowItem : MonoBehaviour
         }
 
         landingIndicator.SetActive(false);
-    }
-
-    private void Update()
-    {
-        if (throwAction == null) return;
-        if (throwAction.WasPressedThisFrame())
-            StartHolding();
-
-        if (throwAction.IsPressed() && isHoldingRightClick)
-
-            UpdateHolding();
-
-        if (throwAction.WasReleasedThisFrame() && isHoldingRightClick)
-            StartThrowing();
-
-        // if (throwAction.IsPressed())
-        //     throwForce += changeThrowDistance.ReadValue<Vector2>().y * 0.5f;
-        if (throwAction.IsPressed() && changeThrowDistance != null)
-            throwForce += changeThrowDistance.ReadValue<Vector2>().y * 0.5f;
     }
 
     private bool CanThrowSelected(out ItemType selected)
