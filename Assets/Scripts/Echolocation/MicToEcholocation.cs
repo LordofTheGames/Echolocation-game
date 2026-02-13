@@ -21,6 +21,7 @@ public class MicToEcholocation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!mic) return;
         timer += Time.deltaTime;
         if (timer < interval) return;
         timer = 0f;
@@ -28,6 +29,6 @@ public class MicToEcholocation : MonoBehaviour
 
         int rays = Mathf.RoundToInt(mic.loudness * maxRays);
         rays = Mathf.Clamp(rays, minRays, maxRays);
-        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, 200f, 0.3f, rays);
+        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, 200f, 0.3f, rays, 100f);
     }
 }

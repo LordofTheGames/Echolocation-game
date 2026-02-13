@@ -5,7 +5,7 @@ public class DetectObjectOutline : MonoBehaviour
 {
     [SerializeField] private Camera cam;
     // maximum distance the ray can reach
-    [SerializeField] private float maxDistance = 30f;
+    [SerializeField] private float maxDistance = 5f;
     [SerializeField] private float sphereRadius = 0.28f;
     // prevents flickering
     [SerializeField] private float loseDelay = 0.12f;

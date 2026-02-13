@@ -256,6 +256,7 @@ GameObject:
   - component: {fileID: 6448768869653819886}
   - component: {fileID: 3073600552268709393}
   - component: {fileID: 896755040844005566}
+  - component: {fileID: 2101662428858691233}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -324,6 +325,7 @@ MonoBehaviour:
   speed: 12
   gravity: -19.62
   jumpHeight: 3
+  jumpEnabled: 0
   groundCheck: {fileID: 8179629045468587835}
   groundDistance: 0.4
   groundMask:
@@ -343,9 +345,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemPrefabs:
   - type: 0
-    prefab: {fileID: 1918452383466067301, guid: 09676d906daf642298004499e6043cf5, type: 3}
-  - type: 3
-    prefab: {fileID: 1918452383466067301, guid: c81eb2e2ee43a409f89d9f980ffbe5ed, type: 3}
+    prefab: {fileID: 6708599122270987611, guid: dc35457561e2b3746bd21668f2e9a16a, type: 3}
+  - type: 2
+    prefab: {fileID: 7286101680068963467, guid: 670934e21c06b15458bf248ada43c43d, type: 3}
   throwForce: 15
   throwHeight: 0.5
   landingIndicatorSize: 1
@@ -386,7 +388,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 7774423660450900798}
-  maxDistance: 30
+  maxDistance: 5
   sphereRadius: 0.28
   loseDelay: 0.12
   interactMask:
@@ -690,6 +692,23 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
+--- !u!114 &2101662428858691233
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6cb3637d5fa7a48d89d461f39dcfcff8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mic: {fileID: 0}
+  cameraTransform: {fileID: 2099696623943395477}
+  interval: 0.2
+  angle: 200
+  uniformity: 0.3
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0
@@ -765,7 +784,7 @@ Light:
   serializedVersion: 11
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 8
+  m_Intensity: 5
   m_Range: 15
   m_SpotAngle: 179
   m_InnerSpotAngle: 0

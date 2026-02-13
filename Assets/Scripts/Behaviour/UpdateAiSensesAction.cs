@@ -4,7 +4,6 @@ using UnityEngine;
 using Action = Unity.Behavior.Action;
 using Unity.Properties;
 using System.Collections.Generic;
-using Unity.VisualScripting;
 #nullable enable annotations
 
 [Serializable, GeneratePropertyBag]
