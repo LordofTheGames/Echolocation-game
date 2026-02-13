@@ -220,7 +220,7 @@ public class EcholocationManager : MonoBehaviour
 
         if (objectToIgnore != null)
         {
-            HideAndSave(sourceObj, 9);  // Layer 2 is the inbuilt ignore raycast layer
+            HideAndSave(sourceObj, 9);  // Layer 9 is the custom Ignore Echolocation layer
             Physics.SyncTransforms();   // Force any layer changes to be applied now
         }
 
