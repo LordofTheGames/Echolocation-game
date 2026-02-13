@@ -12543,6 +12543,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Hide Trigger
       objectReference: {fileID: 0}
+    - target: {fileID: 3714249403760789428, guid: 5eec8533d605eca48912779a707d4d38, type: 3}
+      propertyPath: canBeOutlined
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4381578987095114887, guid: 5eec8533d605eca48912779a707d4d38, type: 3}
       propertyPath: m_LocalPosition.x
       value: -32.94
@@ -12928,6 +12932,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 5235627052445221193, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      propertyPath: m_TagString
+      value: Player
+      objectReference: {fileID: 0}
     - target: {fileID: 7900835251262604122, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: hidePanel
       value: 
@@ -12943,7 +12951,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5235627052445221193, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      insertIndex: 6
+      addedObject: {fileID: 2106793542126640627}
   m_SourcePrefab: {fileID: 100100000, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
 --- !u!1 &2106793542126640619 stripped
 GameObject:
@@ -12966,6 +12977,19 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3853411543216132462, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
   m_PrefabInstance: {fileID: 2106793542126640618}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2106793542126640627
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2106793542126640619}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 441efa5c6fc10164385211ef634398cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isHiding: 0
 --- !u!65 &2187642508281452926
 BoxCollider:
   m_ObjectHideFlags: 0

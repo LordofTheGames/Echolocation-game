@@ -41,6 +41,11 @@ public class HideInBox : MonoBehaviour
         playerMainCamera.gameObject.SetActive(false);
         boxViewCamera.gameObject.SetActive(true);
 
+        if (player.TryGetComponent(out PlayerState state)) 
+        {
+            state.isHiding = true;
+        }
+
         yaw = 0;
         pitch = 0;
     }
@@ -61,6 +66,11 @@ public class HideInBox : MonoBehaviour
         boxViewCamera.gameObject.SetActive(false);
         playerMainCamera.gameObject.SetActive(true);
         if(playerRef.TryGetComponent(out CharacterController cc)) cc.enabled = true;
+
+        if (playerRef.TryGetComponent(out PlayerState state)) 
+        {
+            state.isHiding = false;
+        }
 
         playerRef = null;
     }
