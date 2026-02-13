@@ -30,9 +30,9 @@ public class DetectObjectOutline : MonoBehaviour
         currentPanel = pickupPanel;
     }
 
-    private void Update()
+    public void OnInteract(InputAction.CallbackContext context)
     {
-        if (interactAction.WasPressedThisFrame() && current != null)
+        if (context.performed && current != null)
         {
             PickupItem pickup = current.GetComponentInParent<PickupItem>(); 
             HideInBox hide = current.GetComponentInParent<HideInBox>();
