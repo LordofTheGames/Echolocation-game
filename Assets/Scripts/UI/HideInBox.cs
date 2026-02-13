@@ -32,7 +32,10 @@ public class HideInBox : MonoBehaviour
         playerMainCamera = player.GetComponentInChildren<Camera>();
 
         // should disable player movements
-        if(player.TryGetComponent(out CharacterController cc)) cc.enabled = false;
+        player.GetComponent<CharacterController>().enabled = false;
+        player.GetComponent<PlayerMovement>().enabled = false;
+        player.GetComponentInChildren<MouseLook>().enabled = false;
+
         
         player.transform.position = boxAnchor.position;
         player.transform.rotation = boxAnchor.rotation;
@@ -65,7 +68,9 @@ public class HideInBox : MonoBehaviour
 
         boxViewCamera.gameObject.SetActive(false);
         playerMainCamera.gameObject.SetActive(true);
-        if(playerRef.TryGetComponent(out CharacterController cc)) cc.enabled = true;
+        playerRef.GetComponent<CharacterController>().enabled = true;
+        playerRef.GetComponent<PlayerMovement>().enabled = true;
+        playerRef.GetComponentInChildren<MouseLook>().enabled = true;
 
         if (playerRef.TryGetComponent(out PlayerState state)) 
         {

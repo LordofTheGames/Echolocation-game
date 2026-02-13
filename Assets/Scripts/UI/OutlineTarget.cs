@@ -4,7 +4,7 @@ public class OutlineTarget : MonoBehaviour
 {
     [SerializeField] private string outlinedLayerName = "Outlined Object";
     
-    [SerializeField] public bool canBeOutlined = true; 
+    public bool canBeOutlined = true; 
     
     private int outlinedLayer;
     private int originalLayer;

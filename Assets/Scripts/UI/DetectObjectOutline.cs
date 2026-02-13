@@ -14,14 +14,17 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private float loseDelay = 0.12f;
 
     [SerializeField] private LayerMask interactMask = ~0; 
+
+    [SerializeField] private GameObject pullPanel;
+    [SerializeField] private GameObject pickupPanel;
+    [SerializeField] private GameObject hidePanel;
+
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
     private float lastValidHitTime;
     private InputAction interactAction;
-    [SerializeField] private GameObject pullPanel;
-    [SerializeField] private GameObject pickupPanel;
-    [SerializeField] private GameObject hidePanel;
+
     private GameObject currentPanel;
 
     private void Awake()
@@ -37,8 +40,13 @@ public class DetectObjectOutline : MonoBehaviour
     {
         if (interactAction.WasPressedThisFrame() && current != null)
         {
-            PickupItem pickup = current.GetComponentInParent<PickupItem>(); 
-            HideInBox hide = current.GetComponentInParent<HideInBox>();
+            PickupItem pickup = current.GetComponent<PickupItem>();
+            if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
+            if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
+
+            HideInBox hide = current.GetComponent<HideInBox>();
+            if (!hide) hide = current.GetComponentInParent<HideInBox>();
+            if (!hide) hide = current.GetComponentInChildren<HideInBox>();
 
             if (pickup != null)
             {
