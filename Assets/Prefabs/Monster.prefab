@@ -185,10 +185,9 @@ GameObject:
   - component: {fileID: 1997102751303061440}
   - component: {fileID: 8737043143605252243}
   - component: {fileID: 8738375180280089010}
-  - component: {fileID: 8491061249567926694}
   m_Layer: 0
   m_Name: Monster
-  m_TagString: Monster
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -329,28 +328,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbf0b31af0e16104c83a220d744db206, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Radius: 15
-  Angle: 100
+  Radius: 14
+  Angle: 108
   AgentEyeHeight: 3.9
   TargetEyeHeight: 1.8
-  ObstructionMask:
-    serializedVersion: 2
-    m_Bits: 64
-  ShowDebugVisuals: 1
---- !u!114 &8491061249567926694
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5683829060095955525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f41b16a884a77ea4ea05efabe713814e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxSoundDistance: 30
-  AgentEyeHeight: 3.9
   ObstructionMask:
     serializedVersion: 2
     m_Bits: 64

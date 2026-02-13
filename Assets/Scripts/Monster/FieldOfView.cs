@@ -4,9 +4,9 @@ using UnityEngine;
 
 public class FieldOfViewChecker : MonoBehaviour
 {
-    public float Radius = 15f;
+    public float Radius;
     [Range(0,360)]
-    public float Angle = 100f;
+    public float Angle;
     public float AgentEyeHeight = 3.9f;
     public float TargetEyeHeight = 1.8f;
     public LayerMask ObstructionMask;

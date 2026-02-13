@@ -3,12 +3,6 @@ using UnityEngine.InputSystem;
 
 public class InventoryToggleCursor : MonoBehaviour
 {
-    [Header("Input Setup")]
-    [SerializeField] private PlayerInput playerInput;   // Drag player object here
-    [SerializeField] private string gameplayMap = "Player";
-    [SerializeField] private string inventoryMap = "Inventory";
-
-    [Header("References")]
     [SerializeField] private GameObject inventoryUI;
     [SerializeField] private MouseLook playerLook;
     [SerializeField] private DetectObjectOutline outlineDetector;
@@ -20,19 +14,23 @@ public class InventoryToggleCursor : MonoBehaviour
         SetOpen(false);
     }
 
-    public void OnOpenInventory(InputAction.CallbackContext context)
+    private void Update()
     {
-        if (context.performed && !isOpen)
-        {
-            SetOpen(true);
-        }
-    }
+        if (Keyboard.current == null) return;
 
-    public void OnCloseInventory(InputAction.CallbackContext context)
-    {
-        if (context.performed && isOpen)
+        bool pressedB   = Keyboard.current.bKey.wasPressedThisFrame;
+        bool pressedTab = Keyboard.current.tabKey.wasPressedThisFrame;
+        bool pressedEsc = Keyboard.current.escapeKey.wasPressedThisFrame;
+
+        if (!isOpen)
         {
-            SetOpen(false);
+            if (pressedB || pressedTab)
+                SetOpen(true);
+        }
+        else
+        {
+            if (pressedB || pressedTab || pressedEsc)
+                SetOpen(false);
         }
     }
 
@@ -50,12 +48,6 @@ public class InventoryToggleCursor : MonoBehaviour
 
         Cursor.visible = open;
         Cursor.lockState = open ? CursorLockMode.None : CursorLockMode.Locked;
-
-        if (playerInput != null)
-        {
-            if (open)   playerInput.SwitchCurrentActionMap(inventoryMap);
-            else        playerInput.SwitchCurrentActionMap(gameplayMap);
-        }
 
         if (open) ResetAllSlotsByChildName();
     }

@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,15 +15,26 @@ public class TempEcholocationTrigger : MonoBehaviour
 
     [Header("Angle of projection (0 = line, 60 = cone, 360 = sphere)")]
     public float angle = 60f;
-    
-    [Header("Volume of sound (used for AI reactions)")]
-    public float volume = 100f;
-    
-    public void OnEcholocate(InputAction.CallbackContext context)
+
+    private InputAction echolocateAction;
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
     {
-        if (context.performed)
+        echolocateAction = InputSystem.actions.FindAction("Echolocate");
+
+        if (echolocateAction == null)
         {
-            GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, volume);
+            Debug.Log("Error: Could not find input action 'Echolocate'.");
+        }
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        if (echolocateAction != null && echolocateAction.WasPressedThisFrame())
+        {
+            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays);
         }
     }
 }
