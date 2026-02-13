@@ -21,6 +21,7 @@ public class MicToEcholocation : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!mic) return;
         timer += Time.deltaTime;
         if (timer < interval) return;
         timer = 0f;
