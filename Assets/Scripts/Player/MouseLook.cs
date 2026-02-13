@@ -7,30 +7,32 @@ public class MouseLook : MonoBehaviour
     public Transform playerBody;
     public Transform lightTransform;
     float xRotation = 0f;
-
+    Vector2 lookInput; // Stores the current mouse delta
     InputAction lookAction;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public void OnLook(InputAction.CallbackContext context)
     {
-        // Locking the cursor to the middle of the screen and making it invisible
-        Cursor.lockState = CursorLockMode.Locked;
-        lookAction = InputSystem.actions.FindAction("Look");
+        lookInput = context.ReadValue<Vector2>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        Vector2 lookValue = lookAction.ReadValue<Vector2>();
-        float mouseX = lookValue.x * mouseSensitivity * Time.deltaTime;
-        float mouseY = lookValue.y * mouseSensitivity * Time.deltaTime;
+
+        // If the map is disabled (Inventory open), OnLook stops updating.
+
+        float mouseX = lookInput.x * mouseSensitivity * Time.deltaTime;
+        float mouseY = lookInput.y * mouseSensitivity * Time.deltaTime;
 
         xRotation -= mouseY;
-        xRotation = Mathf.Clamp(xRotation, -90f, 90f); //we clamp the rotation so we cant over-rotate
+        xRotation = Mathf.Clamp(xRotation, -90f, 90f); // We clamp the rotation so we cant over-rotate
         transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
-        lightTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
+        if (lightTransform) lightTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 
 
         playerBody.Rotate(Vector3.up * mouseX); 
+
+        // Reset input after use to prevent "drift" when mouse moving
+        lookInput = Vector2.zero;
     }
 }
