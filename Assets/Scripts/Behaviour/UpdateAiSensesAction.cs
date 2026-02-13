@@ -27,7 +27,6 @@ public partial class UpdateAiSensesAction : Action
     [SerializeReference] public BlackboardVariable<bool> newSoundToInvestigate;
     [SerializeReference] public BlackboardVariable<Vector3> newSoundLocation;
     [SerializeReference] public BlackboardVariable<float> newSoundVolume;
-    [SerializeReference] public BlackboardVariable<float> maxSoundDistance;
     HearingChecker hearingScript;
     // TODO: replace this with per-sound-type values
     // TODO: also, these are to be used when we have ray collisions with monster working!
@@ -47,6 +46,7 @@ public partial class UpdateAiSensesAction : Action
             hearingScript = Agent.Value.GetComponentInChildren<HearingChecker>();
             currentSoundLocation.Value = Agent.Value.transform.position;
             currentSoundVolume.Value = 0;
+            newSoundVolume.Value = 0;
             initialised = true;
         }
         return Status.Running;
@@ -55,7 +55,7 @@ public partial class UpdateAiSensesAction : Action
     protected override Status OnUpdate()
     {
         updateFOV();
-        // updateHearing();
+        updateHearing();
         return Status.Success;
     }
 
@@ -80,13 +80,9 @@ public partial class UpdateAiSensesAction : Action
         SoundData? source = hearingScript.HearingCheck();
         if (source.HasValue)
         {
-            float distance = Vector3.Distance(source.Value.transform.position, Agent.Value.transform.position);
-            if (distance <= maxSoundDistance)
-            {
-                newSoundToInvestigate.Value = true;
-                newSoundLocation.Value = source.Value.transform.position;
-                newSoundVolume.Value = source.Value.volume / distance;
-            }
+            newSoundToInvestigate.Value = true;
+            newSoundLocation.Value = source.Value.transform.position;
+            newSoundVolume.Value = source.Value.volume;
         } 
     }
 

@@ -147,7 +147,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, GameObject ignoreMe = null)
+    public void SetupScan(Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float volume = 10f, GameObject ignoreMe = null)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -157,6 +157,10 @@ public class EcholocationManager : MonoBehaviour
         scanUniformity = Mathf.Clamp01(uniformity);     // Make sure is in valid range
         raysPerScan = Mathf.Clamp(numRays, 0, 20000);   // Make sure is in (currently chosen) valid range
         objectToIgnore = ignoreMe;
+        // TODO: remove this when multiple ray bounces have been implemented
+        // for now just make the monster hear the sound
+        INoiseSensitive sensitiveTarget = GameObject.FindGameObjectWithTag("Monster").GetComponent<INoiseSensitive>();
+        sensitiveTarget.OnHeardScan(transform, volume);
     }
 
     // Fires the rays
@@ -275,18 +279,19 @@ public class EcholocationManager : MonoBehaviour
                 instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
                 activeHitCount++;                                                                                   // Increment the counter
             
-                // Get the thing the ray hit and its INoiseSensitive interface component
-                INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
+                // TODO: add this when we have multiple ray bounces working
+                // // Get the thing the ray hit and its INoiseSensitive interface component
+                // INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
 
-                // If sensitiveTarget is not null, the object has an implemntation of INoiseSensitive and requires knowledge from the rays hitting it
-                if (sensitiveTarget != null)
-                {
-                    // Identify the source, if objectToIgnore (the object that spawned the rays) is null, us the scanner itself - this.transform
-                    Transform sourceTransform = (objectToIgnore != null) ? objectToIgnore.transform : this.transform;
+                // // If sensitiveTarget is not null, the object has an implemntation of INoiseSensitive and requires knowledge from the rays hitting it
+                // if (sensitiveTarget != null)
+                // {
+                //     // Identify the source, if objectToIgnore (the object that spawned the rays) is null, us the scanner itself - this.transform
+                //     Transform sourceTransform = (objectToIgnore != null) ? objectToIgnore.transform : this.transform;
 
-                    // Tell the sensitive target (the Monster) the source that made a noise that hit it, to use for investigating if it passes a certain threshold of noise (number of rays)
-                    sensitiveTarget.OnHeardScan(sourceTransform);
-                }
+                //     // Tell the sensitive target (the Monster) the source that made a noise that hit it, to use for investigating if it passes a certain threshold of noise (number of rays)
+                //     sensitiveTarget.OnHeardScan(sourceTransform);
+                // }
             
             }
 

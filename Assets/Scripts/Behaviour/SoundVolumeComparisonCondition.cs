@@ -17,7 +17,7 @@ public partial class SoundVolumeComparisonCondition : Condition
     public override bool IsTrue()
     {
         Vector3 agentPos = Agent.Value.transform.position;
-        return ConditionUtils.Evaluate(NewVolume / Vector3.Distance(agentPos, NewLocation), Operator, CurrentVolume / Vector3.Distance(agentPos, CurrentLocation));
+        return ConditionUtils.Evaluate(NewVolume.Value / Vector3.Distance(agentPos, NewLocation.Value), Operator, CurrentVolume.Value / Vector3.Distance(agentPos, CurrentLocation.Value));
     }
 
     public override void OnStart()

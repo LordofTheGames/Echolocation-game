@@ -16,6 +16,9 @@ public class TempEcholocationTrigger : MonoBehaviour
     [Header("Angle of projection (0 = line, 60 = cone, 360 = sphere)")]
     public float angle = 60f;
 
+    [Header("Volume of sound (used for AI reactions)")]
+    public float volume = 100f;
+
     private InputAction echolocateAction;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -34,7 +37,7 @@ public class TempEcholocationTrigger : MonoBehaviour
     {
         if (echolocateAction != null && echolocateAction.WasPressedThisFrame())
         {
-            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays);
+            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, volume);
         }
     }
 }

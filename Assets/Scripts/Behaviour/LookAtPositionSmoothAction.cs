@@ -18,7 +18,7 @@ public partial class LookAtPositionSmoothAction : Action
     protected override Status OnStart()
     {
         agentTransform = Agent.Value.transform;
-        Vector3 direction = agentTransform.position - Position;
+        Vector3 direction = Position - agentTransform.position;
         direction.y = 0; // Limit rotation to y-axis
 
         if (direction != Vector3.zero) 
