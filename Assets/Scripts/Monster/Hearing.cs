@@ -1,0 +1,52 @@
+using UnityEngine;
+
+public class HearingChecker : MonoBehaviour, INoiseSensitive
+{
+    public float maxSoundDistance = 30f;
+    public float AgentEyeHeight = 3.9f;
+    public LayerMask ObstructionMask;
+    public bool ShowDebugVisuals;
+
+    private SoundData newSource;
+    private bool newSound = false;
+    private float newMaxDist;
+
+    // This function is called automatically by the Scanner when rays hit the monster
+    public void OnHeardScan(Transform source, float volume)
+    {
+        if (source == null) return;
+
+        Vector3 eyePos = transform.position + Vector3.up * AgentEyeHeight;
+        float distance = Vector3.Distance(eyePos, source.position);
+        // TODO: this calculation is fairly arbritrary! improve it?
+        newMaxDist = maxSoundDistance + (volume / 25f);
+        if (distance <= newMaxDist)
+        {
+            newSound = true;
+            newSource.transform = source;
+            newSource.volume = volume;
+            bool viewObstructed = Physics.Raycast(eyePos, source.position - eyePos, distance, ObstructionMask);
+            // TODO: this calculation is fairly arbritrary! improve it?
+            if (viewObstructed) newSource.volume /= 2;  
+        }
+    }
+
+    // called every frame by monster behaviour tree to check for new sounds
+    public SoundData? HearingCheck()
+    {
+        if (!newSound) return null;
+        newSound = false;
+        return newSource;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (ShowDebugVisuals)
+        {
+            if (newMaxDist == 0) newMaxDist = maxSoundDistance;
+            Vector3 eyePos = transform.position + Vector3.up * AgentEyeHeight;
+            Gizmos.color = Color.green;
+            Gizmos.DrawWireSphere(eyePos, newMaxDist);
+        }
+    }
+}

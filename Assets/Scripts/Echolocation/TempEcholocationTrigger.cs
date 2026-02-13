@@ -14,12 +14,15 @@ public class TempEcholocationTrigger : MonoBehaviour
 
     [Header("Angle of projection (0 = line, 60 = cone, 360 = sphere)")]
     public float angle = 60f;
-
+    
+    [Header("Volume of sound (used for AI reactions)")]
+    public float volume = 100f;
+    
     public void OnEcholocate(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays);
+            GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, volume);
         }
     }
 }

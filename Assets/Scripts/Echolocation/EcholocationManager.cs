@@ -159,7 +159,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float volume = 10f)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -169,6 +169,10 @@ public class EcholocationManager : MonoBehaviour
         scanUniformity = Mathf.Clamp01(uniformity);     // Make sure is in valid range
         raysPerScan = Mathf.Clamp(numRays, 0, 100000);   // Make sure is in (currently chosen) valid range
         objectToIgnore = ignoreMe;
+        // TODO: remove this when multiple ray bounces have been implemented
+        // for now just make the monster hear the sound
+        INoiseSensitive sensitiveTarget = GameObject.FindGameObjectWithTag("Monster").GetComponent<INoiseSensitive>();
+        sensitiveTarget.OnHeardScan(transform, volume);
     }
 
 
@@ -365,7 +369,7 @@ public class EcholocationManager : MonoBehaviour
                         activeHitCount++;                                                                                   // Increment the counter
                     }
                     
-                    // INSERT FUNCTION TO SEND SOURCE OF NOISE INFO TO THE MOSTER HERE
+                    // TODO: add this when we have multiple ray bounces working
                     // INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
                     // if (sensitiveTarget != null) // If the thing hit (the monster) has an implementaion of INoiseSensitive (not null) then it wants this info so send
                     //{
