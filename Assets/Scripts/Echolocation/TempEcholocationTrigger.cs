@@ -19,7 +19,7 @@ public class TempEcholocationTrigger : MonoBehaviour
     {
         if (context.performed)
         {
-            GlobalEchoSystem.Ping(cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays);
+            GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays);
         }
     }
 }
