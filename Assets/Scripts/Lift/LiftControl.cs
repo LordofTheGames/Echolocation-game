@@ -90,4 +90,14 @@ public class LiftControl : MonoBehaviour
                 outlineScript.ignoreLiftChain = false;
             }
     }
+
+    private void OnDrawGizmos()
+    {
+        Transform LiftBody = transform.parent.GetChild(0);
+        Vector3 startPos = LiftBody.position;
+        startPos.y += minHeight;
+        Vector3 endPos = LiftBody.position;
+        endPos.y += maxHeight;
+        Gizmos.DrawLine(startPos, endPos);
+    }
 }
