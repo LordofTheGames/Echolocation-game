@@ -28,6 +28,6 @@ public class MicToEcholocation : MonoBehaviour
 
         int rays = Mathf.RoundToInt(mic.loudness * maxRays);
         rays = Mathf.Clamp(rays, minRays, maxRays);
-        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, 200f, 0.3f, rays);
+        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, 200f, 0.3f, rays, 100f);
     }
 }
