@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using NUnit.Framework.Internal.Commands;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -20,7 +17,6 @@ public class DetectObjectOutline : MonoBehaviour
 
     private OutlineTarget current;
     private float lastValidHitTime;
-    private InputAction interactAction;
     private GameObject currentPanel;
 
     private void Awake()
@@ -28,26 +24,36 @@ public class DetectObjectOutline : MonoBehaviour
         if (pickupPanel) pickupPanel.SetActive(false);
         if (pullPanel) pullPanel.SetActive(false);
         currentPanel = pickupPanel;
-        interactAction = InputSystem.actions.FindAction("Interact");
+    }
+
+    public void OnInteract(InputAction.CallbackContext context)
+    {
+        if (context.performed && current != null)
+        {
+            PerformInteract();
+        }
+    }
+
+    private void PerformInteract()
+    {
+        currentPanel.SetActive(false);
+        current.SetOutlined(false);
+
+        var pickup = current.GetComponent<PickupItem>();
+        if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
+        if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
+
+        if (pickup != null)
+        {
+            pickup.Interact();
+        }
+
+        current = null;
     }
 
     private void Update()
     {
-        if (interactAction.WasPressedThisFrame() && current != null)
-        {
-            currentPanel.SetActive(false);
-            current.SetOutlined(false);
-
-            var pickup = current.GetComponent<PickupItem>();
-            if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
-            if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
-
-            if (pickup != null)
-                pickup.Interact(); 
-
-            current = null;
-            return; 
-        }
+        
         // create a ray from the center of the screen
         var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
