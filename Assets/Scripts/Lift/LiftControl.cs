@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class LiftControl : MonoBehaviour
 {
@@ -79,6 +80,8 @@ public class LiftControl : MonoBehaviour
                 {
                     LiftBody.position = endPos;
                     this.transform.position = endPos;
+                    SceneManager.LoadScene("GameVictory");
+                    return;
                 }
                 else
                 {
