@@ -211,14 +211,15 @@ public class ThrowItem : MonoBehaviour
             if (rb != null)
                 rb.isKinematic = true;
 
-            MeshRenderer cubeRenderer = currentObj.GetComponent<MeshRenderer>();
-            if (cubeRenderer != null)
-            {
-                Material cubeMat = cubeRenderer.material;
-                Color cubeColor = cubeMat.color;
-                cubeColor.a = 0.8f;
-                cubeMat.color = cubeColor;
-            }
+            // Seemingly unnecessary and gives error message - left in comments in case it's needed later
+            // MeshRenderer cubeRenderer = currentObj.GetComponent<MeshRenderer>();
+            // if (cubeRenderer != null)
+            // {
+            //     Material cubeMat = cubeRenderer.material;
+            //     Color cubeColor = cubeMat.color;
+            //     cubeColor.a = 0.8f;
+            //     cubeMat.color = cubeColor;
+            // }
         }
 
         trajectoryLine.enabled = true;
