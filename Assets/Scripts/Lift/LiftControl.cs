@@ -33,6 +33,8 @@ public class LiftControl : MonoBehaviour
     private int consecutiveFails;
     private GameObject qteCanvas;
     private Text qtePromptText;
+    private Image qteCountdownRing;
+    private RectTransform qteCountdownRect;
 
     private void Start()
     {
@@ -56,15 +58,36 @@ public class LiftControl : MonoBehaviour
         qteCanvas.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         qteCanvas.AddComponent<GraphicRaycaster>();
 
-        var go = new GameObject("QTE_Prompt");
-        go.transform.SetParent(qteCanvas.transform, false);
-        var rect = go.AddComponent<RectTransform>();
-        rect.anchorMin = new Vector2(0.5f, 0.5f);
-        rect.anchorMax = new Vector2(0.5f, 0.5f);
-        rect.sizeDelta = new Vector2(320f, 120f);
-        rect.anchoredPosition = Vector2.zero;
+        var panel = new GameObject("QTE_Panel");
+        panel.transform.SetParent(qteCanvas.transform, false);
+        var panelRect = panel.AddComponent<RectTransform>();
+        panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+        panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+        panelRect.sizeDelta = new Vector2(400f, 400f);
+        panelRect.anchoredPosition = Vector2.zero;
 
-        qtePromptText = go.AddComponent<Text>();
+        var ringGo = new GameObject("QTE_CountdownRing");
+        ringGo.transform.SetParent(panel.transform, false);
+        var ringRect = ringGo.AddComponent<RectTransform>();
+        ringRect.anchorMin = Vector2.zero;
+        ringRect.anchorMax = Vector2.one;
+        ringRect.offsetMin = Vector2.zero;
+        ringRect.offsetMax = Vector2.zero;
+        qteCountdownRect = ringRect;
+
+        qteCountdownRing = ringGo.AddComponent<Image>();
+        qteCountdownRing.sprite = CreateCircleSprite();
+        qteCountdownRing.color = new Color(1f, 0.3f, 0.2f, 0.9f);
+
+        var textGo = new GameObject("QTE_Prompt");
+        textGo.transform.SetParent(panel.transform, false);
+        var textRect = textGo.AddComponent<RectTransform>();
+        textRect.anchorMin = new Vector2(0.5f, 0.5f);
+        textRect.anchorMax = new Vector2(0.5f, 0.5f);
+        textRect.sizeDelta = new Vector2(320f, 120f);
+        textRect.anchoredPosition = Vector2.zero;
+
+        qtePromptText = textGo.AddComponent<Text>();
         qtePromptText.font = Font.CreateDynamicFontFromOSFont("Arial", 72);
         qtePromptText.fontSize = 72;
         qtePromptText.alignment = TextAnchor.MiddleCenter;
@@ -73,15 +96,42 @@ public class LiftControl : MonoBehaviour
         qteCanvas.SetActive(false);
     }
 
+    private Sprite CreateCircleSprite()
+    {
+        int size = 128;
+        var tex = new Texture2D(size, size);
+        var fill = Color.white;
+        float r = (size - 2) * 0.5f;
+        float cx = r + 1;
+        float cy = r + 1;
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float d = Mathf.Sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
+                tex.SetPixel(x, y, d <= r ? fill : Color.clear);
+            }
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
+    }
+
     private void ShowQte(KeyCode key)
     {
         activeQteKey = key;
         qteStartTime = Time.time;
         if (qtePromptText != null)
-        {
-            qtePromptText.text = "Press " + key.ToString();
-            if (qteCanvas != null) qteCanvas.SetActive(true);
-        }
+            qtePromptText.text = key.ToString();
+        if (qteCountdownRect != null)
+            qteCountdownRect.localScale = Vector3.one;
+        if (qteCanvas != null)
+            qteCanvas.SetActive(true);
+    }
+
+    private void UpdateQteCountdownVisual()
+    {
+        if (qteCountdownRect == null) return;
+        float elapsed = Time.time - qteStartTime;
+        float remaining = 1f - Mathf.Clamp01(elapsed / qteTimeLimit);
+        qteCountdownRect.localScale = Vector3.one * remaining;
     }
 
     private void HideQte()
@@ -139,6 +189,7 @@ public class LiftControl : MonoBehaviour
         {
             if (startAtBottom && activeQteKey.HasValue)
             {
+                UpdateQteCountdownVisual();
                 KeyCode expected = activeQteKey.Value;
                 bool hit = (expected == KeyCode.J && Keyboard.current != null && Keyboard.current.jKey.wasPressedThisFrame) ||
                            (expected == KeyCode.K && Keyboard.current != null && Keyboard.current.kKey.wasPressedThisFrame) ||
