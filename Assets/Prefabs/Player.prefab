@@ -322,7 +322,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 6022567831833219258}
-  speed: 12
+  crouchSpeed: 3
+  walkSpeed: 6
+  sprintSpeed: 12
   gravity: -19.62
   jumpHeight: 3
   jumpEnabled: 0
@@ -331,6 +333,10 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
+  cameraTransform: {fileID: 2099696623943395477}
+  standingCamY: 1.6
+  crouchingCamY: 1
+  camSmooth: 10
 --- !u!114 &3275837314705130536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -687,7 +693,11 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
     m_ActionName: UI/TrackedDeviceOrientation
-  m_NeverAutoSwitchControlSchemes: 0
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 2383c4ce-20e7-4e0c-b631-77d362856de0
+    m_ActionName: 'Player/Crouch[/Keyboard/leftShift]'
+  m_NeverAutoSwitchControlSchemes: 1
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
