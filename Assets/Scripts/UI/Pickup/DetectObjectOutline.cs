@@ -13,6 +13,8 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private LayerMask interactMask = ~0; 
     [SerializeField] private GameObject pickupPanel; 
     [SerializeField] private GameObject pullPanel; 
+    [SerializeField] private GameObject gateHintPanel;   
+    [SerializeField] private GameObject gateUnlockPanel;
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
@@ -23,7 +25,20 @@ public class DetectObjectOutline : MonoBehaviour
     {
         if (pickupPanel) pickupPanel.SetActive(false);
         if (pullPanel) pullPanel.SetActive(false);
-        currentPanel = pickupPanel;
+        if (gateHintPanel) gateHintPanel.SetActive(false);
+        if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+
+    currentPanel = pickupPanel;
+    }
+    private void ShowOnly(GameObject panel)
+    {
+    if (pickupPanel) pickupPanel.SetActive(false);
+    if (pullPanel) pullPanel.SetActive(false);
+    if (gateHintPanel) gateHintPanel.SetActive(false);
+    if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+
+    currentPanel = panel;
+    if (currentPanel) currentPanel.SetActive(true);
     }
 
     public void OnInteract(InputAction.CallbackContext context)
@@ -32,6 +47,19 @@ public class DetectObjectOutline : MonoBehaviour
         {
             PerformInteract();
         }
+    }
+    public void OnUnlock(InputAction.CallbackContext context)
+    {
+    if (!context.performed || current == null) return;
+
+    if (currentPanel) currentPanel.SetActive(false);
+    current.SetOutlined(false);
+
+    var gate = current.GetComponentInParent<Gate>();
+    if (gate != null)
+        gate.TryUnlock();
+
+    current = null;
     }
 
     private void PerformInteract()
@@ -53,7 +81,7 @@ public class DetectObjectOutline : MonoBehaviour
 
     private void Update()
     {
-        
+
         // create a ray from the center of the screen
         var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
@@ -62,8 +90,21 @@ public class DetectObjectOutline : MonoBehaviour
         if (best != null)
         {
             if (best.gameObject.name == "Lift chain")
-                currentPanel = pullPanel;
-            else currentPanel = pickupPanel;
+            {
+                ShowOnly(pullPanel);
+            }
+            else
+            {
+                var gate = best.GetComponentInParent<Gate>();
+                if (gate != null)
+                {
+                    ShowOnly(gate.HasKey() ? gateUnlockPanel : gateHintPanel);
+                }
+                else
+                {
+                    ShowOnly(pickupPanel);
+                }
+            }
         }
 
         if (best != null)
@@ -74,14 +115,18 @@ public class DetectObjectOutline : MonoBehaviour
 
         if (best == current)
         {
-            currentPanel.SetActive(current != null);
             return;
         }
         if (current) current.SetOutlined(false);
         current = best;
-        if (current) current.SetOutlined(true);
-
-        currentPanel.SetActive(current != null);
+        if (current)
+        {
+            current.SetOutlined(true);
+        }
+        else
+        {
+            ShowOnly(null);
+        }
     }
 
         
@@ -141,6 +186,8 @@ public class DetectObjectOutline : MonoBehaviour
         if (current) current.SetOutlined(false);
         current = null;
 
-        if (pickupPanel) pickupPanel.SetActive(false);
+        ShowOnly(null);
+
+        lastValidHitTime = 0f;
     }
 }
