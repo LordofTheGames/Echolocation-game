@@ -257,6 +257,7 @@ GameObject:
   - component: {fileID: 3073600552268709393}
   - component: {fileID: 896755040844005566}
   - component: {fileID: 2101662428858691233}
+  - component: {fileID: 1318630112358169782}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -709,6 +710,39 @@ MonoBehaviour:
   interval: 0.2
   angle: 200
   uniformity: 0.3
+--- !u!114 &1318630112358169782
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 933aeb9c695107b4d923399996bbec46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  footstepSound: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
+  audioSource: {fileID: 0}
+  footSeparation: 1
+  echoRays: 5000
+  echoAngle: 360
+  volForMonster: 50
+  crouch:
+    name: Crouch
+    maxSpeed: 3
+    stepDistance: 1.2
+    volume: 0.3
+  walk:
+    name: Walk
+    maxSpeed: 6
+    stepDistance: 2
+    volume: 0.6
+  sprint:
+    name: Sprint
+    maxSpeed: 12
+    stepDistance: 3.5
+    volume: 1
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0
