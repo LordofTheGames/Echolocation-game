@@ -2,6 +2,13 @@ using UnityEngine;
 
 public class CollisionEcho : MonoBehaviour
 {
+
+    [Header("Audion Settings")]
+    [Tooltip("Drag impact sound here")]
+    public AudioClip collisionSound;
+    [Range(0f,1f)]
+    public float soundVolume = 1.0f;
+
     [Tooltip("How far to pull back the hit point from the surface it hits so rays don't go on the wrong side - hit point is in/part of the surface")]
     public float pingOffset = 0.3f;
     public float minDelayAfterArm = 0.05f; // Prevents immediate collision detection
@@ -31,6 +38,15 @@ public class CollisionEcho : MonoBehaviour
 
         ContactPoint contact = collision.contacts[0]; // Get contact point
         Vector3 spawnPoint = contact.point + (contact.normal * pingOffset); // Offset along normal to the surface
+
+        if (collisionSound != null)
+        {
+            AudioSource.PlayClipAtPoint(collisionSound, contact.point, soundVolume);    // Plays audio at exact point of impact
+        }
+        else
+        {
+            Debug.Log("No sound attached for this type of collision");  // Warning in case a sound is meant to be attached
+        }
 
         GlobalEchoSystem.Ping(gameObject, spawnPoint); // Ping the echolocation system with the point of contact and object that spawned it
         currentPings++;
