@@ -727,24 +727,28 @@ MonoBehaviour:
   footstepSound: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
   audioSource: {fileID: 0}
   footSeparation: 1
-  echoRays: 5000
   echoAngle: 360
-  volForMonster: 50
   crouch:
     name: Crouch
     maxSpeed: 3
-    stepDistance: 1.2
-    volume: 0.3
+    stepDistance: 2
+    volume: 10
+    echoRays: 1000
+    volForMonster: 0
   walk:
     name: Walk
     maxSpeed: 6
-    stepDistance: 2
-    volume: 0.6
+    stepDistance: 4
+    volume: 20
+    echoRays: 3000
+    volForMonster: 25
   sprint:
     name: Sprint
     maxSpeed: 12
-    stepDistance: 3.5
-    volume: 1
+    stepDistance: 5
+    volume: 30
+    echoRays: 5000
+    volForMonster: 50
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0

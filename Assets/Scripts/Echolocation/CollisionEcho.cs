@@ -6,7 +6,7 @@ public class CollisionEcho : MonoBehaviour
     [Header("Audion Settings")]
     [Tooltip("Drag impact sound here")]
     public AudioClip collisionSound;
-    [Range(0f,1f)]
+    [Range(0f,30f)]
     public float soundVolume = 1.0f;
 
     [Tooltip("How far to pull back the hit point from the surface it hits so rays don't go on the wrong side - hit point is in/part of the surface")]

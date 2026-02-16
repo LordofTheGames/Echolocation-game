@@ -1,10 +1,12 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class TempEcholocationTrigger : MonoBehaviour
+public class ClickerTrigger : MonoBehaviour
 {
     [Header("Audio Settings")]
     public AudioClip clickerSound;
+    [Range(0f,10f)]
+    public float soundEffectVolume = 5f;
     public AudioSource audioSource; // If not assigned on is auto created
 
     [Header("Pulse Origins")]
@@ -38,7 +40,7 @@ public class TempEcholocationTrigger : MonoBehaviour
             if (clickerSound != null)
             {
                 audioSource.pitch = Random.Range(0.98f, 1.02f); // Vary pitch very slightly each time
-                audioSource.PlayOneShot(clickerSound);
+                audioSource.PlayOneShot(clickerSound, soundEffectVolume);
             }
             GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, volume);
         }
