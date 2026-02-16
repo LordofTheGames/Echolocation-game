@@ -10,7 +10,9 @@ public class PlayerFootsteps : MonoBehaviour
         public float stepDistance;   
         [Range(0f, 30f)] public float volume; 
         public int echoRays;            // Number of rays for the effect
-        public float volForMonster;   // The "volume" the monster hears
+        [Range(0f, 50f)]
+        public float maxDistance;       // Max Distance rays travel
+        public float volForMonster;     // The "volume" the monster hears
 
     }
 
@@ -23,9 +25,9 @@ public class PlayerFootsteps : MonoBehaviour
     public float echoAngle = 360f;      // 360 for a full ripple around the foot
 
     [Header("Movement Profiles")]
-    public MoveSettings crouch = new MoveSettings { name = "Crouch", maxSpeed = 3f, stepDistance = 1.2f, volume = 2f, echoRays = 1000, volForMonster = 0f };
-    public MoveSettings walk = new MoveSettings { name = "Walk", maxSpeed = 6f, stepDistance = 2.0f, volume = 5f, echoRays = 3000, volForMonster = 25f };
-    public MoveSettings sprint = new MoveSettings { name = "Sprint", maxSpeed = 12f, stepDistance = 3.5f, volume = 10f, echoRays = 5000, volForMonster = 50f };
+    public MoveSettings crouch = new MoveSettings { name = "Crouch", maxSpeed = 3f, stepDistance = 1.2f, volume = 2f, echoRays = 1000, maxDistance = 5f, volForMonster = 0f };
+    public MoveSettings walk = new MoveSettings { name = "Walk", maxSpeed = 6f, stepDistance = 2.0f, volume = 5f, echoRays = 3000, maxDistance = 10f, volForMonster = 25f };
+    public MoveSettings sprint = new MoveSettings { name = "Sprint", maxSpeed = 12f, stepDistance = 3.5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 50f };
 
 
     private Vector3 lastPos;
@@ -92,6 +94,6 @@ public class PlayerFootsteps : MonoBehaviour
 
         // 3. Trigger Echo
         // We use footPos as origin, and transform.forward for direction (though if angle is 360, direction doesn't matter)
-        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.volForMonster);
+        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.maxDistance, currentSettings.volForMonster);
     }
 }

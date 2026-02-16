@@ -159,7 +159,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float volume = 10f)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float maxDist = 50f, float volume = 10f)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -168,6 +168,7 @@ public class EcholocationManager : MonoBehaviour
         scanAngle = angle;
         scanUniformity = Mathf.Clamp01(uniformity);     // Make sure is in valid range
         raysPerScan = Mathf.Clamp(numRays, 0, 100000);   // Make sure is in (currently chosen) valid range
+        maxDistance = maxDist;
         objectToIgnore = ignoreMe;
         // TODO: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
@@ -434,7 +435,7 @@ public class EcholocationManager : MonoBehaviour
             matrixBuffer.SetData(instanceMatrices, 0, 0, activeHitCount); // Send the matrices to the GPU buffer
         }
 
-        Debug.Log("Scan fired! Hits: " + activeHitCount);
+        //Debug.Log("Scan fired! Hits: " + activeHitCount);
     }
 
     // Function that actually draws the graphics

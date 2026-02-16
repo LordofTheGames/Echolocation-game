@@ -48,7 +48,7 @@ public class CollisionEcho : MonoBehaviour
             Debug.Log("No sound attached for this type of collision");  // Warning in case a sound is meant to be attached
         }
 
-        GlobalEchoSystem.Ping(gameObject, spawnPoint); // Ping the echolocation system with the point of contact and object that spawned it
+        GlobalEchoSystem.Ping(gameObject, spawnPoint, Vector3.forward, 360f, 1.0f, 10000, 25f, 100f);
         currentPings++;
 
         if (currentPings >= maxPings)
