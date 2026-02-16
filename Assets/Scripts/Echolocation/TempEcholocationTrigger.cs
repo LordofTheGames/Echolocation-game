@@ -3,6 +3,10 @@ using UnityEngine.InputSystem;
 
 public class TempEcholocationTrigger : MonoBehaviour
 {
+    [Header("Audio Settings")]
+    public AudioClip clickerSound;
+    public AudioSource audioSource; // If not assigned on is auto created
+
     [Header("Pulse Origins")]
     public Transform cameraTransform; // Assign main camera here
 
@@ -18,10 +22,24 @@ public class TempEcholocationTrigger : MonoBehaviour
     [Header("Volume of sound (used for AI reactions)")]
     public float volume = 100f;
     
+    void Start()
+    {
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.spatialBlend = 0f; // Heard equally in both ears since it's coming from the player
+        }
+    }
+
     public void OnEcholocate(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
+            if (clickerSound != null)
+            {
+                audioSource.pitch = Random.Range(0.98f, 1.02f); // Vary pitch very slightly each time
+                audioSource.PlayOneShot(clickerSound);
+            }
             GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, volume);
         }
     }
