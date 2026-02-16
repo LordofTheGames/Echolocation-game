@@ -5,7 +5,8 @@ public class MicToEcholocation : MonoBehaviour
     public MicInput mic;
     public Transform cameraTransform;
 
-    private int maxRays = 20000;
+    private float numRaysScale = 0.5f;
+    private int maxRays = 10000;
     private int minRays = 100;
     private float maxDistance = 50f;
     private float maxVolForMonster = 300f;
@@ -32,7 +33,7 @@ public class MicToEcholocation : MonoBehaviour
         timer = 0f;
         if (mic.loudness < 0.05f) return;
 
-        int rays = Mathf.RoundToInt(mic.loudness * maxRays);
+        int rays = Mathf.RoundToInt(mic.loudness * maxRays * numRaysScale);
         rays = Mathf.Clamp(rays, minRays, maxRays);
 
         proportion = ((float) rays / maxRays);
