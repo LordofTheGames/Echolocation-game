@@ -372,6 +372,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clickerSound: {fileID: 8300000, guid: 03f111c93295398499034ddfe43c1e3d, type: 3}
+  soundEffectVolume: 2
   audioSource: {fileID: 0}
   cameraTransform: {fileID: 2099696623943395477}
   uniformity: 1
@@ -732,21 +733,21 @@ MonoBehaviour:
     name: Crouch
     maxSpeed: 3
     stepDistance: 2
-    volume: 10
+    volume: 0.5
     echoRays: 1000
     volForMonster: 0
   walk:
     name: Walk
     maxSpeed: 6
     stepDistance: 4
-    volume: 20
+    volume: 0.7
     echoRays: 3000
     volForMonster: 25
   sprint:
     name: Sprint
     maxSpeed: 12
     stepDistance: 5
-    volume: 30
+    volume: 1
     echoRays: 5000
     volForMonster: 50
 --- !u!1 &5489064552480596990
