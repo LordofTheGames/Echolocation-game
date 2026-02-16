@@ -377,6 +377,7 @@ MonoBehaviour:
   cameraTransform: {fileID: 2099696623943395477}
   uniformity: 1
   numRays: 20000
+  maxDistance: 50
   angle: 360
   volume: 200
 --- !u!114 &7900835251262604122
@@ -735,6 +736,7 @@ MonoBehaviour:
     stepDistance: 2
     volume: 0.2
     echoRays: 1000
+    maxDistance: 7.5
     volForMonster: 0
   walk:
     name: Walk
@@ -742,6 +744,7 @@ MonoBehaviour:
     stepDistance: 4
     volume: 0.5
     echoRays: 3000
+    maxDistance: 15
     volForMonster: 25
   sprint:
     name: Sprint
@@ -749,6 +752,7 @@ MonoBehaviour:
     stepDistance: 5
     volume: 1
     echoRays: 5000
+    maxDistance: 30
     volForMonster: 50
 --- !u!1 &5489064552480596990
 GameObject:
