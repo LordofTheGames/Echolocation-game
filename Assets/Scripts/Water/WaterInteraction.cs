@@ -23,7 +23,7 @@ public class WaterInteraction : MonoBehaviour
     private CharacterController cc;
     private Vector3 lastPos;
     private float distanceTraveled;
-    private bool inWater;
+    public bool inWater;
     private bool isRightFoot;
     private RaycastHit waterHit;
     private LayerMask waterLayer;

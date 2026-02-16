@@ -36,30 +36,39 @@ public class PlayerFootsteps : MonoBehaviour
     private float smoothedSpeed; 
     private bool isRightFoot = false; // Toggle for left/right steps
 
+    private WaterInteraction waterInteraction; // Private water interaction for detecting if in water
+
+
     void Start()
     {
         lastPos = transform.position;
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         currentSettings = walk;
+
+        waterInteraction = GetComponent<WaterInteraction>(); // Get the reference
     }
 
     void Update()
     {
-        // 1. Calculate REAL distance moved this frame
+        // Calculate REAL distance moved this frame
         Vector3 currentPos = transform.position;
         float moveDistance = Vector3.Distance(new Vector3(currentPos.x, 0, currentPos.z), new Vector3(lastPos.x, 0, lastPos.z));
         float rawSpeed = moveDistance / Time.deltaTime;
 
-        // 2. Smooth speed for profile selection only
+        // Smooth speed for profile selection
         smoothedSpeed = Mathf.Lerp(smoothedSpeed, rawSpeed, Time.deltaTime * 8f);
 
-        // 3. Select Profile
+        // Select Profile
         if (smoothedSpeed <= crouch.maxSpeed) currentSettings = crouch;
         else if (smoothedSpeed <= walk.maxSpeed + 0.5f) currentSettings = walk;
         else currentSettings = sprint;
 
-        // 4. Accumulate Distance
-        if (moveDistance > 0.001f)
+        // Check for water
+        if (waterInteraction != null && waterInteraction.inWater)
+        {
+            distanceTraveled = 0f; // Reset distance so it doesn't build up while in water (stops this player footstep effect from happening in water)
+        }
+        else if (moveDistance > 0.001f) // Accumulate Distance/normal behaviour
         {
             distanceTraveled += moveDistance;
 
@@ -75,24 +84,22 @@ public class PlayerFootsteps : MonoBehaviour
 
     void PlayStep()
     {
-        // 1. Audio
+        // Audio
         if (footstepSound != null)
         {
             audioSource.pitch = Random.Range(0.92f, 1.08f);
             audioSource.PlayOneShot(footstepSound, currentSettings.volume);
         }
 
-        // 2. Calculate Foot Position
+        // Calculate Foot Position
         isRightFoot = !isRightFoot; // Toggle foot
         float dirMultiplier = isRightFoot ? 1f : -1f;
-        
-        // Calculate the specific foot position relative to the player
         Vector3 footPos = transform.position + (transform.right * footSeparation * dirMultiplier);
         
         // Ensure the echo spawns at ground level (optional, assumes pivot is at feet)
         footPos.y = transform.position.y; 
 
-        // 3. Trigger Echo
+        // Trigger Echo
         // We use footPos as origin, and transform.forward for direction (though if angle is 360, direction doesn't matter)
         GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.maxDistance, currentSettings.volForMonster);
     }
