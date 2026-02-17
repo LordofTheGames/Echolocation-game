@@ -26,8 +26,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -38.856827, y: 0.49481022, z: 61.569824}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.7054, y: 1.7054, z: 1.7054}
+  m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 886258977231943099}
   - {fileID: 628074932064048790}
@@ -63,8 +63,8 @@ Transform:
   m_GameObject: {fileID: 1606357371228257668}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.8190727, y: 4.3711896, z: 1.4538345}
-  m_LocalScale: {x: 0.25, y: 5, z: 0.37}
+  m_LocalPosition: {x: -2.8190727, y: 23.6, z: 1.4538345}
+  m_LocalScale: {x: 0.25, y: 24.4, z: 0.37}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 8788316896497151588}
@@ -475,10 +475,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: efe8cff2db73a7a43be0dc063586a67a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxHeight: 9
+  maxHeight: 76
   minHeight: 0
   startAtBottom: 1
-  duration: 3
+  speed: 5
+  qteInterval: 3
+  qteTimeLimit: 1
+  maxConsecutiveFails: 5
+  qteFont: {fileID: 11400000, guid: a08d3d9a9af3f4b3682df6970d037c19, type: 2}
+  circleSprite: {fileID: -2413806693520163455, guid: 921c776681fecc245bd7b2de2686fd73, type: 3}
+  circleColor: {r: 1, g: 0.3, b: 0.2, a: 0.9019608}
 --- !u!1 &6959031063494364712
 GameObject:
   m_ObjectHideFlags: 0
