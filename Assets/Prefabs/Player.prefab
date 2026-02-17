@@ -395,6 +395,8 @@ MonoBehaviour:
     m_Bits: 265
   pickupPanel: {fileID: 0}
   pullPanel: {fileID: 0}
+  gateHintPanel: {fileID: 0}
+  gateUnlockPanel: {fileID: 0}
   ignoreLiftChain: 0
 --- !u!114 &6448768869653819886
 MonoBehaviour:
@@ -416,6 +418,8 @@ MonoBehaviour:
   forwardOffset: 2.3
   rippleSize: 1.5
   rippleLifetime: 0.5
+  footstepWaterSound: {fileID: 0}
+  volume: 0.8
 --- !u!114 &3073600552268709393
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -430,6 +434,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mic: {fileID: 0}
   cameraTransform: {fileID: 2099696623943395477}
+  micToEchoEnabled: 1
   interval: 0.2
   angle: 200
   uniformity: 0.3
@@ -686,6 +691,10 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b3f03cb7-db1f-4a80-ab11-9f623845078e
+    m_ActionName: 'UI/Unlock[/Keyboard/c]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
