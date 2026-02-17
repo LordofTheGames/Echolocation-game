@@ -1,26 +1,59 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public class OutlineTarget : MonoBehaviour
 {
     [SerializeField] private string outlinedLayerName = "Outlined Object";
+    [SerializeField] private bool affectChildren = true;
 
-    private int outlinedLayer;
-    private int originalLayer;
+    private int outlinedLayer = -1;
 
-    private void Awake()
+    private struct Entry
     {
-        outlinedLayer = LayerMask.NameToLayer(outlinedLayerName);
-        if (outlinedLayer == -1)
-        originalLayer = gameObject.layer;
-
-        if (outlinedLayer != -1 && gameObject.layer == outlinedLayer)
-            gameObject.layer = originalLayer;
+        public Transform t;
+        public int originalLayer;
     }
 
-    // called every frame that player is looking at target
+    private readonly List<Entry> cache = new();
+
+    private void OnEnable()
+    {
+        outlinedLayer = LayerMask.NameToLayer(outlinedLayerName);
+        if (outlinedLayer == -1) return;
+
+        RebuildCache();
+    }
+
+    private void RebuildCache()
+    {
+        cache.Clear();
+
+        if (!affectChildren)
+        {
+            cache.Add(new Entry { t = transform, originalLayer = gameObject.layer });
+            return;
+        }
+
+        var all = GetComponentsInChildren<Transform>(true);
+        for (int i = 0; i < all.Length; i++)
+        {
+            cache.Add(new Entry { t = all[i], originalLayer = all[i].gameObject.layer });
+        }
+    }
+
     public void SetOutlined(bool on)
     {
         if (outlinedLayer == -1) return;
-        gameObject.layer = on ? outlinedLayer : originalLayer;
+
+        if (cache.Count == 0) RebuildCache();
+
+        for (int i = 0; i < cache.Count; i++)
+        {
+            var t = cache[i].t;
+            if (!t) continue;
+
+            t.gameObject.layer = on ? outlinedLayer : cache[i].originalLayer;
+        }
     }
 }
+
