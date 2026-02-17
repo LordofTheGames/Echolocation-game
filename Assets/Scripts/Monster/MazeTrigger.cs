@@ -19,8 +19,11 @@ public class MazeTrigger : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        bool playerInMaze;
-        agent.BlackboardReference.GetVariableValue("playerInMaze", out playerInMaze);
-        agent.BlackboardReference.SetVariableValue("playerInMaze", !playerInMaze);
+        if (other.CompareTag("Player"))
+        {
+            bool playerInMaze;
+            agent.BlackboardReference.GetVariableValue("playerInMaze", out playerInMaze);
+            agent.BlackboardReference.SetVariableValue("playerInMaze", !playerInMaze);
+        }
     }
 }
