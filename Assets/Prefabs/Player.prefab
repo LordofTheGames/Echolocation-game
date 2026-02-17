@@ -256,7 +256,6 @@ GameObject:
   - component: {fileID: 6448768869653819886}
   - component: {fileID: 3073600552268709393}
   - component: {fileID: 896755040844005566}
-  - component: {fileID: 2101662428858691233}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -357,7 +356,7 @@ MonoBehaviour:
   trajectoryWidth: 0.05
   trajectoryTimeStep: 0.02
   maxTrajectorySteps: 500
-  landingIndicatorPrefab: {fileID: 0}
+  landingIndicatorPrefab: {fileID: 2435089806916180378, guid: cdaff24b6b4b98b459ef9c02909fe49d, type: 3}
 --- !u!114 &2083444333531579490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -692,23 +691,6 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &2101662428858691233
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5235627052445221193}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6cb3637d5fa7a48d89d461f39dcfcff8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  mic: {fileID: 0}
-  cameraTransform: {fileID: 2099696623943395477}
-  interval: 0.2
-  angle: 200
-  uniformity: 0.3
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0
@@ -784,7 +766,7 @@ Light:
   serializedVersion: 11
   m_Type: 0
   m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_Intensity: 5
+  m_Intensity: 2
   m_Range: 15
   m_SpotAngle: 179
   m_InnerSpotAngle: 0
