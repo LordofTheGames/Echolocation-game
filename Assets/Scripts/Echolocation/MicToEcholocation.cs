@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class MicToEcholocation : MonoBehaviour
 {
@@ -15,6 +16,9 @@ public class MicToEcholocation : MonoBehaviour
     private float distance;
     private float volForMonster;
 
+    [Header("Settings")]
+    public bool micToEchoEnabled = true;
+
     [Header("Detection Interval")]
     public float interval = 0.2f;
 
@@ -29,6 +33,7 @@ public class MicToEcholocation : MonoBehaviour
     {
         if (!mic) return;
         timer += Time.deltaTime;
+        if(!micToEchoEnabled) return;
         if (timer < interval) return;
         timer = 0f;
         if (mic.loudness < 0.05f) return;
@@ -40,6 +45,7 @@ public class MicToEcholocation : MonoBehaviour
         distance = proportion * maxDistance;            // Calculate max distance of rays to travel based on proportion of rays of max rays
         volForMonster = proportion * maxVolForMonster;  // Calculate max volume for monster based on proportion of rays of max rays
 
-        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, 200f, 0.3f, rays, distance, volForMonster);
+        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, rays, distance, volForMonster);
+
     }
 }

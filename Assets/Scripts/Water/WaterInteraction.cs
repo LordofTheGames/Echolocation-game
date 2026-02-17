@@ -18,6 +18,10 @@ public class WaterInteraction : MonoBehaviour
     public float rippleSize = 1.5f;
     public float rippleLifetime = 0.5f;
 
+    [Header("Audio Settings")]
+    public AudioClip footstepWaterSound; 
+    public float volume = 0.8f;
+
     private ParticleSystem StepsRipple;
     private ParticleSystem WadeRipple;
     private CharacterController cc;
@@ -142,6 +146,12 @@ public class WaterInteraction : MonoBehaviour
         };
 
         StepsRipple.Emit(emitParams, 1);
+
+        if (footstepWaterSound != null)
+        {
+            AudioSource.PlayClipAtPoint(footstepWaterSound, spawnPos, volume);
+        }
+
         isRightFoot = !isRightFoot;
     }
     

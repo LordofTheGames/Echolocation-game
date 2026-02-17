@@ -3,12 +3,10 @@ using UnityEngine.InputSystem;
 
 public class InventoryToggleCursor : MonoBehaviour
 {
-    [Header("Input Setup")]
-    [SerializeField] private PlayerInput playerInput;   // Drag player object here
+    [SerializeField] private PlayerInput playerInput;  
     [SerializeField] private string gameplayMap = "Player";
     [SerializeField] private string inventoryMap = "Inventory";
 
-    [Header("References")]
     [SerializeField] private GameObject inventoryUI;
     [SerializeField] private MouseLook playerLook;
     [SerializeField] private DetectObjectOutline outlineDetector;

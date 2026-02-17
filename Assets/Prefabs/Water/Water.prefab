@@ -140,6 +140,7 @@ GameObject:
   - component: {fileID: 3494386770120961908}
   - component: {fileID: 7648984447475494282}
   - component: {fileID: 8073592716352385398}
+  - component: {fileID: 7578355644345854013}
   - component: {fileID: 6922719065200180794}
   m_Layer: 4
   m_Name: Water
@@ -233,6 +234,22 @@ MonoBehaviour:
   ObjectsRT: {fileID: 8400000, guid: 75f6c3c5611d11e4d828d5b7f66fe4e8, type: 2}
   RippleShader: {fileID: 4800000, guid: 7f0c838b2a36b5447bf17cdb064fc1dc, type: 3}
   AddShader: {fileID: 4800000, guid: 32c6a055fc4b1ff42b22032673149a70, type: 3}
+--- !u!114 &7578355644345854013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7157249110289540924}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8888f691531fcd34987f93c7d2a3adfd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ripplePrefab: {fileID: 8389308920234909956, guid: 283f519f9280de64f9bfb9b4ac2ae3cb, type: 3}
+  splashSound: {fileID: 8300000, guid: e5fc18917017ecb4a98acb65407541cf, type: 3}
+  volume: 0.8
+  playerTag: Player
 --- !u!65 &6922719065200180794
 BoxCollider:
   m_ObjectHideFlags: 0
