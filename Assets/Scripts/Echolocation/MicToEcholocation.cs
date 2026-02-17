@@ -6,9 +6,15 @@ public class MicToEcholocation : MonoBehaviour
     public MicInput mic;
     public Transform cameraTransform;
 
-    private int maxRays = 20000;
+    private float numRaysScale = 0.5f;
+    private int maxRays = 10000;
     private int minRays = 100;
+    private float maxDistance = 50f;
+    private float maxVolForMonster = 300f;
     private float timer;
+    private float proportion;
+    private float distance;
+    private float volForMonster;
 
     [Header("Settings")]
     public bool micToEchoEnabled = true;
@@ -21,9 +27,6 @@ public class MicToEcholocation : MonoBehaviour
 
     [Header("Uniformity (0-1)")]
     public float uniformity = 0.3f;
-    public float volumeScale = 350f;
-     public float maxVolume = 300f;
-
 
     // Update is called once per frame
     void Update()
@@ -35,11 +38,14 @@ public class MicToEcholocation : MonoBehaviour
         timer = 0f;
         if (mic.loudness < 0.05f) return;
 
-        int rays = Mathf.RoundToInt(mic.loudness * maxRays);
+        int rays = Mathf.RoundToInt(mic.loudness * maxRays * numRaysScale);
         rays = Mathf.Clamp(rays, minRays, maxRays);
 
-        float volume = mic.loudness * volumeScale;
-        volume = Mathf.Clamp(volume, 0f, maxVolume);
-        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, rays, volume);
+        proportion = ((float) rays / maxRays);
+        distance = proportion * maxDistance;            // Calculate max distance of rays to travel based on proportion of rays of max rays
+        volForMonster = proportion * maxVolForMonster;  // Calculate max volume for monster based on proportion of rays of max rays
+
+        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, rays, distance, volForMonster);
+
     }
 }

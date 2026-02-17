@@ -173,12 +173,6 @@ public class ThrowItem : MonoBehaviour
         {
             currentObj = Instantiate(prefab, cubeSpawnPoint.position, Quaternion.identity);
             currentObj.transform.SetParent(cubeSpawnPoint);
-
-            
-
-            Rigidbody rb = currentObj.GetComponent<Rigidbody>();
-            if (rb != null)
-                rb.isKinematic = true;
         }
 
         trajectoryLine.enabled = true;
