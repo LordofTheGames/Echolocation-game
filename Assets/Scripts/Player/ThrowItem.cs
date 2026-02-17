@@ -204,21 +204,6 @@ public class ThrowItem : MonoBehaviour
         {
             currentObj = Instantiate(prefab, cubeSpawnPoint.position, Quaternion.identity);
             currentObj.transform.SetParent(cubeSpawnPoint);
-
-            
-
-            Rigidbody rb = currentObj.GetComponent<Rigidbody>();
-            if (rb != null)
-                rb.isKinematic = true;
-
-            MeshRenderer cubeRenderer = currentObj.GetComponent<MeshRenderer>();
-            if (cubeRenderer != null)
-            {
-                Material cubeMat = cubeRenderer.material;
-                Color cubeColor = cubeMat.color;
-                cubeColor.a = 0.8f;
-                cubeMat.color = cubeColor;
-            }
         }
 
         trajectoryLine.enabled = true;
