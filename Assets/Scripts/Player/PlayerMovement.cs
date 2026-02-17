@@ -40,7 +40,11 @@ public class PlayerMovement : MonoBehaviour
     public void OnCrouch(InputAction.CallbackContext context)
     {
         if (context.performed)
+        {
+            Debug.Log("AHAHA");
             isCrouching = !isCrouching; 
+        }
+             
     }
 
     public void OnMove(InputAction.CallbackContext context)
