@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using TMPro;
 
 public class LiftControl : MonoBehaviour
 {
@@ -15,6 +16,7 @@ public class LiftControl : MonoBehaviour
     [SerializeField] private float qteInterval = 3f;
     [SerializeField] private float qteTimeLimit = 1f;
     [SerializeField] private int maxConsecutiveFails = 3;
+    public TMP_FontAsset qteFont;
 
     private static readonly KeyCode[] QteKeys = { KeyCode.J, KeyCode.K, KeyCode.L };
 
@@ -32,7 +34,7 @@ public class LiftControl : MonoBehaviour
     private float qteStartTime;
     private int consecutiveFails;
     private GameObject qteCanvas;
-    private Text qtePromptText;
+    private TextMeshProUGUI qtePromptText;
     private Image qteCountdownRing;
     private RectTransform qteCountdownRect;
 
@@ -87,10 +89,10 @@ public class LiftControl : MonoBehaviour
         textRect.sizeDelta = new Vector2(320f, 120f);
         textRect.anchoredPosition = Vector2.zero;
 
-        qtePromptText = textGo.AddComponent<Text>();
-        qtePromptText.font = Font.CreateDynamicFontFromOSFont("Arial", 72);
+        qtePromptText = textGo.AddComponent<TextMeshProUGUI>();
+        qtePromptText.font = qteFont;
+        qtePromptText.alignment = TextAlignmentOptions.Center;
         qtePromptText.fontSize = 72;
-        qtePromptText.alignment = TextAnchor.MiddleCenter;
         qtePromptText.color = Color.white;
 
         qteCanvas.SetActive(false);
@@ -225,7 +227,7 @@ public class LiftControl : MonoBehaviour
                     LiftBody.position = newPos;
                     this.transform.position = newPos;
                     HideQte();
-                    SceneManager.LoadScene("GameVictory");
+                    Invoke("loadVictoryScreen", 1f); // wait 1 second before loading victory screen
                     return;
                 }
             }
@@ -249,6 +251,11 @@ public class LiftControl : MonoBehaviour
             this.transform.position = newPos;
             if (playerController != null) playerController.Move(platformMovement);
         }
+    }
+
+    private void loadVictoryScreen()
+    {
+        SceneManager.LoadScene("GameVictory");
     }
 
     private void OnDrawGizmos()
