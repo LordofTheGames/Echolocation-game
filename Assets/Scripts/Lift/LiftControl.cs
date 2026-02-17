@@ -16,7 +16,9 @@ public class LiftControl : MonoBehaviour
     [SerializeField] private float qteInterval = 3f;
     [SerializeField] private float qteTimeLimit = 1f;
     [SerializeField] private int maxConsecutiveFails = 3;
-    public TMP_FontAsset qteFont;
+    [SerializeField] private TMP_FontAsset qteFont;
+    [SerializeField] private Sprite circleSprite;
+    [SerializeField] private Color circleColor = new(1f, 0.3f, 0.2f, 0.9f);
 
     private static readonly KeyCode[] QteKeys = { KeyCode.J, KeyCode.K, KeyCode.L };
 
@@ -78,8 +80,8 @@ public class LiftControl : MonoBehaviour
         qteCountdownRect = ringRect;
 
         qteCountdownRing = ringGo.AddComponent<Image>();
-        qteCountdownRing.sprite = CreateCircleSprite();
-        qteCountdownRing.color = new Color(1f, 0.3f, 0.2f, 0.9f);
+        qteCountdownRing.sprite = circleSprite;
+        qteCountdownRing.color = circleColor;
 
         var textGo = new GameObject("QTE_Prompt");
         textGo.transform.SetParent(panel.transform, false);
@@ -96,24 +98,6 @@ public class LiftControl : MonoBehaviour
         qtePromptText.color = Color.white;
 
         qteCanvas.SetActive(false);
-    }
-
-    private Sprite CreateCircleSprite()
-    {
-        int size = 128;
-        var tex = new Texture2D(size, size);
-        var fill = Color.white;
-        float r = (size - 2) * 0.5f;
-        float cx = r + 1;
-        float cy = r + 1;
-        for (int y = 0; y < size; y++)
-            for (int x = 0; x < size; x++)
-            {
-                float d = Mathf.Sqrt((x - cx) * (x - cx) + (y - cy) * (y - cy));
-                tex.SetPixel(x, y, d <= r ? fill : Color.clear);
-            }
-        tex.Apply();
-        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f));
     }
 
     private void ShowQte(KeyCode key)
