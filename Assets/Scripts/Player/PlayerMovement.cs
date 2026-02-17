@@ -40,10 +40,7 @@ public class PlayerMovement : MonoBehaviour
     public void OnCrouch(InputAction.CallbackContext context)
     {
         if (context.performed)
-            isCrouching = true;
-
-        if (context.canceled)
-            isCrouching = false;
+            isCrouching = !isCrouching; 
     }
 
     public void OnMove(InputAction.CallbackContext context)
