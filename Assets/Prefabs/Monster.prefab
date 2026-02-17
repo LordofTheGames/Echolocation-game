@@ -186,6 +186,8 @@ GameObject:
   - component: {fileID: 8737043143605252243}
   - component: {fileID: 8738375180280089010}
   - component: {fileID: 8491061249567926694}
+  - component: {fileID: 8795594309079875185}
+  - component: {fileID: 3235923388471130729}
   m_Layer: 0
   m_Name: Monster
   m_TagString: Monster
@@ -272,6 +274,7 @@ MonoBehaviour:
   - rid: 2320555136217252138
   - rid: 104681315139322730
   - rid: 104681315854975966
+  - rid: 104681503906332964
   m_OriginalGraph: {fileID: 0}
   m_IsInitialised: 0
   m_IsStarted: 0
@@ -301,6 +304,26 @@ MonoBehaviour:
           m_Value1: 9244008707605244312
         Name: Scream
         m_Value: {fileID: 8300000, guid: da0ad4c7a65a0a04ba5e4e6573e3d2b0, type: 3}
+    - rid: 104681503906332964
+      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 11413828909850511174
+          m_Value1: 6308012497802893335
+        Name: Waypoints Maze
+        m_Value:
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
+        - {fileID: 0}
     - rid: 2320555136217252090
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -355,6 +378,48 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   ShowDebugVisuals: 1
+--- !u!114 &8795594309079875185
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683829060095955525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b6e1d0e0c6dc4e4f99e5287b5b36548, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  player: {fileID: 0}
+  fadeStartDistance: 10
+  fadeEndDistance: 15
+--- !u!54 &3235923388471130729
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683829060095955525}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1 &7588749238681027325
 GameObject:
   m_ObjectHideFlags: 0
@@ -452,7 +517,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
+  - {fileID: 2100000, guid: 201358f6692c62e4d8347693f752784c, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

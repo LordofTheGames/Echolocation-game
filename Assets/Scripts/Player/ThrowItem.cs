@@ -59,9 +59,7 @@ public class ThrowItem : MonoBehaviour
         }
 
         CreateTrajectoryLine();
-
-        CreateLandingIndicator();
-
+        landingIndicator = Instantiate(landingIndicatorPrefab);
         trajectoryLine.enabled = false;
         landingIndicator.SetActive(false);
     }
@@ -117,9 +115,7 @@ public class ThrowItem : MonoBehaviour
 
     private Material CreateUnlitTrajectoryMaterial()
     {
-        Shader unlit = Shader.Find("Universal Render Pipeline/Unlit")
-            ?? Shader.Find("Unlit/Color")
-            ?? Shader.Find("Sprites/Default");
+        Shader unlit = Shader.Find("Universal Render Pipeline/Unlit");
         Material mat = new Material(unlit);
         if (mat.HasProperty("_BaseColor")) mat.SetColor("_BaseColor", TrajectoryBrightRed);
         if (mat.HasProperty("_Color")) mat.SetColor("_Color", TrajectoryBrightRed);
@@ -139,33 +135,6 @@ public class ThrowItem : MonoBehaviour
             if (mat.HasProperty("_Color"))
                 mat.SetColor("_Color", TrajectoryBrightRed);
         }
-    }
-
-    private void CreateLandingIndicator()
-    {
-        if (landingIndicatorPrefab != null)
-        {
-            landingIndicator = Instantiate(landingIndicatorPrefab);
-        }
-        else
-        {
-            landingIndicator = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            landingIndicator.name = "LandingIndicator";
-
-            Material mat = new Material(Shader.Find("Standard"));
-            mat.color = new Color(1f, 0.5f, 0f, 0.7f);
-            mat.SetFloat("_Mode", 3); 
-            mat.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-            mat.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-            mat.EnableKeyword("_ALPHABLEND_ON");
-            mat.renderQueue = 3000;
-
-            landingIndicator.GetComponent<Renderer>().material = mat;
-
-            Destroy(landingIndicator.GetComponent<Collider>());
-        }
-
-        landingIndicator.SetActive(false);
     }
 
     private bool CanThrowSelected(out ItemType selected)
@@ -210,15 +179,6 @@ public class ThrowItem : MonoBehaviour
             Rigidbody rb = currentObj.GetComponent<Rigidbody>();
             if (rb != null)
                 rb.isKinematic = true;
-
-            MeshRenderer cubeRenderer = currentObj.GetComponent<MeshRenderer>();
-            if (cubeRenderer != null)
-            {
-                Material cubeMat = cubeRenderer.material;
-                Color cubeColor = cubeMat.color;
-                cubeColor.a = 0.8f;
-                cubeMat.color = cubeColor;
-            }
         }
 
         trajectoryLine.enabled = true;
