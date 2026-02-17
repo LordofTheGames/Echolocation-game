@@ -321,7 +321,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 6022567831833219258}
-  speed: 12
+  crouchSpeed: 3
+  walkSpeed: 6
+  sprintSpeed: 12
   gravity: -19.62
   jumpHeight: 3
   jumpEnabled: 0
@@ -330,6 +332,7 @@ MonoBehaviour:
   groundMask:
     serializedVersion: 2
     m_Bits: 64
+  cameraTransform: {fileID: 2099696623943395477}
 --- !u!114 &3275837314705130536
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -438,6 +441,8 @@ MonoBehaviour:
   interval: 0.2
   angle: 200
   uniformity: 0.3
+  volumeScale: 350
+  maxVolume: 300
 --- !u!114 &896755040844005566
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -564,7 +569,19 @@ MonoBehaviour:
     m_ActionId: f1ba0d36-48eb-4cd5-b651-1c94a6531f70
     m_ActionName: 'Player/Jump[/Keyboard/space]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6415922210037909487}
+        m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
+        m_MethodName: OnSprint
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 641cd816-40e6-41b4-8c3d-04687c349290
     m_ActionName: 'Player/Sprint[/Keyboard/leftShift]'
   - m_PersistentCalls:
@@ -691,6 +708,22 @@ MonoBehaviour:
       m_Calls: []
     m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
     m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6415922210037909487}
+        m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
+        m_MethodName: OnCrouch
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 2383c4ce-20e7-4e0c-b631-77d362856de0
+    m_ActionName: 'Player/Crouch[/Keyboard/leftShift]'
   - m_PersistentCalls:
       m_Calls: []
     m_ActionId: b3f03cb7-db1f-4a80-ab11-9f623845078e

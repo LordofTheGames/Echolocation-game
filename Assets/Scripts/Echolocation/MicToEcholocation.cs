@@ -21,6 +21,8 @@ public class MicToEcholocation : MonoBehaviour
 
     [Header("Uniformity (0-1)")]
     public float uniformity = 0.3f;
+    public float volumeScale = 350f;
+     public float maxVolume = 300f;
 
 
     // Update is called once per frame
@@ -35,6 +37,9 @@ public class MicToEcholocation : MonoBehaviour
 
         int rays = Mathf.RoundToInt(mic.loudness * maxRays);
         rays = Mathf.Clamp(rays, minRays, maxRays);
-        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, rays, 100f);
+
+        float volume = mic.loudness * volumeScale;
+        volume = Mathf.Clamp(volume, 0f, maxVolume);
+        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, rays, volume);
     }
 }
