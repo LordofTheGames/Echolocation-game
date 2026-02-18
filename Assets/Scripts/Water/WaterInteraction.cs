@@ -22,6 +22,14 @@ public class WaterInteraction : MonoBehaviour
     public AudioClip footstepWaterSound; 
     public float volume = 0.8f;
 
+    [Header("Movement Profiles")]
+    public MoveSettings crouch = new MoveSettings { name = "Crouch", maxSpeed = 3f, stepDistance = 1.2f, volume = 2f, echoRays = 1000, maxDistance = 5f, volForMonster = 0f };
+    public MoveSettings walk = new MoveSettings { name = "Walk", maxSpeed = 6f, stepDistance = 2.0f, volume = 5f, echoRays = 3000, maxDistance = 10f, volForMonster = 25f };
+    public MoveSettings sprint = new MoveSettings { name = "Sprint", maxSpeed = 12f, stepDistance = 3.5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 50f };
+    public float echoAngle = 360f;      // 360 for a full ripple around the foot
+    private MoveSettings currentSettings;
+    private float smoothedSpeed; 
+
     private ParticleSystem StepsRipple;
     private ParticleSystem WadeRipple;
     private CharacterController cc;
@@ -44,6 +52,7 @@ public class WaterInteraction : MonoBehaviour
         playerPos = transform.position;
         WadeRipple = Instantiate(WadeRipplePrefab);
         StepsRipple = Instantiate(StepsRipplePrefab);
+        currentSettings = walk;
     }
 
     void Update()
@@ -66,6 +75,15 @@ public class WaterInteraction : MonoBehaviour
                         float ratio = 1.0f - (overflow / moveStep);
                         Vector3 exactStepPos = Vector3.Lerp(lastPos, currentPos, ratio);
 
+                        // select movement profile (for echolocation)
+                        float rawSpeed = moveStep / Time.deltaTime;
+                        // Smooth speed for profile selection
+                        smoothedSpeed = Mathf.Lerp(smoothedSpeed, rawSpeed, Time.deltaTime * 8f);
+                        // Select Profile
+                        if (smoothedSpeed <= crouch.maxSpeed) currentSettings = crouch;
+                        else if (smoothedSpeed <= walk.maxSpeed + 0.5f) currentSettings = walk;
+                        else currentSettings = sprint;
+
                         CreateFootstep(exactStepPos);
                         distanceTraveled = 0;
                     }
@@ -73,7 +91,7 @@ public class WaterInteraction : MonoBehaviour
             }
             else
             {
-                distanceTraveled = 0; 
+                distanceTraveled = 0;
             }
 
             lastPos = currentPos;
@@ -151,8 +169,16 @@ public class WaterInteraction : MonoBehaviour
         {
             AudioSource.PlayClipAtPoint(footstepWaterSound, spawnPos, volume);
         }
+        PerformStepEcho(spawnPos);
 
         isRightFoot = !isRightFoot;
+    }
+
+    void PerformStepEcho(Vector3 spawnPos)
+    {
+        // Trigger Echo
+        // We use footPos as origin, and transform.forward for direction (though if angle is 360, direction doesn't matter)
+        GlobalEchoSystem.Ping(this.gameObject, spawnPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.maxDistance, currentSettings.volForMonster, true);
     }
     
     void HandleWadeRipples()
