@@ -101,6 +101,6 @@ public class PlayerFootsteps : MonoBehaviour
 
         // Trigger Echo
         // We use footPos as origin, and transform.forward for direction (though if angle is 360, direction doesn't matter)
-        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.maxDistance, currentSettings.volForMonster);
+        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.maxDistance, currentSettings.volForMonster, true);
     }
 }

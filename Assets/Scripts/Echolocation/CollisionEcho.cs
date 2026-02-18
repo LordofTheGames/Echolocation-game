@@ -3,7 +3,7 @@ using UnityEngine;
 public class CollisionEcho : MonoBehaviour
 {
 
-    [Header("Audion Settings")]
+    [Header("Audio Settings")]
     [Tooltip("Drag impact sound here")]
     public AudioClip collisionSound;
     [Range(0f,30f)]
@@ -19,6 +19,13 @@ public class CollisionEcho : MonoBehaviour
 
     public int currentPings = 0;
     public int maxPings = 3; // Number of bounces/collisions that will trigger echolocation
+    
+    [Header("Ping Settings")]
+    public float angle = 360f;
+    public float uniformity = 1f;
+    public int numRays = 10000;
+    public float maxDistance = 25f;
+    public float monsterVolume = 100f;
 
     public void Arm() // Called by the throwing system when the object is released
     {
@@ -48,7 +55,7 @@ public class CollisionEcho : MonoBehaviour
             Debug.Log("No sound attached for this type of collision");  // Warning in case a sound is meant to be attached
         }
 
-        GlobalEchoSystem.Ping(gameObject, spawnPoint, Vector3.forward, 360f, 1.0f, 10000, 25f, 100f);
+        GlobalEchoSystem.Ping(gameObject, spawnPoint, Vector3.forward, angle, uniformity, numRays, maxDistance, monsterVolume);
         currentPings++;
 
         if (currentPings >= maxPings)

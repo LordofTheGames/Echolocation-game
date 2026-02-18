@@ -26,6 +26,8 @@ public partial class UpdateAiSensesAction : Action
     [SerializeReference] public BlackboardVariable<bool> newSoundToInvestigate;
     [SerializeReference] public BlackboardVariable<Vector3> newSoundLocation;
     [SerializeReference] public BlackboardVariable<float> newSoundVolume;
+    [SerializeReference] public BlackboardVariable<bool> newIsFootsteps;
+
     HearingChecker hearingScript;
     // TODO: replace this with per-sound-type values
     // TODO: also, these are to be used when we have ray collisions with monster working!
@@ -82,6 +84,7 @@ public partial class UpdateAiSensesAction : Action
             newSoundToInvestigate.Value = true;
             newSoundLocation.Value = source.Value.transform.position;
             newSoundVolume.Value = source.Value.volume;
+            newIsFootsteps.Value = source.Value.isFootsteps;
         } 
     }
 

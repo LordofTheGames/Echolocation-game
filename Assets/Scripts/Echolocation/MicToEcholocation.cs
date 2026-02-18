@@ -6,7 +6,7 @@ public class MicToEcholocation : MonoBehaviour
     public MicInput mic;
     public Transform cameraTransform;
 
-    private float numRaysScale = 0.5f;
+    private float numRaysScale = 0.6f;
     private int maxRays = 10000;
     private int minRays = 100;
     private float maxDistance = 50f;

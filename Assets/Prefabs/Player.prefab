@@ -351,8 +351,6 @@ MonoBehaviour:
     prefab: {fileID: 6708599122270987611, guid: dc35457561e2b3746bd21668f2e9a16a, type: 3}
   - type: 2
     prefab: {fileID: 7286101680068963467, guid: 670934e21c06b15458bf248ada43c43d, type: 3}
-  - type: 4
-    prefab: {fileID: 6702684450419178585, guid: c2088c08a9dd54556805cb8e3e6d6a74, type: 3}
   throwForce: 15
   throwHeight: 0.5
   landingIndicatorSize: 1
@@ -382,7 +380,7 @@ MonoBehaviour:
   uniformity: 0
   numRays: 20000
   maxDistance: 50
-  angle: 120
+  angle: 110
   volume: 200
 --- !u!114 &7900835251262604122
 MonoBehaviour:
@@ -788,16 +786,16 @@ MonoBehaviour:
     maxSpeed: 3
     stepDistance: 2
     volume: 0.2
-    echoRays: 1000
-    maxDistance: 7.5
+    echoRays: 700
+    maxDistance: 6
     volForMonster: 0
   walk:
     name: Walk
     maxSpeed: 6
     stepDistance: 4
     volume: 0.5
-    echoRays: 3000
-    maxDistance: 15
+    echoRays: 2000
+    maxDistance: 12
     volForMonster: 25
   sprint:
     name: Sprint

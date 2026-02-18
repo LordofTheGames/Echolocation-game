@@ -178,7 +178,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float maxDist = 50f, float volume = 10f)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float maxDist = 50f, float volume = 10f, bool isFootsteps = false)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -192,7 +192,7 @@ public class EcholocationManager : MonoBehaviour
         // TODO: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
         INoiseSensitive sensitiveTarget = GameObject.FindGameObjectWithTag("Monster").GetComponent<INoiseSensitive>();
-        sensitiveTarget.OnHeardScan(transform, volume);
+        sensitiveTarget.OnHeardScan(transform, volume, isFootsteps);
     }
 
 
