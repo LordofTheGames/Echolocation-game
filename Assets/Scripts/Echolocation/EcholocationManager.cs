@@ -31,9 +31,21 @@ public class EcholocationManager : MonoBehaviour
     [Tooltip("How far from the quad/'window' the grid will project the grid (how far surfaces can be before the grid isn't painted on them).")]
     public float gridDepth = 10.0f;
 
+    
     [Header("References")]
     public Mesh quadMesh;               // Holds the 3D shape data (vertices and triangles) - we're using a simple flat quad
     public Material scannerMaterial;    // Holds the Shader and Textures
+
+
+    [Header("Colour Palettes")]
+    public Color[] monsterColors = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
+    public Color[] interactableColors = new Color[3] {Color.green, new Color(0f, 0.8f, 0f), new Color(0f, 0.6f, 0f)};
+    public Color[] defaultColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
+
+    [Header("Layers To Detect (for different colour dots/squares)")]
+    public LayerMask monsterLayer;
+    public LayerMask interactableLayer;
+    public LayerMask outlinedObjectLayer;
 
 
     // Hidden GPU variables
@@ -41,10 +53,14 @@ public class EcholocationManager : MonoBehaviour
     // ComputeBuffer is a special list that lives in the GPU
     private ComputeBuffer argsBuffer;       // Holds arguments for drawing (how many meshes to draw)
     private ComputeBuffer matrixBuffer;     // Holds the position/rotation/scale of every single mesh
+    private ComputeBuffer colorBuffer;      // Holds the colour for each dot/square
+
+
     // NativeArray is a high-performance list used by the job system
-    private NativeArray<RaycastCommand> commands;   // The "to do list" of raycasts
-    private NativeArray<RaycastHit> results;        // The results
-    private Matrix4x4[] instanceMatrices; // Holds position data before sending it to the GPU
+    private NativeArray<RaycastCommand> commands;       // The "to do list" of raycasts
+    private NativeArray<RaycastHit> results;            // The results
+    private Matrix4x4[] instanceMatrices;               // Holds position data before sending it to the GPU
+    private Vector4[] instanceColors;                   // Holds color data before sending it to GPU
     private uint[] args = new uint[5] { 0, 0, 0, 0, 0}; // Array of 5 uints required by "DrawMeshInstancedIndirect" command
     private int activeHitCount = 0; // A counter to keep track of how many rays have actually hit a wall this frame
 
@@ -118,9 +134,12 @@ public class EcholocationManager : MonoBehaviour
         long totalMaxHits = (long) raysPerScan * (maxBounces + 1);                                          // Calculate max number of rays/hits, including initial pulse and subsequent reflections
         int safeBufferSize = (int)Mathf.Min(totalMaxHits, 1000000);                                         // Prevenet a single pulse event from taking up to much VRAM
 
-        instanceMatrices = new Matrix4x4[safeBufferSize];                                                      // Intialise theh array to hold "raysPerScan" number of matrices (positions)
-        matrixBuffer = new ComputeBuffer(safeBufferSize, 64);                                                  // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
-        argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments); // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
+        instanceMatrices = new Matrix4x4[safeBufferSize];                                                       // Intialise theh array to hold "raysPerScan" number of matrices (positions)
+        instanceColors = new Vector4[safeBufferSize];                                                           // Intialise theh array to hold "raysPerScan" number of colors
+        
+        matrixBuffer = new ComputeBuffer(safeBufferSize, 64);                                                   // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
+        colorBuffer = new ComputeBuffer(safeBufferSize, 16);                                                    // Create GPU buffer for colours, 16 = 4 floats * 4 bytes
+        argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);     // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
 
         PerformScan();
         Destroy(gameObject, pulseDuration); // Destory this instance once the pulse duration has ended
@@ -367,6 +386,29 @@ public class EcholocationManager : MonoBehaviour
                         }
 
                         instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
+                        
+                        
+                        // Color logic 
+
+                        int hitLayer = hit.collider.gameObject.layer;   // Get hit layer
+                        int hitLayerMask = 1 << hitLayer;               // Convert layer to bitmask
+
+                        int variantIndex = UnityEngine.Random.Range(0,3);   // Get random index for colour within monster/interactable/default colours
+
+                        if ((monsterLayer.value & hitLayerMask) > 0) // Bit wise comparison
+                        {
+                            instanceColors[activeHitCount] = monsterColors[variantIndex];
+                        }
+                        else if ((interactableLayer & hitLayerMask) > 0 || (outlinedObjectLayer & hitLayerMask) > 0) // Check if interactable or currently outlined (only happens to interactables)
+                        {
+                            instanceColors[activeHitCount] = interactableColors[variantIndex];
+                        }
+                        else
+                        {
+                            instanceColors[activeHitCount] = defaultColors[variantIndex];
+                        }
+
+                        
                         activeHitCount++;                                                                                   // Increment the counter
                     }
                     
@@ -432,7 +474,8 @@ public class EcholocationManager : MonoBehaviour
         if (activeHitCount > 0)
         {
             // Zeroes are, respectively, source index (start reading at beginning of C# array) and destination index (start writing at the beginning of the GPU buffer)
-            matrixBuffer.SetData(instanceMatrices, 0, 0, activeHitCount); // Send the matrices to the GPU buffer
+            matrixBuffer.SetData(instanceMatrices, 0, 0, activeHitCount);   // Send the matrices to the GPU buffer
+            colorBuffer.SetData(instanceColors, 0, 0, activeHitCount);      // Send the colours to the GPU buffer
         }
 
         //Debug.Log("Scan fired! Hits: " + activeHitCount);
@@ -443,7 +486,8 @@ public class EcholocationManager : MonoBehaviour
     {
         if (instanceMaterial == null || quadMesh == null) return;
 
-        instanceMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);   // Tell the material where to find the position data (the matrix buffer)
+        instanceMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);  // Tell the material where to find the position data (the matrix buffer)
+        instanceMaterial.SetBuffer("_InstanceColors", colorBuffer);     // Tell the material where to find the colours 
 
         // Issue the draw command - "DrawMeshInstancedIndirect" is the most efficient way to draw lots of objects
         // Reads the count from args buffer instead of CPU telling it a number
@@ -461,5 +505,6 @@ public class EcholocationManager : MonoBehaviour
         // Must manually release buffers or they'll stay in VRAM forever - memory leak
         if (matrixBuffer != null) matrixBuffer.Release();
         if (argsBuffer != null) argsBuffer.Release();
+        if (colorBuffer != null) colorBuffer.Release();
     }
 }

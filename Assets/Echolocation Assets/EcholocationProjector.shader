@@ -14,11 +14,6 @@ Shader "Echolocation/EcholocationProjector"
         _GridTiling("Mesh Grid Density", Float) = 0.2                   // Controls grid density/size of squares, higher = more denser/smaller squares
         _GlobalVisibility ("Global Visibility", Float) = 1.0            // Starting visibility for each specific instance/pulse
         _Falloff("Depth Projection Limit (Grid only)", Float) = 10.0    // Limits how "far behind" the "window" for the mesh grid visualisation we will look for object surfaces to light up
-        
-        [Header(Colors)]
-        _Color1 ("Color 1", Color) = (1, 0, 0, 1)
-        _Color2 ("Color 2", Color) = (0, 1, 0, 1)
-        _Color3 ("Color 3", Color) = (0, 0, 1, 1)
     }
     SubShader
     {
@@ -66,7 +61,7 @@ Shader "Echolocation/EcholocationProjector"
                 float4 screenPos : TEXCOORD0;      // Like above vertex, it's the position of pixel on the screen, but will be converted to texture coordinates (0 to 1), to be compatible with the depth texture to find how far past "windows" surfaces of objects are
                 float3 worldPos : TEXCOORD1;    // 3D coordinate of quad in the game world
                 float2 uv : TEXCOORD2;          // UVs from the mesh grid/dot texture to draw on quad surface
-                float randomVal : TEXCOORD3;
+                float4 color : COLOR;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -87,6 +82,7 @@ Shader "Echolocation/EcholocationProjector"
 
             #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED          // Check the machine user is on is capable of GPU instancing
                 StructuredBuffer<float4x4> _InstanceMatrices;   // A list containing the position, rotation, and scale of every raycast hit
+                StructuredBuffer<float4> _InstanceColors;       // A list containg the colour to make each of the dots/squares
             #endif
 
             void setup()
@@ -104,8 +100,12 @@ Shader "Echolocation/EcholocationProjector"
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
 
                 #ifdef UNITY_PROCEDURAL_INSTANCING_ENABLED
-                    unity_ObjectToWorld = _InstanceMatrices[instanceID]; // Get correct matrix, unity_ObjectToWorld is a built-in variable with lots of pre-made funcitonality
+                    unity_ObjectToWorld = _InstanceMatrices[instanceID];    // Get correct matrix, unity_ObjectToWorld is a built-in variable with lots of pre-made funcitonality
+                    o.color = _InstanceColors[instanceID];                  // Get instancee colour
+                #else
+                    o.color = float4(0,1,1,1);  // Fallback colour if instancing fails
                 #endif
+
 
                 float4 worldPos = mul(unity_ObjectToWorld, v.vertex);   // Convert local quad space to world space
                 o.worldPos = worldPos.xyz;
@@ -114,12 +114,6 @@ Shader "Echolocation/EcholocationProjector"
 
                 float4 activeST = lerp(_DotTex_ST, _GridTex_ST, _UseMesh);  // Get tiling/offset depending on mode
                 o.uv = v.uv * activeST.xy + activeST.zw;                    // Apply any tiling/offset - we won't use but is good practice
-
-                // Random logic (for picking colour)
-                // Get the "Origin" of this specific square instance
-                float3 instanceOrigin = float3(unity_ObjectToWorld[0][3], unity_ObjectToWorld[1][3], unity_ObjectToWorld[2][3]);
-                // Generate a "Hash" (Random number 0.0 to 1.0) based on that position
-                o.randomVal = frac(sin(dot(instanceOrigin, float3(12.9898, 78.233, 45.5432))) * 43758.5453);
 
                 return o;
             }
@@ -182,22 +176,17 @@ Shader "Echolocation/EcholocationProjector"
 
                     // Apply spot mask
                     float spotMask = tex2D(_AlphaMask, i.uv).a;         // Read the soft circle mask texture to trim the square edges of the quad
-                    col *= _Color;                                      // Apply colour/tint
+                    col *= i.color;                                     // Apply instance color
                     col.a *= depthAlpha * spotMask * _GlobalVisibility; // Combine all effects - including fading effect
                 }
                 else
                 {
                     // // Using normal Flat Mapping for dots mode
-                    // col = tex2D(_DotTex, i.uv);     // Use Quad's standard UV to keep dot perfectly round in the centre
-                    // col *= _Color;                  // Apply colour/tint
 
-                    if (i.randomVal < 0.33)
-                        col = _Color1;
-                    else if (i.randomVal < 0.66)
-                        col = _Color2;
-                    else
-                        col = _Color3;
-                        
+                    //col = tex2D(_DotTex, i.uv);  (not using - doing squares)   // Use Quad's standard UV to keep dot perfectly round in the centre
+                    
+                    col = i.color;  // Apply instance color
+
                     col.a *= _GlobalVisibility;     // Apply fading effect
                 }
 
