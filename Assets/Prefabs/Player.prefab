@@ -236,7 +236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fa11b056f64ba14bb8268d4fcafe82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseSensitivity: 50
+  mouseSensitivity: 30
   playerBody: {fileID: 3853411543216132462}
   lightTransform: {fileID: 7770523898133361850}
 --- !u!1 &5235627052445221193
@@ -731,18 +731,30 @@ MonoBehaviour:
     m_ActionId: b3f03cb7-db1f-4a80-ab11-9f623845078e
     m_ActionName: 'UI/Unlock[/Keyboard/c]'
   - m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 6415922210037909487}
+        m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
+        m_MethodName: OnCrouch
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 2383c4ce-20e7-4e0c-b631-77d362856de0
     m_ActionName: 'Player/Crouch[/Keyboard/leftCtrl]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 6617871961147126018, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
+      - m_Target: {fileID: 7900835251262604122}
+        m_TargetAssemblyTypeName: DetectObjectOutline, Assembly-CSharp
+        m_MethodName: OnUnlock
+        m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
