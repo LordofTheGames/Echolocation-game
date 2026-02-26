@@ -274,7 +274,9 @@ public class ThrowItem : MonoBehaviour
         if (timedEmitter == null) timedEmitter = currentObj.GetComponentInChildren<TimedEchoEmitter>(true);
         if (timedEmitter != null) timedEmitter.SetArmOnNextCollision();
 
-        
+        var sonicGrenade = currentObj.GetComponent<SonicGrenade>();
+        if (sonicGrenade == null) sonicGrenade = currentObj.GetComponentInChildren<SonicGrenade>(true);
+        if (sonicGrenade != null) sonicGrenade.Arm();
 
         Rigidbody rb = currentObj.GetComponent<Rigidbody>();
         if (rb == null) rb = currentObj.GetComponentInChildren<Rigidbody>(true);
