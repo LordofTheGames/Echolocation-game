@@ -26,16 +26,8 @@ public class ScreenEffectsManager : MonoBehaviour
     [Header("Screen flash defaults")]
     [SerializeField] [Range(0.2f, 2f)] private float defaultFlashDuration = 0.75f;
 
-    [Header("Camera shake defaults")]
-    [SerializeField] [Range(0.1f, 2f)] private float defaultShakeDuration = 0.4f;
-    [SerializeField] [Range(0.01f, 0.5f)] private float defaultShakeIntensity = 0.15f;
-
-    private Canvas overlayCanvas;
     private Image flashImage;
     private Coroutine flashRoutine;
-    private Coroutine shakeRoutine;
-    private Transform cameraTransform;
-    private Vector3 cameraLocalPosition;
 
     private void Awake()
     {
@@ -45,13 +37,6 @@ public class ScreenEffectsManager : MonoBehaviour
             return;
         }
         _instance = this;
-
-        Camera mainCam = Camera.main;
-        if (mainCam != null)
-        {
-            cameraTransform = mainCam.transform;
-            cameraLocalPosition = cameraTransform.localPosition;
-        }
         CreateFlashOverlay();
     }
 
@@ -60,9 +45,9 @@ public class ScreenEffectsManager : MonoBehaviour
         var go = new GameObject("ScreenFlash_Canvas");
         go.transform.SetParent(transform);
 
-        overlayCanvas = go.AddComponent<Canvas>();
-        overlayCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        overlayCanvas.sortingOrder = 32767;
+        var canvas = go.AddComponent<Canvas>();
+        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+        canvas.sortingOrder = 32767;
         go.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         go.AddComponent<GraphicRaycaster>();
 
@@ -92,63 +77,28 @@ public class ScreenEffectsManager : MonoBehaviour
     {
         if (flashImage == null) yield break;
 
-        float half = duration * 0.5f;
+        float holdTime = duration * 0.55f;
+        float fadeTime = duration * 0.45f;
         flashImage.color = new Color(1f, 1f, 1f, 1f);
 
         float elapsed = 0f;
-        while (elapsed < half)
+        while (elapsed < holdTime)
         {
             elapsed += Time.deltaTime;
             yield return null;
         }
 
         elapsed = 0f;
-        while (elapsed < half)
+        while (elapsed < fadeTime)
         {
             elapsed += Time.deltaTime;
-            float t = elapsed / half;
+            float t = elapsed / fadeTime;
             flashImage.color = new Color(1f, 1f, 1f, 1f - t);
             yield return null;
         }
 
         flashImage.color = new Color(1f, 1f, 1f, 0f);
         flashRoutine = null;
-    }
-
-    public void CameraShake(float duration = -1f, float intensity = -1f)
-    {
-        if (duration < 0f) duration = defaultShakeDuration;
-        if (intensity < 0f) intensity = defaultShakeIntensity;
-        if (shakeRoutine != null) StopCoroutine(shakeRoutine);
-        shakeRoutine = StartCoroutine(ShakeRoutine(duration, intensity));
-    }
-
-    private IEnumerator ShakeRoutine(float duration, float intensity)
-    {
-        if (cameraTransform == null)
-        {
-            shakeRoutine = null;
-            yield break;
-        }
-
-        float elapsed = 0f;
-        cameraLocalPosition = cameraTransform.localPosition;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-            float decay = 1f - (elapsed / duration);
-            Vector3 offset = new Vector3(
-                (Random.value - 0.5f) * 2f * intensity * decay,
-                (Random.value - 0.5f) * 2f * intensity * decay,
-                (Random.value - 0.5f) * 2f * intensity * decay
-            );
-            cameraTransform.localPosition = cameraLocalPosition + offset;
-            yield return null;
-        }
-
-        cameraTransform.localPosition = cameraLocalPosition;
-        shakeRoutine = null;
     }
 
     private void OnDestroy()

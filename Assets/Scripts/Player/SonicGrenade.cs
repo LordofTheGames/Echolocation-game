@@ -7,20 +7,16 @@ public class SonicGrenade : MonoBehaviour
 {
     [Header("First impact audio")]
     public AudioClip impactClip;
-    [Range(0f, 3f)] public float explosionVolume = 1.5f;
-    [Range(0f, 2f)] public float tinnitusVolume = 1f;
-    public float tinnitusDelayAfterExplosion = 0.15f;
+    [Range(0f, 5f)] public float impactVolume = 2.5f;
 
-    [Header("Screen and camera")]
-    [Range(0.4f, 1.5f)] public float screenFlashDuration = 0.75f;
-    [Range(0.1f, 1f)] public float cameraShakeDuration = 0.35f;
-    [Range(0.02f, 0.4f)] public float cameraShakeIntensity = 0.18f;
+    [Header("Screen")]
+    [Range(0.4f, 2f)] public float screenFlashDuration = 1.1f;
 
     [Header("360 echo burst")]
     public float echoPingOffset = 0.3f;
-    [Range(5000, 50000)] public int echoNumRays = 25000;
-    [Range(15f, 60f)] public float echoMaxDistance = 35f;
-    public float echoMonsterVolume = 150f;
+    [Range(5000, 60000)] public int echoNumRays = 40000;
+    [Range(15f, 80f)] public float echoMaxDistance = 50f;
+    public float echoMonsterVolume = 220f;
 
     public float minDelayAfterArm = 0.08f;
 
@@ -46,15 +42,10 @@ public class SonicGrenade : MonoBehaviour
         Vector3 spawnPoint = contact.point + contact.normal * echoPingOffset;
 
         if (impactClip != null)
-            AudioSource.PlayClipAtPoint(impactClip, contact.point, explosionVolume);
-
-        StartCoroutine(PlayTinnitusDelayed(contact.point));
+            AudioSource.PlayClipAtPoint(impactClip, contact.point, impactVolume);
 
         if (ScreenEffectsManager.Instance != null)
-        {
             ScreenEffectsManager.Instance.ScreenFlash(screenFlashDuration);
-            ScreenEffectsManager.Instance.CameraShake(cameraShakeDuration, cameraShakeIntensity);
-        }
 
         if (GlobalEchoSystem.Instance != null)
         {
@@ -69,13 +60,7 @@ public class SonicGrenade : MonoBehaviour
                 echoMonsterVolume
             );
         }
-    }
 
-    private IEnumerator PlayTinnitusDelayed(Vector3 position)
-    {
-        if (tinnitusDelayAfterExplosion > 0f)
-            yield return new WaitForSeconds(tinnitusDelayAfterExplosion);
-        if (impactClip != null)
-            AudioSource.PlayClipAtPoint(impactClip, position, tinnitusVolume);
+        Destroy(gameObject);
     }
 }
