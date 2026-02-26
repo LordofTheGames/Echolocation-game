@@ -4,5 +4,6 @@ public enum ItemType
     Clicker,
     Plank,
     Flashbang, 
-    Key
+    Key,
+    EchoBeacon
 }
