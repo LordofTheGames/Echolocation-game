@@ -20,7 +20,6 @@ public class InventorySlot : MonoBehaviour,
     [SerializeField] private InventoryToggleCursor toggle;
 
     private int currentCount;
-    private bool isSelecting;
 
     private void OnEnable()
     {
@@ -61,10 +60,8 @@ public class InventorySlot : MonoBehaviour,
 
         if (InventoryManager.Instance.Selecting == itemType){
             ShowHighlight();
-            isSelecting = true;
         }else{
             HideHighlight();
-            isSelecting = false;
         }
     }
 
@@ -76,7 +73,7 @@ public class InventorySlot : MonoBehaviour,
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        //HideHighlight();
+        HideHighlight();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -85,7 +82,6 @@ public class InventorySlot : MonoBehaviour,
         if (currentCount <= 0) return;
 
         InventoryManager.Instance.Select(itemType);
-        Debug.Log(isSelecting);
 
         if (toggle != null)
             toggle.CloseInventory();

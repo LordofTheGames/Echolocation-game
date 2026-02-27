@@ -30,7 +30,7 @@ public class InventoryManager : MonoBehaviour
         counts[t] = 0;
     }
 
-        Select(ItemType.Rock);
+        Select(ItemType.None);
 
     }
 
@@ -100,11 +100,12 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    public void HandleNext()
+    private void HandleNext()
     {
         ItemType looper = Selecting;
 
-        for(int i=0; i<counts.Count; i++)
+        //loop through the inventory except the selecting
+        for(int i=0; i<counts.Count-1; i++)
         {
             if(looper != ItemType.Key && looper != ItemType.None) looper++;
             else looper = ItemType.Rock;
@@ -122,11 +123,11 @@ public class InventoryManager : MonoBehaviour
         OnSelecting?.Invoke();
     }
 
-    public void HandlePrevious()
+    private void HandlePrevious()
     {
         ItemType looper = Selecting;
 
-        for(int i=0; i<counts.Count; i++)
+        for(int i=0; i<counts.Count-1; i++)
         {
             if(looper != ItemType.Rock && looper != ItemType.None) looper--;
             else looper = ItemType.Key;
