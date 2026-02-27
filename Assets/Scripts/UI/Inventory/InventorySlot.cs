@@ -20,21 +20,26 @@ public class InventorySlot : MonoBehaviour,
     [SerializeField] private InventoryToggleCursor toggle;
 
     private int currentCount;
+    private bool isSelecting;
 
     private void OnEnable()
     {
-        HideHighlight();
 
-        if (InventoryManager.Instance != null)
+        if (InventoryManager.Instance != null){
             InventoryManager.Instance.OnInventoryChanged += RefreshCount;
+            InventoryManager.Instance.OnSelecting += Selecting;
+        }
 
         RefreshCount();
+        Selecting();
     }
 
     private void OnDisable()
     {
-        if (InventoryManager.Instance != null)
+        if (InventoryManager.Instance != null){
             InventoryManager.Instance.OnInventoryChanged -= RefreshCount;
+            InventoryManager.Instance.OnSelecting -= Selecting;
+        }
     }
 
     public void RefreshCount()
@@ -50,6 +55,19 @@ public class InventorySlot : MonoBehaviour,
             HideHighlight();
     }
 
+    public void Selecting()
+    {
+        if (InventoryManager.Instance == null) return;
+
+        if (InventoryManager.Instance.Selecting == itemType){
+            ShowHighlight();
+            isSelecting = true;
+        }else{
+            HideHighlight();
+            isSelecting = false;
+        }
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
     {
         if (currentCount <= 0) return;
@@ -58,7 +76,7 @@ public class InventorySlot : MonoBehaviour,
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        HideHighlight();
+        //HideHighlight();
     }
 
     public void OnPointerClick(PointerEventData eventData)
@@ -67,6 +85,7 @@ public class InventorySlot : MonoBehaviour,
         if (currentCount <= 0) return;
 
         InventoryManager.Instance.Select(itemType);
+        Debug.Log(isSelecting);
 
         if (toggle != null)
             toggle.CloseInventory();

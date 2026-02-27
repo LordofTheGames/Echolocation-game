@@ -33,7 +33,7 @@ public class InventoryToggleCursor : MonoBehaviour
             SetOpen(false);
         }
     }
-
+    
     public void CloseInventory() => SetOpen(false);
     public void OpenInventory()  => SetOpen(true);
 
@@ -55,7 +55,7 @@ public class InventoryToggleCursor : MonoBehaviour
             else        playerInput.SwitchCurrentActionMap(gameplayMap);
         }
 
-        if (open) ResetAllSlotsByChildName();
+        //if (open) ResetAllSlotsByChildName();
     }
 
     private void ResetAllSlotsByChildName()
