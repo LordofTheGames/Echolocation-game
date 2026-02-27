@@ -31,10 +31,7 @@ public class PlayerMovement : MonoBehaviour
     public void OnSprint(InputAction.CallbackContext context)
     {
         if (context.performed)
-            isSprinting = true;
-
-        if (context.canceled)
-            isSprinting = false;
+            isSprinting = !isSprinting;
     }
 
     public void OnCrouch(InputAction.CallbackContext context)
@@ -94,7 +91,15 @@ public class PlayerMovement : MonoBehaviour
         if (isCrouching)
             currentSpeed = crouchSpeed;
         else if (sprintAllowed && isSprinting)
+        {
             currentSpeed = sprintSpeed;
+
+            if(moveInput.Equals(Vector2.zero)){ 
+                currentSpeed = walkSpeed;
+                isSprinting = false;
+            }
+        }
+        
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         controller.Move(currentSpeed * Time.deltaTime * move);

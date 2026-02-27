@@ -69,4 +69,9 @@ public class InventoryToggleCursor : MonoBehaviour
             if (t.name == "LightBG") t.gameObject.SetActive(false);
         }
     }
+
+    public bool UIopen()
+    {
+        return isOpen;
+    }
 }

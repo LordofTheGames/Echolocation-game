@@ -86,7 +86,7 @@ public class InventoryManager : MonoBehaviour
 
     public void OnNext(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && Instance.toggle.UIopen())
         {
             Instance.HandleNext();
         }
@@ -94,7 +94,7 @@ public class InventoryManager : MonoBehaviour
 
     public void OnPrevious(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && Instance.toggle.UIopen())
         {
             Instance.HandlePrevious();
         }
