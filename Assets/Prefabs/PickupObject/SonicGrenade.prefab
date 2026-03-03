@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 8420489998919849192}
   - component: {fileID: -207613143742101198}
   - component: {fileID: -6837100196721062915}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: SonicGrenade
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -166,16 +166,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   impactClip: {fileID: 8300000, guid: 8dc22bb9c31b28c488745a76bbdd93fe, type: 3}
-  explosionVolume: 1.5
-  tinnitusVolume: 1
-  tinnitusDelayAfterExplosion: 0.15
-  screenFlashDuration: 0.75
-  cameraShakeDuration: 0.35
-  cameraShakeIntensity: 0.18
+  ringingClip: {fileID: 8300000, guid: b52ea0b0404698c4fa203b884d0791c5, type: 3}
+  impactVolume: 1
+  screenFlashDuration: 1
   echoPingOffset: 0.3
-  echoNumRays: 25000
-  echoMaxDistance: 35
-  echoMonsterVolume: 150
+  echoNumRays: 100000
+  echoMaxDistance: 100000
+  echoMonsterVolume: 1000
   minDelayAfterArm: 0.08
 --- !u!114 &-6837100196721062915
 MonoBehaviour:

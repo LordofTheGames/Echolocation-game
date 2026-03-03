@@ -7,22 +7,33 @@ public class SonicGrenade : MonoBehaviour
 {
     [Header("First impact audio")]
     public AudioClip impactClip;
-    [Range(0f, 5f)] public float impactVolume = 2.5f;
+    [Range(0f, 5f)] public float impactVolume = 1f;
+    public AudioClip ringingClip;
+    [Range(0f, 5f)] public float ringingVolume = 1f;
 
     [Header("Screen")]
     [Range(0.4f, 2f)] public float screenFlashDuration = 1.1f;
 
     [Header("360 echo burst")]
     public float echoPingOffset = 0.3f;
-    [Range(5000, 60000)] public int echoNumRays = 40000;
-    [Range(15f, 80f)] public float echoMaxDistance = 50f;
-    public float echoMonsterVolume = 220f;
+    [Range(5000, 100000)] public int echoNumRays = 100000;
+    [Range(15f, 100000f)] public float echoMaxDistance = 100000f;
+    public float echoMonsterVolume = 1000f;
 
     public float minDelayAfterArm = 0.08f;
 
     private bool armed;
     private float armTime = -999f;
     private bool hasTriggered;
+
+    private AudioSource audioSource;
+
+    public void Start()
+    {
+        GameObject player = GameObject.Find("Player");
+        if (audioSource == null)
+            audioSource = player.AddComponent<AudioSource>();
+    }
 
     public void Arm()
     {
@@ -42,7 +53,10 @@ public class SonicGrenade : MonoBehaviour
         Vector3 spawnPoint = contact.point + contact.normal * echoPingOffset;
 
         if (impactClip != null)
-            AudioSource.PlayClipAtPoint(impactClip, contact.point, impactVolume);
+            // AudioSource.PlayClipAtPoint(impactClip, contact.point, impactVolume);
+            audioSource.PlayOneShot(impactClip, impactVolume);
+        if (ringingClip != null)
+            audioSource.PlayOneShot(ringingClip, ringingVolume);
 
         if (ScreenEffectsManager.Instance != null)
             ScreenEffectsManager.Instance.ScreenFlash(screenFlashDuration);
