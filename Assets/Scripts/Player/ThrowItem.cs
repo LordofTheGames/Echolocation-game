@@ -42,6 +42,7 @@ public class ThrowItem : MonoBehaviour
     private ItemType holdingType;
 
     private float scrollInput;
+    public LayerMask layerMask;
 
 
     private void Start()
@@ -211,7 +212,7 @@ public class ThrowItem : MonoBehaviour
             Vector3 rayDir = currentPos - lastPoint;
             float rayDist = rayDir.magnitude;
 
-            if (Physics.Raycast(lastPoint, rayDir.normalized, out RaycastHit hit, rayDist))
+            if (Physics.Raycast(lastPoint, rayDir.normalized, out RaycastHit hit, rayDist, layerMask))
             {
                 landingPosition = hit.point;
                 trajectoryPointsList.Add(landingPosition);

@@ -34,7 +34,6 @@ public class InventoryManager : MonoBehaviour
 
         //add items so tutorial got something to switch to
         Add(ItemType.Rock, 3);
-        Add(ItemType.Plank, 1);
 
     }
 

@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Rendering.UI;
 
 public class Tutorial : MonoBehaviour
 {
@@ -7,9 +8,15 @@ public class Tutorial : MonoBehaviour
     private Animator animator;
     private float loudness;
     private GameObject player;
+    
+    public float volume = 0.8f;
+    public AudioSource audioSource;
     [SerializeField] private Target walk, sprint;
+    [SerializeField] private ThrowTarget target;
     [SerializeField] private GameObject look;
     [SerializeField] private Camera cam;
+    [SerializeField] private AudioClip monsterSound;
+    [SerializeField] private InventoryManager inventory;
 
     private void Awake(){
         if (Instance != null && Instance != this)
@@ -26,17 +33,21 @@ public class Tutorial : MonoBehaviour
 
         walk.OnCollision += OnWalk;
         sprint.OnCollision += OnSprint;
+        target.OnCollision += OnTargetThrow;
+        inventory.OnInventoryChanged += OnPick;
     }
 
     private void Update()
     {
         Loudness();
-        if(animator.GetBool("Change")) animator.SetBool("Change", false);
 
-        if(Input.anyKeyDown) animator.SetBool("Change", true);
-        else if(loudness > 0 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) animator.SetTrigger("Mic");
+        if(loudness > 0.1 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) {
+            animator.SetTrigger("Change");
+        }
 
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("end")) Destroy(gameObject);
+        if(animator.GetCurrentAnimatorStateInfo(0).IsName("end")){ 
+            Destroy(gameObject);
+        }
     }
 
     private void Loudness()
@@ -48,69 +59,77 @@ public class Tutorial : MonoBehaviour
         loudness = script.loudness;
     }
 
+    public void OnNext(InputAction.CallbackContext context)
+    {
+        if(context.performed) animator.SetTrigger("Next");
+    }
+
     public void OnEcho(InputAction.CallbackContext context)
     {
         if(animator.GetCurrentAnimatorStateInfo(0).IsName("clicker")) 
-            animator.SetTrigger("Clicker");
+            animator.SetTrigger("Change");
     }
 
     public void OnLook(InputAction.CallbackContext context)
     {
         float angle = Vector3.Dot(cam.transform.forward, look.transform.up);
 
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("look") && angle > 0.8) 
-            animator.SetTrigger("Look");
+        if(animator.GetCurrentAnimatorStateInfo(0).IsName("look") && angle > 0.85) 
+            animator.SetTrigger("Change");
     }
 
     public void OnWalk()
     {
         var script = player.GetComponent<PlayerMovement>();
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("walk") && !script.GetSprint()) 
-            animator.SetTrigger("Walk");
+            animator.SetTrigger("Change");
     }
 
     public void OnSprint()
     {
         var script = player.GetComponent<PlayerMovement>();
         if(animator.GetCurrentAnimatorStateInfo(0).IsName("sprint") && script.GetSprint()) 
-            animator.SetTrigger("Sprint");
+            animator.SetTrigger("Change");
     }
 
-    public void OnPick(InputAction.CallbackContext context)
+    public void OnPick()
     {
         if(animator.GetCurrentAnimatorStateInfo(0).IsName("pick")) 
-            animator.SetTrigger("Pick");
+            animator.SetTrigger("Change");
     }
 
     public void OnThrow(InputAction.CallbackContext context)
     {
         if (context.started && animator.GetCurrentAnimatorStateInfo(0).IsName("throw"))
         {
-            animator.SetTrigger("Throw");
+            animator.SetTrigger("Change");
         }
-        else if (context.canceled && animator.GetCurrentAnimatorStateInfo(0).IsName("throw2"))
-        {
-            animator.SetTrigger("Throw2");
+    }
+
+    public void OnTargetThrow()
+    {
+        if(animator.GetCurrentAnimatorStateInfo(0).IsName("throw2")) {
+            animator.SetTrigger("Change");
+            audioSource.PlayOneShot(monsterSound, volume);
         }
-            
     }
 
     public void OnOpen(InputAction.CallbackContext context)
     {
         if(animator.GetCurrentAnimatorStateInfo(0).IsName("openinventory")) 
-            animator.SetTrigger("Open");
+            animator.SetTrigger("Change");
     }
 
     public void OnChoose(InputAction.CallbackContext context)
     {
         if(animator.GetCurrentAnimatorStateInfo(0).IsName("choosing")) 
-            animator.SetTrigger("Choose");
+            animator.SetTrigger("Change");
     }
 
     public void OnSelect(InputAction.CallbackContext context)
     {
         if(animator.GetCurrentAnimatorStateInfo(0).IsName("select")) 
-            animator.SetTrigger("Select");
+            animator.SetTrigger("Change");
     }
 
 }
