@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Unity.Behavior;
 
 [RequireComponent(typeof(Rigidbody))]
 [RequireComponent(typeof(Collider))]
@@ -27,9 +28,11 @@ public class SonicGrenade : MonoBehaviour
     private bool hasTriggered;
 
     private AudioSource audioSource;
+    private BehaviorGraphAgent agent;
 
     public void Start()
     {
+        agent = GameObject.Find("Monster").GetComponent<BehaviorGraphAgent>();
         GameObject player = GameObject.Find("Player");
         if (audioSource == null)
             audioSource = player.AddComponent<AudioSource>();
@@ -74,6 +77,9 @@ public class SonicGrenade : MonoBehaviour
                 echoMonsterVolume
             );
         }
+
+        agent.BlackboardReference.SetVariableValue("sonicGrenadeTriggered", true);
+        agent.BlackboardReference.SetVariableValue("sonicGrenadePosition", transform.position);
 
         Destroy(gameObject);
     }
