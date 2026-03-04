@@ -236,7 +236,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fa11b056f64ba14bb8268d4fcafe82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseSensitivity: 50
+  mouseSensitivity: 40
   playerBody: {fileID: 3853411543216132462}
   lightTransform: {fileID: 7770523898133361850}
 --- !u!1 &5235627052445221193
@@ -365,6 +365,9 @@ MonoBehaviour:
   trajectoryTimeStep: 0.02
   maxTrajectorySteps: 500
   landingIndicatorPrefab: {fileID: 2435089806916180378, guid: cdaff24b6b4b98b459ef9c02909fe49d, type: 3}
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 1499
 --- !u!114 &2083444333531579490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -764,6 +767,30 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 3134112a-381a-4520-a7b8-145426c6be88
     m_ActionName: 'Player/Unlock[/Keyboard/c]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 100bead9-47e4-4006-b45d-3f454c973284
+    m_ActionName: 'Inventory/Next[/XInputControllerWindows/rightShoulder]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 896d8340-4a79-45c0-8f05-2777fe573c73
+    m_ActionName: 'Inventory/Previous[/XInputControllerWindows/leftShoulder]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e40a1bc3-da6a-4e16-9488-049f2509acf4
+    m_ActionName: 'Inventory/Select[/XInputControllerWindows/buttonWest]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 724b1d81-b19a-4e07-8c1d-5d645c0c6523
+    m_ActionName: 'UI/Tutorial next[/XInputControllerWindows/buttonSouth]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 3c27b295-38b5-4c1f-bf51-1de6873b988b
+    m_ActionName: 'UI/Pause[/Keyboard/p,/XInputControllerWindows/start]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: e807b729-5057-4d00-8b83-a548192a99ea
+    m_ActionName: 'UI/Tutorial skip[/XInputControllerWindows/buttonNorth]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
