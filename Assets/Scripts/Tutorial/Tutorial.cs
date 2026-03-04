@@ -11,6 +11,7 @@ public class Tutorial : MonoBehaviour
     
     public float volume = 0.8f;
     public AudioSource audioSource;
+    [SerializeField] private bool tutorial = true;
     [SerializeField] private Target walk, sprint;
     [SerializeField] private ThrowTarget target;
     [SerializeField] private GameObject look;
@@ -35,6 +36,8 @@ public class Tutorial : MonoBehaviour
         sprint.OnCollision += OnSprint;
         target.OnCollision += OnTargetThrow;
         inventory.OnInventoryChanged += OnPick;
+
+        animator.SetBool("Tutorial", tutorial);
     }
 
     private void Update()
@@ -57,6 +60,15 @@ public class Tutorial : MonoBehaviour
         if(script == null) return;
 
         loudness = script.loudness;
+    }
+
+    public void OnSkip(InputAction.CallbackContext context)
+    {
+        if (context.performed)
+        {
+            animator.SetBool("Tutorial", false);
+            tutorial = false;
+        }
     }
 
     public void OnNext(InputAction.CallbackContext context)
