@@ -68,7 +68,7 @@ public class InventoryManager : MonoBehaviour
 
         if(counts[type] == 0) 
         {
-            HandleNext();
+            HandleNext(ItemType.None);
             Selected = Selecting;
         }
         OnInventoryChanged?.Invoke();
@@ -91,7 +91,7 @@ public class InventoryManager : MonoBehaviour
     {
         if (context.performed && Instance.toggle.UIopen())
         {
-            Instance.HandleNext();
+            Instance.HandleNext(Instance.Selecting);
         }
     }
 
@@ -103,9 +103,9 @@ public class InventoryManager : MonoBehaviour
         }
     }
 
-    private void HandleNext()
+    private void HandleNext(ItemType start)
     {
-        ItemType looper = Selecting;
+        ItemType looper = start;
 
         //loop through the inventory except the selecting
         for(int i=0; i<counts.Count-1; i++)

@@ -47,10 +47,6 @@ public class Tutorial : MonoBehaviour
         if(loudness > 0.1 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) {
             animator.SetTrigger("Change");
         }
-
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("end")){ 
-            Destroy(gameObject);
-        }
     }
 
     private void Loudness()

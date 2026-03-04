@@ -43,7 +43,7 @@ public class InventoryToggleCursor : MonoBehaviour
 
         if (inventoryUI) inventoryUI.SetActive(open);
 
-        if (playerLook) playerLook.enabled = !open;
+        //if (playerLook) playerLook.enabled = !open;
         if (outlineDetector) outlineDetector.SetEnabled(!open);
 
         Cursor.visible = open;
