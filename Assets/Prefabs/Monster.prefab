@@ -188,7 +188,8 @@ GameObject:
   - component: {fileID: 8491061249567926694}
   - component: {fileID: 8795594309079875185}
   - component: {fileID: 3235923388471130729}
-  - component: {fileID: 1391974572525447847}
+  - component: {fileID: 1766991889299169475}
+  - component: {fileID: 8255928641836917361}
   m_Layer: 10
   m_Name: Monster
   m_TagString: Monster
@@ -324,7 +325,7 @@ MonoBehaviour:
           m_Value0: 5441324417730705381
           m_Value1: 959115960180765656
         Name: MonsterSound
-        m_Value: {fileID: 1391974572525447847}
+        m_Value: {fileID: 8255928641836917361}
     - rid: 2320555136217252090
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -421,7 +422,55 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!82 &1391974572525447847
+--- !u!114 &1766991889299169475
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683829060095955525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 50bc4357d26884845ad88f63ab984789, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  footstepSound: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
+  audioSource: {fileID: 8255928641836917361}
+  footSeparation: 1
+  echoAngle: 360
+  patrol:
+    name: Patrol
+    maxSpeed: 0
+    stepDistance: 3
+    volume: 2
+    echoRays: 500
+    maxDistance: 5
+    volForMonster: 0
+  investigate:
+    name: Investigate
+    maxSpeed: 0
+    stepDistance: 4
+    volume: 5
+    echoRays: 2000
+    maxDistance: 10
+    volForMonster: 0
+  chase:
+    name: Chase
+    maxSpeed: 0
+    stepDistance: 5
+    volume: 10
+    echoRays: 5000
+    maxDistance: 20
+    volForMonster: 0
+  runAway:
+    name: Run Away
+    maxSpeed: 0
+    stepDistance: 5
+    volume: 10
+    echoRays: 5000
+    maxDistance: 20
+    volForMonster: 0
+--- !u!82 &8255928641836917361
 AudioSource:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -443,7 +492,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 500
+  MaxDistance: 40
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
@@ -478,7 +527,7 @@ AudioSource:
     m_Curve:
     - serializedVersion: 3
       time: 0
-      value: 0.65
+      value: 1
       inSlope: 0
       outSlope: 0
       tangentMode: 0
