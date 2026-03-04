@@ -26,10 +26,10 @@ public class MonsterFootsteps : MonoBehaviour
     public float echoAngle = 360f;      // 360 for a full ripple around the foot
 
     [Header("Movement Profiles")]
-    public MoveSettings patrol = new MoveSettings { name = "Patrol", maxSpeed = 3f, stepDistance = 1.2f, volume = 2f, echoRays = 1000, maxDistance = 5f, volForMonster = 0f };
-    public MoveSettings investigate = new MoveSettings { name = "Investigate", maxSpeed = 6f, stepDistance = 2.0f, volume = 5f, echoRays = 3000, maxDistance = 10f, volForMonster = 0f };
-    public MoveSettings chase = new MoveSettings { name = "Chase", maxSpeed = 12f, stepDistance = 3.5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 0f };
-    public MoveSettings runAway = new MoveSettings { name = "Run Away", maxSpeed = 12f, stepDistance = 3.5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 0f };
+    public MoveSettings patrol = new MoveSettings { name = "Patrol", maxSpeed = 0f, stepDistance = 3f, volume = 2f, echoRays = 500, maxDistance = 5f, volForMonster = 0f };
+    public MoveSettings investigate = new MoveSettings { name = "Investigate", maxSpeed = 0f, stepDistance = 4f, volume = 5f, echoRays = 2000, maxDistance = 10f, volForMonster = 0f };
+    public MoveSettings chase = new MoveSettings { name = "Chase", maxSpeed = 0f, stepDistance = 5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 0f };
+    public MoveSettings runAway = new MoveSettings { name = "Run Away", maxSpeed = 0f, stepDistance = 5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 0f };
 
 
     private Vector3 lastPos;
@@ -53,10 +53,10 @@ public class MonsterFootsteps : MonoBehaviour
         // Calculate REAL distance moved this frame
         Vector3 currentPos = transform.position;
         float moveDistance = Vector3.Distance(new Vector3(currentPos.x, 0, currentPos.z), new Vector3(lastPos.x, 0, lastPos.z));
-        float rawSpeed = moveDistance / Time.deltaTime;
+        // float rawSpeed = moveDistance / Time.deltaTime;
 
         // Smooth speed for profile selection
-        smoothedSpeed = Mathf.Lerp(smoothedSpeed, rawSpeed, Time.deltaTime * 8f);
+        // smoothedSpeed = Mathf.Lerp(smoothedSpeed, rawSpeed, Time.deltaTime * 8f);
 
         // Select Profile
         // if (smoothedSpeed <= crouch.maxSpeed) currentSettings = crouch;
