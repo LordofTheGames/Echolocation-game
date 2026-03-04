@@ -428,6 +428,31 @@ MonoBehaviour:
   rippleLifetime: 0.5
   footstepWaterSound: {fileID: 8300000, guid: 28c38b101d76bb841941851d69b82999, type: 3}
   volume: 0.1
+  crouch:
+    name: Crouch
+    maxSpeed: 3
+    stepDistance: 1.2
+    volume: 2
+    echoRays: 1000
+    maxDistance: 5
+    volForMonster: 10
+  walk:
+    name: Walk
+    maxSpeed: 6
+    stepDistance: 2
+    volume: 5
+    echoRays: 3000
+    maxDistance: 10
+    volForMonster: 35
+  sprint:
+    name: Sprint
+    maxSpeed: 12
+    stepDistance: 3.5
+    volume: 10
+    echoRays: 5000
+    maxDistance: 20
+    volForMonster: 65
+  echoAngle: 360
   inWater: 0
 --- !u!114 &3073600552268709393
 MonoBehaviour:
