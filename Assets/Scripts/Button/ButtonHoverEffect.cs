@@ -2,7 +2,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections;
 
-public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler
+public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerClickHandler, 
+ISelectHandler, IDeselectHandler, ISubmitHandler
 {
     [Header("Hover Effect Settings")]
     [SerializeField] private float hoverScale = 1.2f;
@@ -13,7 +14,7 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
     [SerializeField] private AudioClip clickSound;
     
     [SerializeField] [Range(0f, 1f)] private float clickSoundVolume = 1f;
-    
+
     private Vector3 originalScale;
     private RectTransform rectTransform;
     private Coroutine scaleCoroutine;
@@ -49,7 +50,17 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
         }
     }
 
+    public void OnSelect(BaseEventData eventData)
+    {
+        Selection();
+    }
+
     public void OnPointerEnter(PointerEventData eventData)
+    {
+        Selection();
+    }
+
+    private void Selection()
     {
         if (scaleCoroutine != null)
         {
@@ -60,7 +71,17 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
         scaleCoroutine = StartCoroutine(ScaleTo(targetScale));
     }
 
+    public void OnDeselect(BaseEventData eventdata)
+    {
+        Deselection();
+    }
+
     public void OnPointerExit(PointerEventData eventData)
+    {
+        Deselection();
+    }
+
+    private void Deselection()
     {
         if (scaleCoroutine != null)
         {
@@ -71,6 +92,11 @@ public class ButtonHoverEffect : MonoBehaviour, IPointerEnterHandler, IPointerEx
     }
 
     public void OnPointerClick(PointerEventData eventData)
+    {
+        PlayClickSound();
+    }
+
+    public void OnSubmit(BaseEventData eventData)
     {
         PlayClickSound();
     }
