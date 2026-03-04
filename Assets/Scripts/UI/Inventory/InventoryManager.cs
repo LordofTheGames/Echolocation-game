@@ -84,7 +84,6 @@ public class InventoryManager : MonoBehaviour
     {
         if (GetCount(type) <= 0) return;
         Selected = type;
-        Debug.Log(Selected);
     }
 
     public void OnNext(InputAction.CallbackContext context)
@@ -122,7 +121,6 @@ public class InventoryManager : MonoBehaviour
 
         if(counts[Selecting] == 0) Selecting = ItemType.None;
 
-        Debug.Log(Selecting);
         OnSelecting?.Invoke();
     }
 
@@ -144,7 +142,6 @@ public class InventoryManager : MonoBehaviour
 
         if(counts[Selecting] == 0) Selecting = ItemType.None;
 
-        Debug.Log(Selecting);
         OnSelecting?.Invoke();
     }
 
