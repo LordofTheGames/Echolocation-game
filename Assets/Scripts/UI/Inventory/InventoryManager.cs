@@ -32,6 +32,9 @@ public class InventoryManager : MonoBehaviour
 
         Select(ItemType.None);
 
+        //add items so tutorial got something to switch to
+        Add(ItemType.Rock, 3);
+
     }
 
     public void Add(ItemType type, int amount = 1)

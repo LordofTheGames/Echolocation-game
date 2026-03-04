@@ -910,7 +910,7 @@
                     "name": "Submit",
                     "type": "Button",
                     "id": "7607c7b6-cd76-4816-beef-bd0341cfe950",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -991,6 +991,33 @@
                     "name": "Unlock",
                     "type": "Button",
                     "id": "b3f03cb7-db1f-4a80-ab11-9f623845078e",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Tutorial next",
+                    "type": "Button",
+                    "id": "724b1d81-b19a-4e07-8c1d-5d645c0c6523",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "3c27b295-38b5-4c1f-bf51-1de6873b988b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Tutorial skip",
+                    "type": "Button",
+                    "id": "e807b729-5057-4d00-8b83-a548192a99ea",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -1435,6 +1462,50 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "Unlock",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "51360d30-6f48-4f78-87ac-73ec319e4bdf",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Tutorial next",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4e07d05e-cf20-4c2a-9c24-db158cef3623",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f0145eba-6c9b-4348-a5ff-218e17f5c186",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b52c00ff-c9d5-494e-9dc1-9766e2c3d2e7",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Tutorial skip",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
