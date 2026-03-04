@@ -12,7 +12,6 @@ public partial class FindNavigablePositionWithDecreasingRadiusAction : Action
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
     [SerializeReference] public BlackboardVariable<Vector3> FinalPoint;
     [SerializeReference] public BlackboardVariable<float> MaxRadius = new BlackboardVariable<float>(10.0f);
-    [SerializeReference] public BlackboardVariable<bool> allowPointsInsideRadius = new BlackboardVariable<bool>(false);
 
     private float checkCount;
     private float currRadius;
@@ -26,11 +25,7 @@ public partial class FindNavigablePositionWithDecreasingRadiusAction : Action
 
     protected override Status OnUpdate()
     {
-        Vector3 randomPosition;
-        if (allowPointsInsideRadius)
-            randomPosition = UnityEngine.Random.insideUnitSphere * MaxRadius;
-        else
-            randomPosition = UnityEngine.Random.onUnitSphere * MaxRadius;
+        Vector3 randomPosition = UnityEngine.Random.onUnitSphere * MaxRadius;
         randomPosition.y = 0;
         randomPosition += Agent.Value.transform.position;
 

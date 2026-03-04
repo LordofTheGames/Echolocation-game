@@ -6,10 +6,11 @@ using Unity.Properties;
 using UnityEngine.AI;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "Find Navigable Position on Radius", story: "[Agent] finds navigable position at [FinalPoint] on radius [Radius]", category: "Action", id: "e54da2c2e5a9af96897aea6c83ff1418")]
-public partial class FindNavigablePositionAction : Action
+[NodeDescription(name: "Find Navigable position around Vector", story: "Set [FinalPoint] to navigable position on radius [Radius] from [Vector]", category: "Action", id: "49a3b614ea795818b894a3c25d883128")]
+public partial class FindNavigablePositionAroundVectorAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
+    [SerializeReference] public BlackboardVariable<Vector3> Vector;
     [SerializeReference] public BlackboardVariable<Vector3> FinalPoint;
     [SerializeReference] public BlackboardVariable<float> Radius = new BlackboardVariable<float>(10.0f);
 
@@ -23,12 +24,13 @@ public partial class FindNavigablePositionAction : Action
 
     protected override Status OnUpdate()
     {
-        Vector3 randomPosition = UnityEngine.Random.onUnitSphere * Radius;
+        Vector3 randomPosition = UnityEngine.Random.onUnitSphere;
         randomPosition.y = 0;
-        randomPosition += Agent.Value.transform.position;
+        randomPosition = randomPosition.normalized * Radius; // normalize so point is always at radius, not inside !
+        randomPosition += Vector;
 
         NavMeshHit hit;
-        // if random position is not navigable, max distance SamplePosition will look to find navigable position
+        // if random position is not navigable, this is max distance SamplePosition will look to find navigable position
         float maxSearchDist = 4f;
         checkCount++;
         if(NavMesh.SamplePosition(randomPosition, out hit, maxSearchDist, NavMesh.AllAreas))
@@ -38,12 +40,12 @@ public partial class FindNavigablePositionAction : Action
         }
         else if (checkCount == 5)
         {
-            FinalPoint.Value = Agent.Value.transform.position;
+            if (Agent.Value != null) FinalPoint.Value = Agent.Value.transform.position;
             return Status.Failure;
         }
         else 
         {
-            FinalPoint.Value = Agent.Value.transform.position;
+            if (Agent.Value != null) FinalPoint.Value = Agent.Value.transform.position;
             return Status.Running;
         }
 
