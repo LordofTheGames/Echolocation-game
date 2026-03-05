@@ -27,6 +27,9 @@ public class PlayerFootsteps : MonoBehaviour
         public MoveSettings crouch = new MoveSettings { name = "Crouch", maxSpeed = 3f, stepDistance = 1.2f, volume = 2f, echoRays = 1000, maxDistance = 5f, volForMonster = 0f };
         public MoveSettings walk = new MoveSettings { name = "Walk", maxSpeed = 6f, stepDistance = 2.0f, volume = 5f, echoRays = 3000, maxDistance = 10f, volForMonster = 25f };
         public MoveSettings sprint = new MoveSettings { name = "Sprint", maxSpeed = 12f, stepDistance = 3.5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 50f };
+        public MoveSettings waterCrouch = new MoveSettings { name = "Water Crouch", maxSpeed = 3f, stepDistance = 1.2f, volume = 2f, echoRays = 1000, maxDistance = 5f, volForMonster = 0f };
+        public MoveSettings waterWalk = new MoveSettings { name = "Water Walk", maxSpeed = 6f, stepDistance = 2.0f, volume = 5f, echoRays = 3000, maxDistance = 10f, volForMonster = 25f };
+        public MoveSettings waterSprint = new MoveSettings { name = "Water Sprint", maxSpeed = 12f, stepDistance = 3.5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 50f };
 
 
         private Vector3 lastPos;
@@ -57,20 +60,25 @@ public class PlayerFootsteps : MonoBehaviour
             // Smooth speed for profile selection
             smoothedSpeed = Mathf.Lerp(smoothedSpeed, rawSpeed, Time.deltaTime * 8f);
 
-            // Select Profile
-            if (smoothedSpeed <= crouch.maxSpeed) currentSettings = crouch;
-            else if (smoothedSpeed <= walk.maxSpeed + 0.5f) currentSettings = walk;
-            else currentSettings = sprint;
-
             // Check for water
             if (waterInteraction != null && waterInteraction.inWater)
             {
-                distanceTraveled = 0f; // Reset distance so it doesn't build up while in water (stops this player footstep effect from happening in water)
+                // Select Profile for water
+                if (smoothedSpeed <= waterCrouch.maxSpeed) currentSettings = waterCrouch;
+                else if (smoothedSpeed <= waterWalk.maxSpeed + 0.5f) currentSettings = waterWalk;
+                else currentSettings = waterSprint;
+                // distanceTraveled = 0f; // Reset distance so it doesn't build up while in water (stops this player footstep effect from happening in water)
             }
-            else if (moveDistance > 0.001f) // Accumulate Distance/normal behaviour
+            else {
+                // Select Profile for ground
+                if (smoothedSpeed <= crouch.maxSpeed) currentSettings = crouch;
+                else if (smoothedSpeed <= walk.maxSpeed + 0.5f) currentSettings = walk;
+                else currentSettings = sprint;
+            }
+
+            if (moveDistance > 0.001f) // Accumulate Distance/normal behaviour
             {
                 distanceTraveled += moveDistance;
-
                 if (distanceTraveled >= currentSettings.stepDistance)
                 {
                     PlayStep();
@@ -83,8 +91,8 @@ public class PlayerFootsteps : MonoBehaviour
 
         void PlayStep()
         {
-            // Audio
-            if (footstepSound != null)
+            // Audio - there is separate script (waterInteraction) for water sounds
+            if (footstepSound != null && !waterInteraction.inWater)
             {
                 audioSource.pitch = Random.Range(0.92f, 1.08f);
                 audioSource.PlayOneShot(footstepSound, currentSettings.volume);
