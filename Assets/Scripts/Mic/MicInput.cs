@@ -4,7 +4,8 @@ using UnityEngine.Audio;
 public class MicInput : MonoBehaviour
 {
 
-    private float sensitivity = 3f;
+    [Range(0f,3f)]
+    public float sensitivity = 3f;
     public float loudness;
     private int windowSize = 4096;
 

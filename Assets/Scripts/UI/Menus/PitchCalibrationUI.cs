@@ -1,15 +1,15 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class MainMenuUI : MonoBehaviour
+public class PitchCalibrationUI : MonoBehaviour
 {
 	public void OnStartGameClicked()
 	{
-		Invoke(nameof(LoadGameScene), 0.5f);
+		Invoke(nameof(LoadGameScene), 3f);
 	}
 
 	private void LoadGameScene()
 	{
-		SceneManager.LoadScene("PitchCalibration");
+		SceneManager.LoadScene("MVP");
 	}
 }
