@@ -16,6 +16,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "517cf75b-821b-4c94-8605-e8495170c190",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Look",
                     "type": "Value",
                     "id": "6b444451-8a00-4d00-a97e-f47457f736a8",
@@ -245,6 +254,28 @@
                     "processors": "",
                     "groups": "Joystick",
                     "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0ed0925c-071d-4cac-aacd-370065c7000c",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f99406d2-08fc-4765-ae44-684e1ec3b860",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -572,6 +603,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "782c9834-3a1c-4fa6-bab0-03458281a509",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Jump",
                     "type": "Button",
                     "id": "0aeac2f0-edd6-460e-a771-684c1a1f8f80",
@@ -756,6 +796,28 @@
                     "processors": "",
                     "groups": "Joystick",
                     "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "569ab3dc-20a3-4b70-a5df-2f7a14e08152",
+                    "path": "<Keyboard>/p",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Pause",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6669d83b-62d9-4220-9cc2-eeeaa584391c",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Pause",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -1000,15 +1062,6 @@
                     "name": "Tutorial next",
                     "type": "Button",
                     "id": "724b1d81-b19a-4e07-8c1d-5d645c0c6523",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "Pause",
-                    "type": "Button",
-                    "id": "3c27b295-38b5-4c1f-bf51-1de6873b988b",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -1478,7 +1531,35 @@
                 },
                 {
                     "name": "",
-                    "id": "4e07d05e-cf20-4c2a-9c24-db158cef3623",
+                    "id": "b52c00ff-c9d5-494e-9dc1-9766e2c3d2e7",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Tutorial skip",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        },
+        {
+            "name": "Pause Menu",
+            "id": "e27ba9b7-70c0-4623-9279-9757843294ce",
+            "actions": [
+                {
+                    "name": "Pause",
+                    "type": "Button",
+                    "id": "f71c37c3-0a95-45e6-a6be-64d4ffd123b1",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "30f3ff1c-51bf-46ba-bbc7-5e992a0e49b7",
                     "path": "<Keyboard>/p",
                     "interactions": "",
                     "processors": "",
@@ -1489,23 +1570,12 @@
                 },
                 {
                     "name": "",
-                    "id": "f0145eba-6c9b-4348-a5ff-218e17f5c186",
+                    "id": "9c91cfa6-e1b6-46eb-8b55-cd1586328933",
                     "path": "<Gamepad>/start",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
                     "action": "Pause",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "b52c00ff-c9d5-494e-9dc1-9766e2c3d2e7",
-                    "path": "<Gamepad>/buttonEast",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Tutorial skip",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
