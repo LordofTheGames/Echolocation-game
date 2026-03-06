@@ -1,5 +1,7 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class PitchCalibrationUI : MonoBehaviour
 {
@@ -7,6 +9,7 @@ public class PitchCalibrationUI : MonoBehaviour
 	public GameObject HighPitchPanel;
 	public GameObject NormalPitchPanel;
 	public GameObject FinalPanel;
+	public MicInput MicInput;
 	
 	private enum State
 	{
@@ -17,11 +20,20 @@ public class PitchCalibrationUI : MonoBehaviour
 	}
 	private State state;
 
-    public void Start()
+	private MeasurePitch highPitchScript;
+	private MeasurePitch normalPitchScript;
+	private float highPitch = 0;
+	private float normalPitch = 0;
+	private bool measureFinished = false;
+
+    void Start()
     {
         state = State.MIC;
 		MicPanel.SetActive(true);
 		HighPitchPanel.SetActive(false);
+
+		highPitchScript = HighPitchPanel.GetComponent<MeasurePitch>();	
+		normalPitchScript = NormalPitchPanel.GetComponent<MeasurePitch>();	
     }
 
     public void OnMicButtonClicked()
@@ -33,11 +45,30 @@ public class PitchCalibrationUI : MonoBehaviour
 
 	public void OnHighPitchButtonClicked()
 	{
+		if (measureFinished)
+		{
+			HighPitchPanel.SetActive(false);
+			NormalPitchPanel.SetActive(true);
+			state = State.NORMAL;
+			measureFinished = false;
+		}
+	}
+
+	public void OnNormalPitchButtonClicked()
+	{
+		if (measureFinished)
+		{
+			NormalPitchPanel.SetActive(false);
+			FinalPanel.SetActive(true);
+            StartCoroutine(SelectFinalButtonLater());
+			state = State.FINAL;
+			measureFinished = false;
+		}
 	}
 
 	public void OnFinalButtonClicked()
 	{
-		Invoke(nameof(LoadGameScene), 3f);
+		Invoke(nameof(LoadGameScene), 3.5f);
 	}
 
 	private void LoadGameScene()
@@ -45,20 +76,33 @@ public class PitchCalibrationUI : MonoBehaviour
 		SceneManager.LoadScene("MVP");
 	}
 
-    public void Update()
+    void Update()
     {
         switch (state)
 		{
 			case State.MIC:
 				break;
 			case State.HIGH:
-				// do pitch stuff
+				if (!measureFinished) highPitch = highPitchScript.GetPitch();
+				if (highPitch != -1) measureFinished = true;
 				break;
 			case State.NORMAL:
-				// do pitch stuff
+				if(!measureFinished) normalPitch = normalPitchScript.GetPitch();
+				if (normalPitch != -1) {
+					measureFinished = true;
+					MicInput.setPitchCalibrationValues(highPitch, normalPitch);
+				}
 				break;
 			case State.FINAL:
 				break;
 		}
     }
+
+
+    private IEnumerator SelectFinalButtonLater()
+        {
+            // Wait for one frame so the UI can fully initialize
+            yield return null; 
+            FinalPanel.GetComponentInChildren<Button>().Select();
+        }
 }

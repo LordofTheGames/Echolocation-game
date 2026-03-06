@@ -14,6 +14,7 @@ public class MicInput : MonoBehaviour
     private float[] samples;
 
     public float pitchHz;
+    public float relativePitch;
     public SwiftF0Runner swiftF0;
     
     private int sampleRate;
@@ -22,6 +23,8 @@ public class MicInput : MonoBehaviour
     [SerializeField] private AudioMixerGroup micSilentGroup;
     [SerializeField] private string micVolumeParam = "MicSilentVolume";
 
+    private float highPitch;
+    private float normalPitch;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -89,5 +92,11 @@ public class MicInput : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(micDevice))
             Microphone.End(micDevice);
+    }
+
+    public void setPitchCalibrationValues(float highPitch, float normalPitch)
+    {
+        this.normalPitch = normalPitch;
+        this.highPitch = highPitch;
     }
 }
