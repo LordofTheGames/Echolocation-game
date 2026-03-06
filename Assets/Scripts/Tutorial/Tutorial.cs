@@ -73,7 +73,7 @@ public class Tutorial : MonoBehaviour
     public void OnNext(InputAction.CallbackContext context)
     {
         
-        if(context.performed){ animator.SetBool("Next", true); Debug.Log(animator.GetBool("Next"));}
+        if(context.performed) animator.SetBool("Next", true);
     }
 
     public void OnEcho(InputAction.CallbackContext context)

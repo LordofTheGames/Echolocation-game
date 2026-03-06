@@ -147,8 +147,10 @@ public class InventoryManager : MonoBehaviour
 
     public void OnSelect(InputAction.CallbackContext context)
     {
-        Instance.Select(Instance.Selecting);
-        Instance.toggle.CloseInventory();
+        if(context.performed && Instance.toggle.UIopen()){
+            Instance.Select(Instance.Selecting);
+            Instance.toggle.CloseInventory();
+        }
     }
 }
 
