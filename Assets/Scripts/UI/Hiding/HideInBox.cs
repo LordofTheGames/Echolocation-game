@@ -4,8 +4,8 @@ using UnityEngine;
 public class HideInBox : MonoBehaviour
 {
     [Header("Setup")]
-    [SerializeField] private Transform boxAnchor;     
-    [SerializeField] private float exitDistance = 1.5f;
+    [SerializeField] private Transform boxAnchor;    
+    [SerializeField] private float exitDistance = 1.5f; 
     [SerializeField] private float transitionDuration = 0.5f; // How long the lerp takes
     
     [Header("Rotation Limits")]
@@ -13,20 +13,21 @@ public class HideInBox : MonoBehaviour
     [SerializeField] private float verticalLimit = 30f;
     [SerializeField] private float sensitivity = 2f;
 
+    private float originalPlayerY;
+
     private bool isHiding = false;
-    private bool isTransitioning = false; // Prevents input while moving
+    private bool isTransitioning = false; // Prevents bugs if player spams interact
     
     private GameObject playerRef;
     private Camera playerMainCamera;
-    private Quaternion originalCameraLocalRot; // Saves the camera's neck angle
+    private Quaternion originalCamLocalRot; // Saves original neck angle
     
     private float yaw;
     private float pitch;
 
     public void Interact(GameObject player)
     {
-        // Don't allow interaction if we are currently animating in or out
-        if (isTransitioning) return; 
+        if (isTransitioning) return; // Do nothing if we are currently lerping
 
         if (!isHiding) StartCoroutine(EnterBoxRoutine(player));
         else StartCoroutine(ExitBoxRoutine());
@@ -38,43 +39,40 @@ public class HideInBox : MonoBehaviour
         playerRef = player;
         playerMainCamera = player.GetComponentInChildren<Camera>();
 
-        // Disable player movement
-        if(player.TryGetComponent(out CharacterController cc)) cc.enabled = false;
+        // Disable player movements safely
+        player.GetComponent<CharacterController>().enabled = false;
+        player.GetComponent<PlayerMovement>().enabled = false;
+        player.GetComponentInChildren<MouseLook>().enabled = false;
 
-        // Save the camera's local rotation so we can restore it when exiting
-        originalCameraLocalRot = playerMainCamera.transform.localRotation;
+        // Save the FPC camera's local rotation to restore upon exit
+        originalCamLocalRot = playerMainCamera.transform.localRotation;
+
+        originalPlayerY = player.transform.position.y;
 
         Vector3 startPos = player.transform.position;
         Quaternion startPlayerRot = player.transform.rotation;
         Quaternion startCamRot = playerMainCamera.transform.rotation;
 
-        float time = 0;
-        while (time < transitionDuration)
+        float t = 0f;
+        while (t < 1f)
         {
-            time += Time.deltaTime;
-            float t = time / transitionDuration;
-            
-            // Smooth step equation for nicer, eased movement (starts slow, fast in middle, ends slow)
-            t = t * t * (3f - 2f * t); 
+            // Add time, but use Clamp01 so the final frame calculates exactly 100% (1.0)
+            t += Time.deltaTime / transitionDuration;
+            float clampedT = Mathf.Clamp01(t); 
 
-            // Lerp Player Body
-            player.transform.position = Vector3.Lerp(startPos, boxAnchor.position, t);
-            player.transform.rotation = Quaternion.Slerp(startPlayerRot, boxAnchor.rotation, t);
-            
-            // Lerp Camera to look straight out of the box
-            playerMainCamera.transform.rotation = Quaternion.Slerp(startCamRot, boxAnchor.rotation, t);
+            // Smooth easing
+            float ease = clampedT * clampedT * (3f - 2f * clampedT);
 
-            yield return null; // Wait until next frame
+            // Lerp position and rotations smoothly
+            player.transform.position = Vector3.Lerp(startPos, boxAnchor.position, ease);
+            player.transform.rotation = Quaternion.Slerp(startPlayerRot, boxAnchor.rotation, ease);
+            playerMainCamera.transform.rotation = Quaternion.Slerp(startCamRot, boxAnchor.rotation, ease);
+
+            yield return null; // Wait for next frame
         }
-
-        // Snap to exact final positions just to be perfectly accurate
-        player.transform.position = boxAnchor.position;
-        player.transform.rotation = boxAnchor.rotation;
-        playerMainCamera.transform.rotation = boxAnchor.rotation;
 
         yaw = 0;
         pitch = 0;
-
         isHiding = true;
         isTransitioning = false;
     }
@@ -82,54 +80,59 @@ public class HideInBox : MonoBehaviour
     private IEnumerator ExitBoxRoutine()
     {
         isTransitioning = true;
-        isHiding = false; // Immediately stop the mouse look logic in Update()
+        isHiding = false; 
 
-        // Calculate the safe position IN FRONT of the box
         Vector3 exitDirection = boxAnchor.forward;
         exitDirection.y = 0; 
         exitDirection.Normalize();
 
-        Vector3 exitPos = boxAnchor.position + (exitDirection * exitDistance);
-        Quaternion exitRot = Quaternion.LookRotation(exitDirection);
-
+        Vector3 exitPosition = boxAnchor.position + (exitDirection * exitDistance);
+        exitPosition.y = originalPlayerY;
+        Quaternion exitPlayerRot = Quaternion.LookRotation(exitDirection);
+        
         Vector3 startPos = playerRef.transform.position;
         Quaternion startPlayerRot = playerRef.transform.rotation;
         Quaternion startCamRot = playerMainCamera.transform.rotation;
+        
+        Quaternion targetCamRot = exitPlayerRot * originalCamLocalRot;
 
-        // Where the camera should end up relative to the player body
-        Quaternion targetCamRot = exitRot * originalCameraLocalRot;
-
-        float time = 0;
-        while (time < transitionDuration)
+        float t = 0f;
+        while (t < 1f)
         {
-            time += Time.deltaTime;
-            float t = time / transitionDuration;
-            t = t * t * (3f - 2f * t);
+            t += Time.deltaTime / transitionDuration;
+            float clampedT = Mathf.Clamp01(t);
+            float ease = Mathf.SmoothStep(0f, 1f, clampedT);
 
-            playerRef.transform.position = Vector3.Lerp(startPos, exitPos, t);
-            playerRef.transform.rotation = Quaternion.Slerp(startPlayerRot, exitRot, t);
-            playerMainCamera.transform.rotation = Quaternion.Slerp(startCamRot, targetCamRot, t);
+            playerRef.transform.position = Vector3.Lerp(startPos, exitPosition, ease);
+            playerRef.transform.rotation = Quaternion.Slerp(startPlayerRot, exitPlayerRot, ease);
+            playerMainCamera.transform.rotation = Quaternion.Slerp(startCamRot, targetCamRot, ease);
 
             yield return null;
         }
 
-        playerRef.transform.position = exitPos;
-        playerRef.transform.rotation = exitRot;
-        
-        // Restore the exact original local camera angle so standard FPC scripts don't break
-        playerMainCamera.transform.localRotation = originalCameraLocalRot; 
+        // FIX 1: Explicitly lock in the final 100% transforms
+        playerRef.transform.position = exitPosition;
+        playerRef.transform.rotation = exitPlayerRot;
+        playerMainCamera.transform.rotation = targetCamRot;
 
-        // Re-enable player movement
-        if(playerRef.TryGetComponent(out CharacterController cc)) cc.enabled = true;
+        // Apply local rotation now that the parent transform is 100% perfectly aligned
+        playerMainCamera.transform.localRotation = originalCamLocalRot;
+
+        // FIX 2: Force Unity to update physics transforms BEFORE turning the CharacterController back on
+        Physics.SyncTransforms();
+
+        // Re-enable player movements
+        playerRef.GetComponent<CharacterController>().enabled = true;
+        playerRef.GetComponent<PlayerMovement>().enabled = true;
+        playerRef.GetComponentInChildren<MouseLook>().enabled = true;
 
         playerRef = null;
-        playerMainCamera = null;
         isTransitioning = false;
     }
 
     private void Update()
     {
-        // Don't allow looking around while we are lerping in/out
+        // Don't allow camera movement while transitioning
         if (!isHiding || isTransitioning) return;
 
         if (Input.GetKeyDown(KeyCode.E))
@@ -144,11 +147,12 @@ public class HideInBox : MonoBehaviour
         yaw += mouseX;
         pitch -= mouseY;
 
+        // limits how much the player can rotate cam in box
         yaw = Mathf.Clamp(yaw, -horizontalLimit, horizontalLimit);
         pitch = Mathf.Clamp(pitch, -verticalLimit, verticalLimit);
 
-        // Apply rotation directly to the player's main camera now
+        // Apply clamped rotation relative to the box anchor's forward direction
         Quaternion targetRotation = boxAnchor.rotation * Quaternion.Euler(pitch, yaw, 0);
-        playerMainCamera.transform.rotation = Quaternion.Slerp(playerMainCamera.transform.rotation, targetRotation, Time.deltaTime * 10f);
+        playerMainCamera.transform.rotation = targetRotation;
     }
 }
