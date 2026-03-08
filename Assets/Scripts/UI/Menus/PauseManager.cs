@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+
 
 
 public class PauseManager : MonoBehaviour
@@ -10,6 +12,9 @@ public class PauseManager : MonoBehaviour
     [Tooltip("Toggle pause with P key")]
     [SerializeField] private bool enableKeyboardToggle = true;
     [SerializeField] private GameObject pauseUI;
+
+    [SerializeField] private GameObject firstSelectedButton; // Drag Quit game object here in inspector
+
 
     [SerializeField] private PlayerInput playerInput;  
     [SerializeField] private string pauseMap = "Pause Menu";
@@ -44,20 +49,23 @@ public class PauseManager : MonoBehaviour
         if (pause == IsPaused)
             return;
 
-        // THE SNITCH: This will tell you exactly WHICH GameObject is crashing
-        if (playerInput == null) 
-        {
-            Debug.LogError($"[GHOST COMPONENT FOUND] playerInput is missing on GameObject: '{gameObject.name}'. Delete the PauseManager component from this object!", gameObject);
-            return; 
-        }
-
         IsPaused = pause;
+
+        Time.timeScale = IsPaused ? 0f : 1f;
+
+        AudioListener.pause = IsPaused;
+
+        if (pauseUI != null)
+            pauseUI.SetActive(IsPaused);
 
         if (IsPaused) 
         {
             prevMap = playerInput.currentActionMap?.name;
             playerInput.SwitchCurrentActionMap(pauseMap);
             EnableCursor();
+
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(firstSelectedButton);
         } 
         else 
         {
@@ -66,14 +74,7 @@ public class PauseManager : MonoBehaviour
                 playerInput.SwitchCurrentActionMap(prevMap);
             }
             DisableCursor();
-        }
-
-        Time.timeScale = IsPaused ? 0f : 1f;
-
-        AudioListener.pause = IsPaused;
-
-        if (pauseUI != null)
-            pauseUI.SetActive(IsPaused);
+        }   
     }
 
     private void OnDisable()
@@ -99,7 +100,7 @@ public class PauseManager : MonoBehaviour
     }
 
     // Changed delay method since pause "freezes" time so needs another way for delay
-    public void OnExitClicked()
+    public void OnQuitClicked()
     {
         StartCoroutine(LoadMainMenuWithDelay());
     }
