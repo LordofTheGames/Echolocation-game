@@ -1,5 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+
 
 public class PauseManager : MonoBehaviour
 {
@@ -55,6 +57,7 @@ public class PauseManager : MonoBehaviour
         {
             prevMap = playerInput.currentActionMap?.name;
             playerInput.SwitchCurrentActionMap(pauseMap);
+            EnableCursor();
         } 
         else 
         {
@@ -62,6 +65,7 @@ public class PauseManager : MonoBehaviour
             {
                 playerInput.SwitchCurrentActionMap(prevMap);
             }
+            DisableCursor();
         }
 
         Time.timeScale = IsPaused ? 0f : 1f;
@@ -80,5 +84,35 @@ public class PauseManager : MonoBehaviour
             AudioListener.pause = false;
             IsPaused = false;
         }
+    }
+
+
+    private void EnableCursor()
+    {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    private void DisableCursor()
+    {
+        Cursor.visible = false;
+    }
+
+    // Changed delay method since pause "freezes" time so needs another way for delay
+    public void OnExitClicked()
+    {
+        StartCoroutine(LoadMainMenuWithDelay());
+    }
+
+    private System.Collections.IEnumerator LoadMainMenuWithDelay()
+    {
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        // Reset variables before loading next scene
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+        IsPaused = false;
+
+        SceneManager.LoadScene("MainMenu");
     }
 }
