@@ -39,9 +39,9 @@ public class HideInBox : MonoBehaviour
         playerRef = player;
         playerMainCamera = player.GetComponentInChildren<Camera>();
 
-        // Disable player movements safely
         player.GetComponent<CharacterController>().enabled = false;
         player.GetComponent<PlayerMovement>().enabled = false;
+        player.GetComponentInChildren<MouseLook>().isHiding = true; 
         player.GetComponentInChildren<MouseLook>().enabled = false;
 
         // Save the FPC camera's local rotation to restore upon exit
@@ -124,6 +124,7 @@ public class HideInBox : MonoBehaviour
         // Re-enable player movements
         playerRef.GetComponent<CharacterController>().enabled = true;
         playerRef.GetComponent<PlayerMovement>().enabled = true;
+        playerRef.GetComponentInChildren<MouseLook>().isHiding = false; 
         playerRef.GetComponentInChildren<MouseLook>().enabled = true;
 
         playerRef = null;
@@ -147,11 +148,9 @@ public class HideInBox : MonoBehaviour
         yaw += mouseX;
         pitch -= mouseY;
 
-        // limits how much the player can rotate cam in box
         yaw = Mathf.Clamp(yaw, -horizontalLimit, horizontalLimit);
         pitch = Mathf.Clamp(pitch, -verticalLimit, verticalLimit);
 
-        // Apply clamped rotation relative to the box anchor's forward direction
         Quaternion targetRotation = boxAnchor.rotation * Quaternion.Euler(pitch, yaw, 0);
         playerMainCamera.transform.rotation = targetRotation;
     }

@@ -9,6 +9,7 @@ public class MouseLook : MonoBehaviour
     float xRotation = 0f;
     Vector2 lookInput; // Stores the current mouse delta
     InputAction lookAction;
+    public bool isHiding;
 
     public void OnLook(InputAction.CallbackContext context)
     {
@@ -18,6 +19,7 @@ public class MouseLook : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isHiding) return;
 
         // If the map is disabled (Inventory open), OnLook stops updating.
 
