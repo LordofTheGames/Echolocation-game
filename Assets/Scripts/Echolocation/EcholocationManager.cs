@@ -2,6 +2,7 @@ using UnityEngine;
 using Unity.Collections;            // Native collections (NativeArray) for high-performance memory management
 using Unity.Jobs;                   // The job system - allows us to run code on multiple CPU cores
 using System.Collections.Generic;   // For use of dictionary
+using Unity.Profiling;
 
 public class EcholocationManager : MonoBehaviour
 {
@@ -91,6 +92,9 @@ public class EcholocationManager : MonoBehaviour
 
     // Layer memory - to restore object+children's layers, after setting to IgnoreRaycast layer on first pulse, and reset before first reflections
     private Dictionary<Transform, int> layerMemory = new Dictionary<Transform, int>();
+
+    // For profiling main loop - bounces and stuff
+    static readonly ProfilerMarker scanMarker = new ProfilerMarker("HeavyScanLoop");
 
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -319,140 +323,142 @@ public class EcholocationManager : MonoBehaviour
 
         activeHitCount = 0;
 
-        for (int bounce = 0; bounce <= maxBounces; bounce++)
+        using (scanMarker.Auto())
         {
-            int rayCount = rayOrigins.Length;   // Initialise to current number of rays in "generation
-            if (rayCount == 0) break;           // Stop if none remaining
-
-            // Prepare job memory
-            commands = new NativeArray<RaycastCommand>(rayCount, Allocator.TempJob); 
-            results = new NativeArray<RaycastHit>(rayCount, Allocator.TempJob);
-
-            // Prepare commands for all current rays
-            for (int i = 0; i < rayCount; i++)
+            for (int bounce = 0; bounce <= maxBounces; bounce++)
             {
-                // Set up the settings package
-                QueryParameters queryParams = QueryParameters.Default;
-                queryParams.layerMask = scanLayers;                                         // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
-                queryParams.hitBackfaces = false;                                           // Dont't hit the insides of objects
+                int rayCount = rayOrigins.Length;   // Initialise to current number of rays in "generation
+                if (rayCount == 0) break;           // Stop if none remaining
 
-                commands[i] = new RaycastCommand(rayOrigins[i], rayDirections[i], queryParams, rayRanges[i]);    // Start at ray origin, go in direciton of ray, use these settings, limit distance to remaining from max distance
-            }
+                // Prepare job memory
+                commands = new NativeArray<RaycastCommand>(rayCount, Allocator.TempJob); 
+                results = new NativeArray<RaycastHit>(rayCount, Allocator.TempJob);
 
-            // Fire rays
-            JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
-            handle.Complete();                                                                          // Forces the main thread to wait until the job is finished 
-
-            // Reset object+children layers after initial projections (so reflections can hit it)
-            if (bounce == 0 && objectToIgnore != null)
-            {
-                RestoreLayers();
-            }
-
-            // Lists for next bounce
-            NativeList<Vector3> nextOrigins = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);   
-            NativeList<Vector3> nextDirections = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);
-            NativeList<float> nextRanges = new NativeList<float>(raysPerScan, Allocator.TempJob);
-
-
-
-            // Process Hits
-            for (int i = 0; i < rayCount; i++)
-            {
-                // If the collider is not null, the ray hit something
-                if (results[i].collider != null)
+                // Prepare commands for all current rays
+                for (int i = 0; i < rayCount; i++)
                 {
-                    RaycastHit hit = results[i];    // Get hit data
+                    // Set up the settings package
+                    QueryParameters queryParams = QueryParameters.Default;
+                    queryParams.layerMask = scanLayers;                                         // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
+                    queryParams.hitBackfaces = false;                                           // Dont't hit the insides of objects
+
+                    commands[i] = new RaycastCommand(rayOrigins[i], rayDirections[i], queryParams, rayRanges[i]);    // Start at ray origin, go in direciton of ray, use these settings, limit distance to remaining from max distance
+                }
+
+                // Fire rays
+                JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
+                handle.Complete();                                                                          // Forces the main thread to wait until the job is finished 
+
+                // Reset object+children layers after initial projections (so reflections can hit it)
+                if (bounce == 0 && objectToIgnore != null)
+                {
+                    RestoreLayers();
+                }
+
+                // Lists for next bounce
+                NativeList<Vector3> nextOrigins = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);   
+                NativeList<Vector3> nextDirections = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);
+                NativeList<float> nextRanges = new NativeList<float>(raysPerScan, Allocator.TempJob);
 
 
-                    // NOTE: if you don't want reflected rays to be visualised change the if to if (bounce == 0)
-                    // ALSO: update the total max hit thing to reduce buffer size
 
-                    if (activeHitCount < instanceMatrices.Length)   // Safety check, currently has more than enough space so should have no problems
+                // Process Hits
+                for (int i = 0; i < rayCount; i++)
+                {
+                    // If the collider is not null, the ray hit something
+                    if (results[i].collider != null)
                     {
-                        Quaternion rotation = Quaternion.LookRotation(-hit.normal); // Create a rotation that looks "up" away from the surface normal - makes the quad lie flat on the wall
-                    
-                        Vector3 position;
-                        float scale;
-                        if (isGridMode)
-                        {
-                            position = hit.point + (hit.normal * gridOffset);   // Calculate position of the quad - hitpoint + offset
-                            scale = gridQuadSize;                               // Get scale factor for quad
-                        }
-                        else
-                        {
-                            position = hit.point + (hit.normal * dotOffset);    // Calculate position of the quad - hitpoint + offset
-                            scale = dotScale;                                   // Get scale factor for quad
-                        }
+                        RaycastHit hit = results[i];    // Get hit data
 
-                        instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
+
+                        // NOTE: if you don't want reflected rays to be visualised change the if to if (bounce == 0)
+                        // ALSO: update the total max hit thing to reduce buffer size
+
+                        if (activeHitCount < instanceMatrices.Length)   // Safety check, currently has more than enough space so should have no problems
+                        {
+                            Quaternion rotation = Quaternion.LookRotation(-hit.normal); // Create a rotation that looks "up" away from the surface normal - makes the quad lie flat on the wall
                         
+                            Vector3 position;
+                            float scale;
+                            if (isGridMode)
+                            {
+                                position = hit.point + (hit.normal * gridOffset);   // Calculate position of the quad - hitpoint + offset
+                                scale = gridQuadSize;                               // Get scale factor for quad
+                            }
+                            else
+                            {
+                                position = hit.point + (hit.normal * dotOffset);    // Calculate position of the quad - hitpoint + offset
+                                scale = dotScale;                                   // Get scale factor for quad
+                            }
+
+                            instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
+                            
+                            
+                            // Color logic 
+
+                            int hitLayer = hit.collider.gameObject.layer;   // Get hit layer
+                            int hitLayerMask = 1 << hitLayer;               // Convert layer to bitmask
+
+                            int variantIndex = UnityEngine.Random.Range(0,3);   // Get random index for colour within monster/interactable/default colours
+
+                            if ((monsterLayer.value & hitLayerMask) > 0) // Bit wise comparison
+                            {
+                                instanceColors[activeHitCount] = monsterColors[variantIndex];
+                            }
+                            else if ((interactableLayer & hitLayerMask) > 0 || (outlinedObjectLayer & hitLayerMask) > 0) // Check if interactable or currently outlined (only happens to interactables)
+                            {
+                                instanceColors[activeHitCount] = interactableColors[variantIndex];
+                            }
+                            else
+                            {
+                                instanceColors[activeHitCount] = defaultColors[variantIndex];
+                            }
+
+                            
+                            activeHitCount++;                                                                                   // Increment the counter
+                        }
                         
-                        // Color logic 
+                        // TODO: add this when we have multiple ray bounces working
+                        // INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
+                        // if (sensitiveTarget != null) // If the thing hit (the monster) has an implementaion of INoiseSensitive (not null) then it wants this info so send
+                        //{
+                        //  sensitiveTarget.OnHeardScan(sourceObj.transform); // Send the original source object even after reflections 
+                        //}
 
-                        int hitLayer = hit.collider.gameObject.layer;   // Get hit layer
-                        int hitLayerMask = 1 << hitLayer;               // Convert layer to bitmask
-
-                        int variantIndex = UnityEngine.Random.Range(0,3);   // Get random index for colour within monster/interactable/default colours
-
-                        if ((monsterLayer.value & hitLayerMask) > 0) // Bit wise comparison
+                        // Calculate reflections
+                        if (bounce < maxBounces)
                         {
-                            instanceColors[activeHitCount] = monsterColors[variantIndex];
-                        }
-                        else if ((interactableLayer & hitLayerMask) > 0 || (outlinedObjectLayer & hitLayerMask) > 0) // Check if interactable or currently outlined (only happens to interactables)
-                        {
-                            instanceColors[activeHitCount] = interactableColors[variantIndex];
-                        }
-                        else
-                        {
-                            instanceColors[activeHitCount] = defaultColors[variantIndex];
-                        }
+                            float distanceTravelled = hit.distance;
+                            float remainingRange = rayRanges[i] - distanceTravelled; // Calculate remaining distance
 
-                        
-                        activeHitCount++;                                                                                   // Increment the counter
-                    }
-                    
-                    // TODO: add this when we have multiple ray bounces working
-                    // INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
-                    // if (sensitiveTarget != null) // If the thing hit (the monster) has an implementaion of INoiseSensitive (not null) then it wants this info so send
-                    //{
-                    //  sensitiveTarget.OnHeardScan(sourceObj.transform); // Send the original source object even after reflections 
-                    //}
+                            // Only bounce if range left
+                            if (remainingRange > 0f)
+                            {
+                                Vector3 incomingDir = rayDirections[i];
+                                Vector3 reflectedDir = Vector3.Reflect(incomingDir, hit.normal);
 
-                    // Calculate reflections
-                    if (bounce < maxBounces)
-                    {
-                        float distanceTravelled = hit.distance;
-                        float remainingRange = rayRanges[i] - distanceTravelled; // Calculate remaining distance
-
-                        // Only bounce if range left
-                        if (remainingRange > 0f)
-                        {
-                            Vector3 incomingDir = rayDirections[i];
-                            Vector3 reflectedDir = Vector3.Reflect(incomingDir, hit.normal);
-
-                            // Add to next batch of rays
-                            nextOrigins.Add(hit.point + (hit.normal * 0.01f)); // Add offset to spawn point to prevent self collision
-                            nextDirections.Add(reflectedDir);
-                            nextRanges.Add(remainingRange);
+                                // Add to next batch of rays
+                                nextOrigins.Add(hit.point + (hit.normal * 0.01f)); // Add offset to spawn point to prevent self collision
+                                nextDirections.Add(reflectedDir);
+                                nextRanges.Add(remainingRange);
+                            }
                         }
                     }
                 }
+
+                // Cleanup current "generation"
+                commands.Dispose();
+                results.Dispose();
+                rayOrigins.Dispose();
+                rayDirections.Dispose();
+                rayRanges.Dispose();
+
+                // Swap to next generations
+                rayOrigins = nextOrigins;
+                rayDirections = nextDirections;
+                rayRanges = nextRanges;
             }
-
-            // Cleanup current "generation"
-            commands.Dispose();
-            results.Dispose();
-            rayOrigins.Dispose();
-            rayDirections.Dispose();
-            rayRanges.Dispose();
-
-            // Swap to next generations
-            rayOrigins = nextOrigins;
-            rayDirections = nextDirections;
-            rayRanges = nextRanges;
         }
-
 
         // Final cleanup
         rayOrigins.Dispose();
