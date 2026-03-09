@@ -3,7 +3,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MeasurePitch : MonoBehaviour
+public class MeasureVolume : MonoBehaviour
 {
     public GameObject KeepGoing;
     public GameObject MoreConsistent;
@@ -11,20 +11,21 @@ public class MeasurePitch : MonoBehaviour
     public GameObject Button;
     public MicInput MicInput;
 
-    public float consistencyRange = 5;
-    public float maxConsistentTimeSecs = 3;
+    public float consistencyRange = 0.05f;
+    public float maxConsistentTimeSecs = 2;
 
     private int idx = 0;
-    private int maxIdx = 60; // 1 second (assuming 60fps)
+    private int maxIdx;
     private float elapsedTimeSecs = 0;
     private float consistentTimeSecs = 0;
-    private float[] currPitch;
+    private float[] currVolume;
 
     private GameObject currPrompt;
 
     void Awake()
     {
-        currPitch = new float[maxIdx + 1];
+        maxIdx = (int)(60 * (maxConsistentTimeSecs + 1)); // maxConsistentTimeSecs + 1 seconds (assuming 60fps)
+        currVolume = new float[maxIdx + 1];
         currPrompt = KeepGoing;
         KeepGoing.SetActive(false);
         MoreConsistent.SetActive(false);
@@ -32,26 +33,26 @@ public class MeasurePitch : MonoBehaviour
         Button.SetActive(false);
     }
 
-    public float GetPitch()
+    public float GetVolume()
     {
         elapsedTimeSecs += Time.deltaTime;
 
-        currPitch[idx] = MicInput.pitchHz;
-        if (idx != 0 && currPitch[idx] != 0 && currPitch[idx] - currPitch[idx - 1] <= consistencyRange && currPitch[idx] - currPitch[idx - 1] >= -consistencyRange)
+        currVolume[idx] = MicInput.volume;
+        if (currVolume[idx] != 0 && checkConsistency())
         {
             consistentTimeSecs += Time.deltaTime;
+            idx += 1;
+            if (idx == maxIdx) idx = 0;
         }
-        else if (idx != 0 && currPitch[idx] != 0)
+        else if (currVolume[idx] != 0)
         {
             consistentTimeSecs = 0;
+            idx = 0;
             if (elapsedTimeSecs >= 3)
             {
                 changePrompt(MoreConsistent);
             }
         }
-
-        idx += 1;
-        if (idx == maxIdx) idx = 0;
 
         if (elapsedTimeSecs > 1 && elapsedTimeSecs < 3)
             changePrompt(KeepGoing);
@@ -61,9 +62,19 @@ public class MeasurePitch : MonoBehaviour
             changePrompt(Good);
             Button.SetActive(true);
             StartCoroutine(SelectButtonLater());
-            return currPitch.Sum() / currPitch.Length;
+            return currVolume.Sum() / currVolume.Length;
         }
         else return -1;
+    }
+
+    private bool checkConsistency()
+    {
+        for (int i = 0; i < idx; i++)
+        {
+            if (currVolume[idx] - currVolume[i] > consistencyRange || currVolume[idx] - currVolume[i] < -consistencyRange) 
+                return false;
+        }
+        return true;
     }
 
     private void changePrompt(GameObject prompt)

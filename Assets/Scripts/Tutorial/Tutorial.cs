@@ -1,12 +1,11 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
-using UnityEngine.Rendering.UI;
 
 public class Tutorial : MonoBehaviour
 {
     public static Tutorial Instance;
     private Animator animator;
-    private float loudness;
+    private float micVolume;
     private GameObject player;
     
     public float volume = 0.8f;
@@ -42,20 +41,20 @@ public class Tutorial : MonoBehaviour
 
     private void Update()
     {
-        Loudness();
+        MicVolume();
 
-        if(loudness > 0.1 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) {
+        if(micVolume > 0.1 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) {
             animator.SetTrigger("Change");
         }
     }
 
-    private void Loudness()
+    private void MicVolume()
     {
         var script = GameObject.Find("MicInput").GetComponent<MicInput>();
 
         if(script == null) return;
 
-        loudness = script.loudness;
+        micVolume = script.volume;
     }
 
     public void OnSkip(InputAction.CallbackContext context)
