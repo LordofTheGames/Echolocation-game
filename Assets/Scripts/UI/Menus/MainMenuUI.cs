@@ -10,6 +10,6 @@ public class MainMenuUI : MonoBehaviour
 
 	private void LoadGameScene()
 	{
-		SceneManager.LoadScene("PitchCalibration");
+		SceneManager.LoadScene("MicCalibration");
 	}
 }
