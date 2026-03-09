@@ -585,6 +585,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 7900835251262604122}
+        m_TargetAssemblyTypeName: DetectObjectOutline, Assembly-CSharp
+        m_MethodName: OnUnlock
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 852140f2-7766-474d-8707-702459ba45f3
     m_ActionName: 'Player/Interact[/Keyboard/e]'
   - m_PersistentCalls:
@@ -729,22 +741,6 @@ MonoBehaviour:
     m_ActionName: 'Player/Crouch[/Keyboard/leftCtrl]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7900835251262604122}
-        m_TargetAssemblyTypeName: DetectObjectOutline, Assembly-CSharp
-        m_MethodName: OnUnlock
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 3134112a-381a-4520-a7b8-145426c6be88
-    m_ActionName: 'Player/Unlock[/Keyboard/c]'
-  - m_PersistentCalls:
-      m_Calls:
       - m_Target: {fileID: 8693551460166898632, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
         m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
         m_MethodName: OnNext
@@ -801,10 +797,10 @@ MonoBehaviour:
     m_ActionName: Inventory/Previous
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 8693551460166898632, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
-        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
-        m_MethodName: OnSelect
-        m_Mode: 0
+      - m_Target: {fileID: 995755870794296105, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
+        m_TargetAssemblyTypeName: InventoryToggleCursor, Assembly-CSharp
+        m_MethodName: CloseInventory
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
@@ -877,8 +873,76 @@ MonoBehaviour:
     m_ActionName: 'Player/Pause[/Keyboard/p]'
   - m_PersistentCalls:
       m_Calls: []
-    m_ActionId: bffd6f51-0371-4764-98bb-8345f3d090c7
-    m_ActionName: UI/New action
+    m_ActionId: b65696d9-f141-4e68-b63c-dc799e368e7a
+    m_ActionName: 'UI/Navigate[/XInputControllerWindows/leftStick/up,/XInputControllerWindows/rightStick/up,/XInputControllerWindows/leftStick/down,/XInputControllerWindows/rightStick/down,/XInputControllerWindows/leftStick/left,/XInputControllerWindows/rightStick/left,/XInputControllerWindows/leftStick/right,/XInputControllerWindows/rightStick/right,/XInputControllerWindows/dpad,/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b3729705-7737-4117-893d-1e090cc6b3f1
+    m_ActionName: 'UI/Submit[/Keyboard/enter,/XInputControllerWindows/buttonSouth]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0a6bea12-aff0-4561-b9d6-35054d7175c0
+    m_ActionName: 'UI/Cancel[/Keyboard/escape,/XInputControllerWindows/buttonEast]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0323c8aa-c7b3-41d0-b29b-774d2ce65e19
+    m_ActionName: 'UI/Point[/Mouse/position]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 901917b7-9fa3-4162-adc0-ec18b73c604c
+    m_ActionName: 'UI/Click[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d422a03e-e4da-46a3-a77a-0f46990947ae
+    m_ActionName: 'UI/RightClick[/Mouse/rightButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d40f1eba-08b1-480e-9526-30aea5e076d8
+    m_ActionName: 'UI/MiddleClick[/Mouse/middleButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 99e6d981-1e20-44ac-b597-50c642ba2656
+    m_ActionName: 'UI/ScrollWheel[/Mouse/scroll]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 584575d8-b71f-4566-bc3f-c56cfee11e27
+    m_ActionName: UI/TrackedDevicePosition
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: aac36796-2435-4970-b574-bfa311407352
+    m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
+        m_MethodName: OnNext
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 988dcee3-b2e5-4073-9cc5-6108a8870463
+    m_ActionName: 'Player/Next[/XInputControllerWindows/rightShoulder,/Keyboard/2]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
+        m_MethodName: OnPrevious
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 0731e808-d7be-4032-b59e-18b6f935ba9b
+    m_ActionName: 'Player/Previous[/XInputControllerWindows/leftShoulder,/Keyboard/1]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
