@@ -9,9 +9,10 @@ public class MeasurePitch : MonoBehaviour
     public GameObject MoreConsistent;
     public GameObject Good;
     public GameObject Button;
+    public GameObject SkipButton;
     public MicInput MicInput;
 
-    public float consistencyRange = 5;
+    public float consistencyRange = 8;
     public float maxConsistentTimeSecs = 2;
 
     private int idx = 0;
@@ -52,6 +53,11 @@ public class MeasurePitch : MonoBehaviour
             {
                 changePrompt(MoreConsistent);
             }
+            if (SkipButton != null && elapsedTimeSecs >= 5)
+            {
+                SkipButton.SetActive(true);
+                StartCoroutine(SelectButtonLater(SkipButton));
+            }
         }
 
         if (elapsedTimeSecs > 1 && elapsedTimeSecs < 3)
@@ -59,9 +65,10 @@ public class MeasurePitch : MonoBehaviour
 
         if (consistentTimeSecs >= maxConsistentTimeSecs)
         {
+            if (SkipButton != null) SkipButton.SetActive(false);
             changePrompt(Good);
             Button.SetActive(true);
-            StartCoroutine(SelectButtonLater());
+            StartCoroutine(SelectButtonLater(Button));
             return currPitch.Sum() / currPitch.Length;
         }
         else return -1;
@@ -84,10 +91,10 @@ public class MeasurePitch : MonoBehaviour
             currPrompt.SetActive(true);
     }
 
-    private IEnumerator SelectButtonLater()
+    private IEnumerator SelectButtonLater(GameObject button)
         {
             // Wait for one frame so the UI can fully initialize
             yield return null; 
-            Button.GetComponent<Button>().Select();
+            button.GetComponent<Button>().Select();
         }
 }

@@ -104,6 +104,17 @@ public class MicCalibrationUI : MonoBehaviour
 		}
 	}
 
+	public void onSkipButtonClicked()
+	{
+		NormalPitchPanel.SetActive(false);
+		FinalPitchPanel.SetActive(true);
+		StartCoroutine(SelectButtonLater(FinalPitchPanel));
+		state = State.FINAL_PITCH;
+		measureFinished = false;
+		normalPitch = 50;
+		MicInput.setPitchCalibrationValues(highPitch - normalPitch, normalPitch);
+	}
+
 	public void OnFinalPitchButtonClicked()
 	{
 		Invoke(nameof(LoadGameScene), 3.5f);

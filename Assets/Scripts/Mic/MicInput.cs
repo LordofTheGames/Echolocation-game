@@ -88,7 +88,7 @@ public class MicInput : MonoBehaviour
 
         // loudness = target;
         volume = rms;
-        if (volume  < 0.05f){
+        if (volume  < 0.01f){
             volume = 0f;
         }
         relativeVolume = getRelativeVolume(volume);
