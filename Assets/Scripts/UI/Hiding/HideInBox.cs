@@ -27,7 +27,7 @@ public class HideInBox : MonoBehaviour
 
     public void Interact(GameObject player)
     {
-        if (isTransitioning) return; // Do nothing if we are currently lerping
+        if (isTransitioning) return;
 
         if (!isHiding) StartCoroutine(EnterBoxRoutine(player));
         else StartCoroutine(ExitBoxRoutine());
@@ -59,8 +59,6 @@ public class HideInBox : MonoBehaviour
             // Add time, but use Clamp01 so the final frame calculates exactly 100% (1.0)
             t += Time.deltaTime / transitionDuration;
             float clampedT = Mathf.Clamp01(t); 
-
-            // Smooth easing
             float ease = clampedT * clampedT * (3f - 2f * clampedT);
 
             // Lerp position and rotations smoothly
@@ -110,15 +108,10 @@ public class HideInBox : MonoBehaviour
             yield return null;
         }
 
-        // FIX 1: Explicitly lock in the final 100% transforms
         playerRef.transform.position = exitPosition;
         playerRef.transform.rotation = exitPlayerRot;
         playerMainCamera.transform.rotation = targetCamRot;
-
-        // Apply local rotation now that the parent transform is 100% perfectly aligned
         playerMainCamera.transform.localRotation = originalCamLocalRot;
-
-        // FIX 2: Force Unity to update physics transforms BEFORE turning the CharacterController back on
         Physics.SyncTransforms();
 
         // Re-enable player movements
