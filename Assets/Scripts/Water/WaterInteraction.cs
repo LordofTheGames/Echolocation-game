@@ -22,14 +22,6 @@ public class WaterInteraction : MonoBehaviour
     public AudioClip footstepWaterSound; 
     public float volume = 0.8f;
 
-    [Header("Movement Profiles")]
-    public MoveSettings crouch = new MoveSettings { name = "Crouch", maxSpeed = 3f, stepDistance = 1.2f, volume = 2f, echoRays = 1000, maxDistance = 5f, volForMonster = 0f };
-    public MoveSettings walk = new MoveSettings { name = "Walk", maxSpeed = 6f, stepDistance = 2.0f, volume = 5f, echoRays = 3000, maxDistance = 10f, volForMonster = 25f };
-    public MoveSettings sprint = new MoveSettings { name = "Sprint", maxSpeed = 12f, stepDistance = 3.5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 50f };
-    public float echoAngle = 360f;      // 360 for a full ripple around the foot
-    private MoveSettings currentSettings;
-    private float smoothedSpeed; 
-
     private ParticleSystem StepsRipple;
     private ParticleSystem WadeRipple;
     private CharacterController cc;
@@ -52,7 +44,6 @@ public class WaterInteraction : MonoBehaviour
         playerPos = transform.position;
         WadeRipple = Instantiate(WadeRipplePrefab);
         StepsRipple = Instantiate(StepsRipplePrefab);
-        currentSettings = walk;
     }
 
     void Update()

@@ -24,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
 
     public Transform cameraTransform;
     private float defaultCamY;
+    private PlayerFootsteps footstepsScript;
 
     
 
@@ -31,16 +32,26 @@ public class PlayerMovement : MonoBehaviour
     public void OnSprint(InputAction.CallbackContext context)
     {
         if (context.performed)
+        {
+            footstepsScript.CurrentState = MoveState.SPRINT;
             isSprinting = true;
+        }
 
         if (context.canceled)
+        {
+            footstepsScript.CurrentState = MoveState.WALK;
             isSprinting = false;
+        }
     }
 
     public void OnCrouch(InputAction.CallbackContext context)
     {
         if (context.performed)
+        {
             isCrouching = !isCrouching; 
+            if (isCrouching) footstepsScript.CurrentState = MoveState.CROUCH;
+            else footstepsScript.CurrentState = MoveState.WALK;
+        }
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -66,6 +77,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        footstepsScript = gameObject.GetComponent<PlayerFootsteps>();
         defaultCamY = cameraTransform.localPosition.y;
     }
     // Update is called once per frame
