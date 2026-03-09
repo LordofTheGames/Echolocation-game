@@ -33,7 +33,7 @@ public class InventoryToggleCursor : MonoBehaviour
             SetOpen(false);
         }
     }
-
+    
     public void CloseInventory() => SetOpen(false);
     public void OpenInventory()  => SetOpen(true);
 
@@ -43,7 +43,7 @@ public class InventoryToggleCursor : MonoBehaviour
 
         if (inventoryUI) inventoryUI.SetActive(open);
 
-        if (playerLook) playerLook.enabled = !open;
+        //if (playerLook) playerLook.enabled = !open;
         if (outlineDetector) outlineDetector.SetEnabled(!open);
 
         Cursor.visible = open;
@@ -55,7 +55,7 @@ public class InventoryToggleCursor : MonoBehaviour
             else        playerInput.SwitchCurrentActionMap(gameplayMap);
         }
 
-        if (open) ResetAllSlotsByChildName();
+        //if (open) ResetAllSlotsByChildName();
     }
 
     private void ResetAllSlotsByChildName()
@@ -68,5 +68,10 @@ public class InventoryToggleCursor : MonoBehaviour
             if (t.name == "Original") t.gameObject.SetActive(true);
             if (t.name == "LightBG") t.gameObject.SetActive(false);
         }
+    }
+
+    public bool UIopen()
+    {
+        return isOpen;
     }
 }

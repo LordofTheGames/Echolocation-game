@@ -33,14 +33,9 @@ public class PlayerMovement : MonoBehaviour
     {
         if (context.performed)
         {
-            footstepsScript.CurrentState = MoveState.SPRINT;
-            isSprinting = true;
-        }
-
-        if (context.canceled)
-        {
-            footstepsScript.CurrentState = MoveState.WALK;
-            isSprinting = false;
+            isSprinting = !isSprinting;
+            if (isSprinting) footstepsScript.CurrentState = MoveState.SPRINT;
+            else footstepsScript.CurrentState = MoveState.WALK;
         }
     }
 
@@ -106,7 +101,15 @@ public class PlayerMovement : MonoBehaviour
         if (isCrouching)
             currentSpeed = crouchSpeed;
         else if (sprintAllowed && isSprinting)
+        {
             currentSpeed = sprintSpeed;
+
+            if(moveInput.Equals(Vector2.zero)){ 
+                currentSpeed = walkSpeed;
+                isSprinting = false;
+            }
+        }
+        
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         controller.Move(currentSpeed * Time.deltaTime * move);
@@ -114,5 +117,10 @@ public class PlayerMovement : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    public bool GetSprint()
+    {
+        return isSprinting;
     }
 }

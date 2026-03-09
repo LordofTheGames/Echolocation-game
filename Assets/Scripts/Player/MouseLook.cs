@@ -33,6 +33,6 @@ public class MouseLook : MonoBehaviour
         playerBody.Rotate(Vector3.up * mouseX); 
 
         // Reset input after use to prevent "drift" when mouse moving
-        lookInput = Vector2.zero;
+        //lookInput = Vector2.zero;
     }
 }

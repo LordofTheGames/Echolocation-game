@@ -56,6 +56,10 @@ PrefabInstance:
       propertyPath: m_Layer
       value: 8
       objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 8ededfe9f058c734aa34b48cd0af7811, type: 3}
+      propertyPath: m_TagString
+      value: Throwable
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -114,7 +118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78ae7c92667aa407e8835dfc115f1016, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemType: 2
+  itemType: 1
   amount: 1
 --- !u!114 &7367837703755904851
 MonoBehaviour:
@@ -148,6 +152,11 @@ MonoBehaviour:
   minDelayAfterArm: 0.05
   currentPings: 0
   maxPings: 5
+  angle: 360
+  uniformity: 1
+  numRays: 10000
+  maxDistance: 25
+  monsterVolume: 100
 --- !u!54 &-2232555233214352289
 Rigidbody:
   m_ObjectHideFlags: 0

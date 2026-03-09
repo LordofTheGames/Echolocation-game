@@ -1,16 +1,19 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class InventoryManager : MonoBehaviour
 {
     public static InventoryManager Instance;
-    public event Action OnInventoryChanged;
-
+    public event Action OnInventoryChanged, OnSelecting;
     private Dictionary<ItemType, int> counts = new Dictionary<ItemType, int>();
 
     // currently selected item to throw/use
-    public ItemType Selected { get; private set; } = ItemType.Rock;
+    public ItemType Selected { get; private set; } = ItemType.None;
+    //currently highlighted item in inventory
+    public ItemType Selecting { get; private set; } =ItemType.None;
+    [SerializeField] private InventoryToggleCursor toggle;
 
     private void Awake()
     {
@@ -26,14 +29,29 @@ public class InventoryManager : MonoBehaviour
     {
         counts[t] = 0;
     }
+
+        Select(ItemType.None);
+
+        //add items so tutorial got something to switch to
+        Add(ItemType.Rock, 3);
+
     }
 
     public void Add(ItemType type, int amount = 1)
     {
         counts[type] += amount;
+
+        if(Selecting == ItemType.None)
+        {
+            Selecting = type;
+            Selected = type;
+            OnSelecting?.Invoke();
+        }
+
         OnInventoryChanged?.Invoke();
     }
 
+    //is this function used?
     public void Remove(ItemType type, int amount = 1)
     {
         counts[type] -= amount;
@@ -47,6 +65,12 @@ public class InventoryManager : MonoBehaviour
         if (GetCount(type) < amount) return false;
 
         counts[type] -= amount;
+
+        if(counts[type] == 0) 
+        {
+            HandleNext(ItemType.None);
+            Selected = Selecting;
+        }
         OnInventoryChanged?.Invoke();
         return true;
     }
@@ -60,6 +84,71 @@ public class InventoryManager : MonoBehaviour
     {
         if (GetCount(type) <= 0) return;
         Selected = type;
+    }
+
+    public void OnNext(InputAction.CallbackContext context)
+    {
+        if (context.performed && Instance.toggle.UIopen())
+        {
+            Instance.HandleNext(Instance.Selecting);
+        }
+    }
+
+    public void OnPrevious(InputAction.CallbackContext context)
+    {
+        if (context.performed && Instance.toggle.UIopen())
+        {
+            Instance.HandlePrevious();
+        }
+    }
+
+    private void HandleNext(ItemType start)
+    {
+        ItemType looper = start;
+
+        //loop through the inventory except the selecting
+        for(int i=0; i<counts.Count-1; i++)
+        {
+            if(looper != ItemType.Key && looper != ItemType.None) looper++;
+            else looper = ItemType.Rock;
+
+            if(counts[looper] > 0)
+            {
+                Selecting = looper;
+                break;
+            }
+        }
+
+        if(counts[Selecting] == 0) Selecting = ItemType.None;
+
+        OnSelecting?.Invoke();
+    }
+
+    private void HandlePrevious()
+    {
+        ItemType looper = Selecting;
+
+        for(int i=0; i<counts.Count-1; i++)
+        {
+            if(looper != ItemType.Rock && looper != ItemType.None) looper--;
+            else looper = ItemType.Key;
+
+            if(counts[looper] > 0)
+            {
+                Selecting = looper;
+                break;
+            }
+        }
+
+        if(counts[Selecting] == 0) Selecting = ItemType.None;
+
+        OnSelecting?.Invoke();
+    }
+
+    public void OnSelect(InputAction.CallbackContext context)
+    {
+        Instance.Select(Instance.Selecting);
+        Instance.toggle.CloseInventory();
     }
 }
 
