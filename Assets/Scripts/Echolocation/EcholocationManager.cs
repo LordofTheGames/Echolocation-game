@@ -20,6 +20,7 @@ public class EcholocationManager : MonoBehaviour
     [Header("Reflection Settings")]
     [Tooltip("Maximum number of times sound rays will bounce before stopping")]
     public int maxBounces = 2;
+    public bool visualiseAllBounces = true;
 
     [Header("Visual Settings")]
     // Tooltip adds pop-up info when hovering mouse over the variable in the inspector
@@ -104,6 +105,14 @@ public class EcholocationManager : MonoBehaviour
         public int originalRayIndex;
         public Matrix4x4 matrix;
     };
+
+    // Struct to hold ray data to prevent scrambling in paralllel section
+    public struct RayData
+    {
+        public Vector3 origin;
+        public Vector3 direction;
+        public float range;
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -264,18 +273,13 @@ public class EcholocationManager : MonoBehaviour
         }
 
         // Create temporary memory for the job
-        NativeList<Vector3> rayOrigins = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);   // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
-        NativeList<Vector3> rayDirections = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);
-        NativeList<float> rayRanges = new NativeList<float>(raysPerScan, Allocator.TempJob);
+        NativeList<RayData> currentRays = new NativeList<RayData>(raysPerScan, Allocator.TempJob);   // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
 
         Vector3 startOrigin = transform.position; // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
  
         // Prepare first layer of raycasts
         for (int i = 0; i < raysPerScan; i++)
         {
-            rayOrigins.Add(startOrigin);    // Initial fire before reflections have the same origin
-            rayRanges.Add(maxDistance);     // And start with the same max distance to travel
-            
             Vector3 worldDir;
 
             if (scanAngle >= 360f)
@@ -326,7 +330,8 @@ public class EcholocationManager : MonoBehaviour
                 }
             }
 
-            rayDirections.Add(worldDir);    // Add world direction for this ray
+            // Add combined package
+            currentRays.Add(new RayData{ origin = startOrigin, direction = worldDir, range = maxDistance });
         }
 
 
@@ -338,8 +343,8 @@ public class EcholocationManager : MonoBehaviour
         {
             for (int bounce = 0; bounce <= maxBounces; bounce++)
             {
-                int rayCount = rayOrigins.Length;   // Initialise to current number of rays in "generation"
-                if (rayCount == 0) break;           // Stop if none remaining
+                int rayCount = currentRays.Length;   // Initialise to current number of rays in "generation"
+                if (rayCount == 0) break;            // Stop if none remaining
 
                 // Prepare job memory
                 commands = new NativeArray<RaycastCommand>(rayCount, Allocator.TempJob); 
@@ -348,9 +353,7 @@ public class EcholocationManager : MonoBehaviour
                 // Setup physics job
                 var setupJob = new SetupRaycastJob
                 {
-                    origins = rayOrigins, 
-                    directions = rayDirections, 
-                    ranges = rayRanges,
+                    rays = currentRays.AsArray(), // Pass the combined list
                     layerMask = scanLayers, 
                     commands = commands
                 };
@@ -367,10 +370,8 @@ public class EcholocationManager : MonoBehaviour
                     RestoreLayers();
                 }
 
-                // Lists for next bounce
-                NativeList<Vector3> nextOrigins = new NativeList<Vector3>(rayCount, Allocator.TempJob);   
-                NativeList<Vector3> nextDirections = new NativeList<Vector3>(rayCount, Allocator.TempJob);
-                NativeList<float> nextRanges = new NativeList<float>(rayCount, Allocator.TempJob);
+                // List for next bounce
+                NativeList<RayData> nextRays = new NativeList<RayData>(rayCount, Allocator.TempJob);   
 
                 // Collect list of indices of rays that actually hit something
                 NativeList<int> hitIndices = new NativeList<int>(rayCount, Allocator.TempJob);
@@ -379,17 +380,16 @@ public class EcholocationManager : MonoBehaviour
                 var processJob = new ProcessHitsJob
                 {
                     results = results,
-                    directions = rayDirections,
-                    ranges = rayRanges,
+                    currentRays = currentRays.AsArray(),
                     bounce = bounce,
                     maxBounces = maxBounces,
                     isGridMode = isGridMode,
                     offset = isGridMode ? gridOffset : dotOffset,
                     scale = isGridMode ? gridQuadSize : dotScale,
 
-                    nextOrigins = nextOrigins.AsParallelWriter(),
-                    nextDirections = nextDirections.AsParallelWriter(),
-                    nextRanges = nextRanges.AsParallelWriter(),
+                    visualiseAllBounces = visualiseAllBounces,
+
+                    nextRays = nextRays.AsParallelWriter(),
                     hitIndices = hitIndices.AsParallelWriter(),
                     visualHits = visualHits.AsParallelWriter(),
                 };
@@ -398,13 +398,19 @@ public class EcholocationManager : MonoBehaviour
                 processHandle.Complete();
 
                 // --- Assign colours (main thread unpacking) ---
-                activeHitCount = visualHits.Length;
+                int currentBounceHits = visualHits.Length;
 
                 // Unpack visual data and assign colours
-                for (int k  = 0; k < activeHitCount; k++)
+                for (int k  = 0; k < currentBounceHits; k++)
                 {
                     VisualHit vHit = visualHits[k];
-                    instanceMatrices[k] = vHit.matrix;
+
+                    // Use global index so bounce 1 doesn't overwrite bounce 0
+                    int globalIndex = activeHitCount + k;
+
+                    if (globalIndex >= instanceMatrices.Length) break; // Safety if goes past safeBufferSize
+
+                    instanceMatrices[globalIndex] = vHit.matrix;
 
                     RaycastHit hit = results[vHit.originalRayIndex];
                     int hitLayerMask = 1 << hit.collider.gameObject.layer;  // Get hit layer and convert to bitmask
@@ -412,18 +418,19 @@ public class EcholocationManager : MonoBehaviour
 
                     if ((monsterLayer.value & hitLayerMask) > 0) // Bit wise comparison
                     {
-                        instanceColors[k] = monsterColors[variantIndex];
+                        instanceColors[globalIndex] = monsterColors[variantIndex];
                     }
                     else if ((interactableLayer.value & hitLayerMask) > 0 || (outlinedObjectLayer.value & hitLayerMask) > 0) // Check if interactable or currently outlined (only happens to interactables)
                     {
-                        instanceColors[k] = interactableColors[variantIndex];
+                        instanceColors[globalIndex] = interactableColors[variantIndex];
                     }
                     else
                     {
-                        instanceColors[k] = defaultColors[variantIndex];
+                        instanceColors[globalIndex] = defaultColors[variantIndex];
                     }
                 }
 
+                activeHitCount += currentBounceHits;
                         
                 // TODO: add this when we have multiple ray bounces working
                 // for (int k = 0; k < hitIndices.Length; k++)
@@ -442,23 +449,18 @@ public class EcholocationManager : MonoBehaviour
                 // Cleanup current "generation"
                 commands.Dispose();
                 results.Dispose();
-                rayOrigins.Dispose();
-                rayDirections.Dispose();
-                rayRanges.Dispose();
+                currentRays.Dispose();
                 hitIndices.Dispose();
                 visualHits.Dispose();
 
-                // Swap to next generations
-                rayOrigins = nextOrigins;
-                rayDirections = nextDirections;
-                rayRanges = nextRanges;
+                // Swap to next generation
+                currentRays = nextRays;
             }
         }
 
         // Final cleanup
-        rayOrigins.Dispose();
-        rayDirections.Dispose();
-        rayRanges.Dispose();
+        currentRays.Dispose();
+
         
 
         // Always set the arguments so (incorrect) values from previous calls of perform scan aren't kept
@@ -487,9 +489,7 @@ public class EcholocationManager : MonoBehaviour
     [BurstCompile]
     struct SetupRaycastJob : IJobParallelFor
     {
-        [ReadOnly] public NativeList<Vector3> origins; 
-        [ReadOnly] public NativeList<Vector3> directions;
-        [ReadOnly] public NativeList<float> ranges;
+        [ReadOnly] public NativeArray<RayData> rays;
         public LayerMask layerMask;
         public NativeArray<RaycastCommand> commands;
 
@@ -498,7 +498,7 @@ public class EcholocationManager : MonoBehaviour
             QueryParameters qp = QueryParameters.Default;
             qp.layerMask = layerMask;   // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
             qp.hitBackfaces = false;    // Dont't hit the insides of objects
-            commands[i] = new RaycastCommand(origins[i], directions[i], qp, ranges[i]);
+            commands[i] = new RaycastCommand(rays[i].origin, rays[i].direction, qp, rays[i].range);
         }
 
     };
@@ -507,8 +507,7 @@ public class EcholocationManager : MonoBehaviour
     struct ProcessHitsJob : IJobParallelFor
     {
         [ReadOnly] public NativeArray<RaycastHit> results;
-        [ReadOnly] public NativeList<Vector3> directions;
-        [ReadOnly] public NativeList<float> ranges;
+        [ReadOnly] public NativeArray<RayData> currentRays;
 
         public int bounce;
         public int maxBounces;
@@ -516,9 +515,9 @@ public class EcholocationManager : MonoBehaviour
         public float offset;
         public float scale;
 
-        public NativeList<Vector3>.ParallelWriter nextOrigins;
-        public NativeList<Vector3>.ParallelWriter nextDirections;
-        public NativeList<float>.ParallelWriter nextRanges;
+        public bool visualiseAllBounces;
+
+        public NativeList<RayData>.ParallelWriter nextRays;
         
         public NativeList<int>.ParallelWriter hitIndices;
         public NativeList<VisualHit>.ParallelWriter visualHits;
@@ -531,31 +530,45 @@ public class EcholocationManager : MonoBehaviour
 
             hitIndices.AddNoResize(i);
 
-            if (bounce == 0)
+            if ((bounce == 0 && !visualiseAllBounces) || visualiseAllBounces)
             {
                 // High performance SIMD math
-                quaternion rot = quaternion.LookRotation(-hit.normal, new float3(0, 1, 0));
+                float3 forward = -hit.normal;
+                float3 up = new float3(0, 1, 0);
+
+                // If ray hits flat floor or ceiling, the normal is parallel to our "up" vector
+                // This casuses NaN error. To fix, temporarily use x-axis as "up"
+                if (math.abs(forward.y) > 0.99f)
+                {
+                    up = new float3(1, 0, 0);
+                }
+                quaternion rot = quaternion.LookRotation(forward, up);
                 float3 pos = (float3)hit.point + (float3)(hit.normal * offset);
 
                 // Save indices so main thread can do layer detection for applying colour correctly
                 visualHits.AddNoResize(new VisualHit
                 {
-                    originalRayIndex = i, matrix = Matrix4x4.TRS(pos, rot, new Vector3(scale, scale, scale))
+                    originalRayIndex = i, 
+                    matrix = Matrix4x4.TRS(pos, rot, new Vector3(scale, scale, scale))
                 });
             }
 
             if (bounce < maxBounces)
             {
-                float remainingRange = ranges[i] - hit.distance;
+                float remainingRange = currentRays[i].range - hit.distance;
                 if (remainingRange > 0.0f)
                 {
-                    float3 incoming = directions[i];
+                    float3 incoming = currentRays[i].direction;
                     float3 normal = hit.normal;
                     float3 reflected = incoming - 2 * math.dot(incoming, normal) * normal;
 
-                    nextOrigins.AddNoResize(hit.point + (hit.normal * 0.01f));
-                    nextDirections.AddNoResize(reflected);
-                    nextRanges.AddNoResize(remainingRange);
+                    // Group in struct so they aren't scrambled
+                    nextRays.AddNoResize(new RayData
+                    {
+                        origin = hit.point + (hit.normal * 0.01f),
+                        direction = reflected,
+                        range = remainingRange
+                    });
                 }
             }
         }
