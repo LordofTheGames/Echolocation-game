@@ -104,6 +104,7 @@ public class EcholocationManager : MonoBehaviour
     {
         public int originalRayIndex;
         public Matrix4x4 matrix;
+        public int colorVariant; //  0, 1, or 2
     };
 
     // Struct to hold ray data to prevent scrambling in paralllel section
@@ -370,7 +371,7 @@ public class EcholocationManager : MonoBehaviour
 
                     RaycastHit hit = results[vHit.originalRayIndex];
                     int hitLayerMask = 1 << hit.collider.gameObject.layer;  // Get hit layer and convert to bitmask
-                    int variantIndex = UnityEngine.Random.Range(0,3);       // Get random index for colour within monster/interactable/default colours
+                    int variantIndex = vHit.colorVariant;                   // Get random index for colour within monster/interactable/default colours
 
                     if ((monsterLayer.value & hitLayerMask) > 0) // Bit wise comparison
                     {
@@ -575,11 +576,16 @@ public class EcholocationManager : MonoBehaviour
                 quaternion rot = quaternion.LookRotation(forward, up);
                 float3 pos = (float3)hit.point + (float3)(hit.normal * offset);
 
+                // Hash for random colour variants in range 0-2 
+                uint hash = math.hash(new int2(i, bounce));
+                int colorVariant = (int)(hash % 3); 
+
                 // Save indices so main thread can do layer detection for applying colour correctly
                 visualHits.AddNoResize(new VisualHit
                 {
                     originalRayIndex = i, 
-                    matrix = Matrix4x4.TRS(pos, rot, new Vector3(scale, scale, scale))
+                    matrix = Matrix4x4.TRS(pos, rot, new Vector3(scale, scale, scale)),
+                    colorVariant = colorVariant
                 });
             }
 
