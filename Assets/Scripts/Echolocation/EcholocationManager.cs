@@ -438,6 +438,11 @@ public class EcholocationManager : MonoBehaviour
         }
 
         //Debug.Log("Scan fired! Hits: " + activeHitCount);
+
+        // SetBuffers moved from RenderVisuals to end of perform scan so only called once
+        // RenderVisuals is ran every frame and buffers don't change after initial setting
+        instanceMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);  // Tell the material where to find the position data (the matrix buffer)
+        instanceMaterial.SetBuffer("_InstanceColors", colorBuffer);     // Tell the material where to find the colours 
     }
 
     // --- Burst Jobs ---
@@ -603,9 +608,6 @@ public class EcholocationManager : MonoBehaviour
     void RenderVisuals()
     {
         if (instanceMaterial == null || quadMesh == null) return;
-
-        instanceMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);  // Tell the material where to find the position data (the matrix buffer)
-        instanceMaterial.SetBuffer("_InstanceColors", colorBuffer);     // Tell the material where to find the colours 
 
         // Issue the draw command - "DrawMeshInstancedIndirect" is the most efficient way to draw lots of objects
         // Reads the count from args buffer instead of CPU telling it a number
