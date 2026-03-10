@@ -3,6 +3,8 @@ using Unity.Collections;            // Native collections (NativeArray) for high
 using Unity.Jobs;                   // The job system - allows us to run code on multiple CPU cores
 using System.Collections.Generic;   // For use of dictionary
 using Unity.Profiling;
+using Unity.Mathematics;
+using Unity.Burst;
 
 public class EcholocationManager : MonoBehaviour
 {
@@ -94,8 +96,14 @@ public class EcholocationManager : MonoBehaviour
     private Dictionary<Transform, int> layerMemory = new Dictionary<Transform, int>();
 
     // For profiling main loop - bounces and stuff
-    static readonly ProfilerMarker scanMarker = new ProfilerMarker("HeavyScanLoop");
+    static readonly ProfilerMarker scanMarker = new ProfilerMarker("Burst_HeavyScanLoop");
 
+    // A small data packet the job will send back to main thread
+    public struct VisualHit
+    {
+        public int originalRayIndex;
+        public Matrix4x4 matrix;
+    };
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -135,11 +143,11 @@ public class EcholocationManager : MonoBehaviour
         float totalFalloff = gridOffset + gridDepth;
         instanceMaterial.SetFloat("_Falloff", totalFalloff);
 
-        long totalMaxHits = (long) raysPerScan * (maxBounces + 1);                                          // Calculate max number of rays/hits, including initial pulse and subsequent reflections
-        int safeBufferSize = (int)Mathf.Min(totalMaxHits, 1000000);                                         // Prevenet a single pulse event from taking up to much VRAM
+        long totalMaxHits = (long) raysPerScan * (maxBounces + 1);      // Calculate max number of rays/hits, including initial pulse and subsequent reflections
+        int safeBufferSize = (int)Mathf.Min(totalMaxHits, 1000000);     // Prevenet a single pulse event from taking up to much VRAM
 
-        instanceMatrices = new Matrix4x4[safeBufferSize];                                                       // Intialise theh array to hold "raysPerScan" number of matrices (positions)
-        instanceColors = new Vector4[safeBufferSize];                                                           // Intialise theh array to hold "raysPerScan" number of colors
+        instanceMatrices = new Matrix4x4[safeBufferSize];           // Intialise the array to hold "safeBufferSize" number of matrices (positions)
+        instanceColors = new Vector4[safeBufferSize];               // Intialise the array to hold "safeBufferSize" number of colors
         
         matrixBuffer = new ComputeBuffer(safeBufferSize, 64);                                                   // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
         colorBuffer = new ComputeBuffer(safeBufferSize, 16);                                                    // Create GPU buffer for colours, 16 = 4 floats * 4 bytes
@@ -190,13 +198,16 @@ public class EcholocationManager : MonoBehaviour
         scanDirection = direction.normalized;
         scanAngle = angle;
         scanUniformity = Mathf.Clamp01(uniformity);     // Make sure is in valid range
-        raysPerScan = Mathf.Clamp(numRays, 0, 100000);   // Make sure is in (currently chosen) valid range
+        raysPerScan = Mathf.Clamp(numRays, 0, 100000);  // Make sure is in (currently chosen) valid range
         maxDistance = maxDist;
         objectToIgnore = ignoreMe;
         // TODO: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
-        INoiseSensitive sensitiveTarget = GameObject.FindGameObjectWithTag("Monster").GetComponent<INoiseSensitive>();
-        sensitiveTarget.OnHeardScan(transform, volume, isFootsteps);
+        GameObject monster = GameObject.FindGameObjectWithTag("Monster");
+        if (monster != null) {
+            INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
+            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, volume, isFootsteps);
+        }
     }
 
 
@@ -327,27 +338,28 @@ public class EcholocationManager : MonoBehaviour
         {
             for (int bounce = 0; bounce <= maxBounces; bounce++)
             {
-                int rayCount = rayOrigins.Length;   // Initialise to current number of rays in "generation
+                int rayCount = rayOrigins.Length;   // Initialise to current number of rays in "generation"
                 if (rayCount == 0) break;           // Stop if none remaining
 
                 // Prepare job memory
                 commands = new NativeArray<RaycastCommand>(rayCount, Allocator.TempJob); 
                 results = new NativeArray<RaycastHit>(rayCount, Allocator.TempJob);
 
-                // Prepare commands for all current rays
-                for (int i = 0; i < rayCount; i++)
+                // Setup physics job
+                var setupJob = new SetupRaycastJob
                 {
-                    // Set up the settings package
-                    QueryParameters queryParams = QueryParameters.Default;
-                    queryParams.layerMask = scanLayers;                                         // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
-                    queryParams.hitBackfaces = false;                                           // Dont't hit the insides of objects
+                    origins = rayOrigins, 
+                    directions = rayDirections, 
+                    ranges = rayRanges,
+                    layerMask = scanLayers, 
+                    commands = commands
+                };
+                JobHandle setupHandle = setupJob.Schedule(rayCount, 64);
 
-                    commands[i] = new RaycastCommand(rayOrigins[i], rayDirections[i], queryParams, rayRanges[i]);    // Start at ray origin, go in direciton of ray, use these settings, limit distance to remaining from max distance
-                }
+                // Run physics
+                JobHandle rayHandle = RaycastCommand.ScheduleBatch(commands, results, 1, setupHandle);  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
+                rayHandle.Complete();                                                                   // Main thread waits here till complete
 
-                // Fire rays
-                JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
-                handle.Complete();                                                                          // Forces the main thread to wait until the job is finished 
 
                 // Reset object+children layers after initial projections (so reflections can hit it)
                 if (bounce == 0 && objectToIgnore != null)
@@ -356,95 +368,76 @@ public class EcholocationManager : MonoBehaviour
                 }
 
                 // Lists for next bounce
-                NativeList<Vector3> nextOrigins = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);   
-                NativeList<Vector3> nextDirections = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);
-                NativeList<float> nextRanges = new NativeList<float>(raysPerScan, Allocator.TempJob);
+                NativeList<Vector3> nextOrigins = new NativeList<Vector3>(rayCount, Allocator.TempJob);   
+                NativeList<Vector3> nextDirections = new NativeList<Vector3>(rayCount, Allocator.TempJob);
+                NativeList<float> nextRanges = new NativeList<float>(rayCount, Allocator.TempJob);
 
+                // Collect list of indices of rays that actually hit something
+                NativeList<int> hitIndices = new NativeList<int>(rayCount, Allocator.TempJob);
+                NativeList<VisualHit> visualHits = new NativeList<VisualHit>(rayCount, Allocator.TempJob);
 
-
-                // Process Hits
-                for (int i = 0; i < rayCount; i++)
+                var processJob = new ProcessHitsJob
                 {
-                    // If the collider is not null, the ray hit something
-                    if (results[i].collider != null)
+                    results = results,
+                    directions = rayDirections,
+                    ranges = rayRanges,
+                    bounce = bounce,
+                    maxBounces = maxBounces,
+                    isGridMode = isGridMode,
+                    offset = isGridMode ? gridOffset : dotOffset,
+                    scale = isGridMode ? gridQuadSize : dotScale,
+
+                    nextOrigins = nextOrigins.AsParallelWriter(),
+                    nextDirections = nextDirections.AsParallelWriter(),
+                    nextRanges = nextRanges.AsParallelWriter(),
+                    hitIndices = hitIndices.AsParallelWriter(),
+                    visualHits = visualHits.AsParallelWriter(),
+                };
+
+                JobHandle processHandle = processJob.Schedule(rayCount, 64);
+                processHandle.Complete();
+
+                // --- Assign colours (main thread unpacking) ---
+                activeHitCount = visualHits.Length;
+
+                // Unpack visual data and assign colours
+                for (int k  = 0; k < activeHitCount; k++)
+                {
+                    VisualHit vHit = visualHits[k];
+                    instanceMatrices[k] = vHit.matrix;
+
+                    RaycastHit hit = results[vHit.originalRayIndex];
+                    int hitLayerMask = 1 << hit.collider.gameObject.layer;  // Get hit layer and convert to bitmask
+                    int variantIndex = UnityEngine.Random.Range(0,3);       // Get random index for colour within monster/interactable/default colours
+
+                    if ((monsterLayer.value & hitLayerMask) > 0) // Bit wise comparison
                     {
-                        RaycastHit hit = results[i];    // Get hit data
-
-
-                        // NOTE: if you don't want reflected rays to be visualised change the if to if (bounce == 0)
-                        // ALSO: update the total max hit thing to reduce buffer size
-
-                        if (activeHitCount < instanceMatrices.Length)   // Safety check, currently has more than enough space so should have no problems
-                        {
-                            Quaternion rotation = Quaternion.LookRotation(-hit.normal); // Create a rotation that looks "up" away from the surface normal - makes the quad lie flat on the wall
-                        
-                            Vector3 position;
-                            float scale;
-                            if (isGridMode)
-                            {
-                                position = hit.point + (hit.normal * gridOffset);   // Calculate position of the quad - hitpoint + offset
-                                scale = gridQuadSize;                               // Get scale factor for quad
-                            }
-                            else
-                            {
-                                position = hit.point + (hit.normal * dotOffset);    // Calculate position of the quad - hitpoint + offset
-                                scale = dotScale;                                   // Get scale factor for quad
-                            }
-
-                            instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
-                            
-                            
-                            // Color logic 
-
-                            int hitLayer = hit.collider.gameObject.layer;   // Get hit layer
-                            int hitLayerMask = 1 << hitLayer;               // Convert layer to bitmask
-
-                            int variantIndex = UnityEngine.Random.Range(0,3);   // Get random index for colour within monster/interactable/default colours
-
-                            if ((monsterLayer.value & hitLayerMask) > 0) // Bit wise comparison
-                            {
-                                instanceColors[activeHitCount] = monsterColors[variantIndex];
-                            }
-                            else if ((interactableLayer & hitLayerMask) > 0 || (outlinedObjectLayer & hitLayerMask) > 0) // Check if interactable or currently outlined (only happens to interactables)
-                            {
-                                instanceColors[activeHitCount] = interactableColors[variantIndex];
-                            }
-                            else
-                            {
-                                instanceColors[activeHitCount] = defaultColors[variantIndex];
-                            }
-
-                            
-                            activeHitCount++;                                                                                   // Increment the counter
-                        }
-                        
-                        // TODO: add this when we have multiple ray bounces working
-                        // INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
-                        // if (sensitiveTarget != null) // If the thing hit (the monster) has an implementaion of INoiseSensitive (not null) then it wants this info so send
-                        //{
-                        //  sensitiveTarget.OnHeardScan(sourceObj.transform); // Send the original source object even after reflections 
-                        //}
-
-                        // Calculate reflections
-                        if (bounce < maxBounces)
-                        {
-                            float distanceTravelled = hit.distance;
-                            float remainingRange = rayRanges[i] - distanceTravelled; // Calculate remaining distance
-
-                            // Only bounce if range left
-                            if (remainingRange > 0f)
-                            {
-                                Vector3 incomingDir = rayDirections[i];
-                                Vector3 reflectedDir = Vector3.Reflect(incomingDir, hit.normal);
-
-                                // Add to next batch of rays
-                                nextOrigins.Add(hit.point + (hit.normal * 0.01f)); // Add offset to spawn point to prevent self collision
-                                nextDirections.Add(reflectedDir);
-                                nextRanges.Add(remainingRange);
-                            }
-                        }
+                        instanceColors[k] = monsterColors[variantIndex];
+                    }
+                    else if ((interactableLayer.value & hitLayerMask) > 0 || (outlinedObjectLayer.value & hitLayerMask) > 0) // Check if interactable or currently outlined (only happens to interactables)
+                    {
+                        instanceColors[k] = interactableColors[variantIndex];
+                    }
+                    else
+                    {
+                        instanceColors[k] = defaultColors[variantIndex];
                     }
                 }
+
+                        
+                // TODO: add this when we have multiple ray bounces working
+                // for (int k = 0; k < hitIndices.Length; k++)
+                // {
+                //     int originalRayIndex = hitIndices[k];
+                //     RaycastHit hit = results[originalRayIndex];
+
+                //     INoiseSensitive sensitiveTarget = hit.collider.GetComponent<INoiseSensitive>();
+
+                //     if (sensitiveTarget != null)
+                //     {
+                //         sensitiveTarget.OnHeardScan(sourceObj.transform);
+                //     }
+                // }
 
                 // Cleanup current "generation"
                 commands.Dispose();
@@ -452,6 +445,8 @@ public class EcholocationManager : MonoBehaviour
                 rayOrigins.Dispose();
                 rayDirections.Dispose();
                 rayRanges.Dispose();
+                hitIndices.Dispose();
+                visualHits.Dispose();
 
                 // Swap to next generations
                 rayOrigins = nextOrigins;
@@ -485,6 +480,85 @@ public class EcholocationManager : MonoBehaviour
         }
 
         //Debug.Log("Scan fired! Hits: " + activeHitCount);
+    }
+
+    // --- Burst Jobs ---
+
+    [BurstCompile]
+    struct SetupRaycastJob : IJobParallelFor
+    {
+        [ReadOnly] public NativeList<Vector3> origins; 
+        [ReadOnly] public NativeList<Vector3> directions;
+        [ReadOnly] public NativeList<float> ranges;
+        public LayerMask layerMask;
+        public NativeArray<RaycastCommand> commands;
+
+        public void Execute(int i)
+        {
+            QueryParameters qp = QueryParameters.Default;
+            qp.layerMask = layerMask;   // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
+            qp.hitBackfaces = false;    // Dont't hit the insides of objects
+            commands[i] = new RaycastCommand(origins[i], directions[i], qp, ranges[i]);
+        }
+
+    };
+
+    [BurstCompile]
+    struct ProcessHitsJob : IJobParallelFor
+    {
+        [ReadOnly] public NativeArray<RaycastHit> results;
+        [ReadOnly] public NativeList<Vector3> directions;
+        [ReadOnly] public NativeList<float> ranges;
+
+        public int bounce;
+        public int maxBounces;
+        public bool isGridMode;
+        public float offset;
+        public float scale;
+
+        public NativeList<Vector3>.ParallelWriter nextOrigins;
+        public NativeList<Vector3>.ParallelWriter nextDirections;
+        public NativeList<float>.ParallelWriter nextRanges;
+        
+        public NativeList<int>.ParallelWriter hitIndices;
+        public NativeList<VisualHit>.ParallelWriter visualHits;
+
+        public void Execute(int i)
+        {
+            if (results[i].colliderInstanceID == 0) return;     // Unity's job system returns a colliderInstanceID of 0 if ray didn't hit anything
+
+            RaycastHit hit = results[i];
+
+            hitIndices.AddNoResize(i);
+
+            if (bounce == 0)
+            {
+                // High performance SIMD math
+                quaternion rot = quaternion.LookRotation(-hit.normal, new float3(0, 1, 0));
+                float3 pos = (float3)hit.point + (float3)(hit.normal * offset);
+
+                // Save indices so main thread can do layer detection for applying colour correctly
+                visualHits.AddNoResize(new VisualHit
+                {
+                    originalRayIndex = i, matrix = Matrix4x4.TRS(pos, rot, new Vector3(scale, scale, scale))
+                });
+            }
+
+            if (bounce < maxBounces)
+            {
+                float remainingRange = ranges[i] - hit.distance;
+                if (remainingRange > 0.0f)
+                {
+                    float3 incoming = directions[i];
+                    float3 normal = hit.normal;
+                    float3 reflected = incoming - 2 * math.dot(incoming, normal) * normal;
+
+                    nextOrigins.AddNoResize(hit.point + (hit.normal * 0.01f));
+                    nextDirections.AddNoResize(reflected);
+                    nextRanges.AddNoResize(remainingRange);
+                }
+            }
+        }
     }
 
     // Function that actually draws the graphics
