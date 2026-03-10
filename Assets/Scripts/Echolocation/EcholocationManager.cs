@@ -273,66 +273,22 @@ public class EcholocationManager : MonoBehaviour
         }
 
         // Create temporary memory for the job
-        NativeList<RayData> currentRays = new NativeList<RayData>(raysPerScan, Allocator.TempJob);   // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
-
-        Vector3 startOrigin = transform.position; // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
- 
+        NativeList<RayData> currentRays = new NativeList<RayData>(raysPerScan, Allocator.TempJob);  // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
+        currentRays.Resize(raysPerScan, NativeArrayOptions.UninitializedMemory);                    // Pre-size array without initialising memory
+    
         // Prepare first layer of raycasts
-        for (int i = 0; i < raysPerScan; i++)
+        var genJob  = new GenerateRaysJob
         {
-            Vector3 worldDir;
-
-            if (scanAngle >= 360f)
-            {
-                worldDir = UnityEngine.Random.onUnitSphere;
-            }
-            else
-            {
-                // Uniform cone distribution math - using Archimedes theorem
-                // Any slice of a sphere with the same height, has the same surface area on the "crust" of the sphere
-                // Therefore if you imagine those heights getting really small ~ 0, it produces a circular ring on the sphere's surface
-                // If you uniformly pick  heights/rings, all of which have the same surface area, and uniformly pick points on the rings
-                // You will uniformly distribute points an the surface of the sphere
-                // And if you limit the height to be picked along a line from the sphere's centre, say 1 at surface of a unit sphere, to 0.866 
-                // Where the "width" of the sphere at that point corresponds to a 60 degree cone
-                // You can uniformly distribute rays within a cone without clumping at the centre/pole
-                // And then you can convert to the space of the "direction" of the cone
-
-                float halfAngleRad = (scanAngle / 2f) * Mathf.Deg2Rad;      // Split angle to half on either side of line and convert to radians
-                float minZ = Mathf.Cos(halfAngleRad);                       // Get the height corresponding to the angle of the cone on the sphere
-
-                float exponent = Mathf.Lerp(8.0f, 1.0f, scanUniformity);    // How clumped the rays should be
-
-                float rng = UnityEngine.Random.value;                       // Random value 0 to 1
-                float biasedT = Mathf.Pow(rng, 1.0f / exponent);            // Warp random value using exponent, root effect for smooth hill like distribution
-
-                float z = Mathf.Lerp(minZ, 1.0f, biasedT);                  // Uniformity = 1 means exponent = 1 means 1 / exponent = 1 means even distribution, higher exponent/lower uniformity means more clumped
-
-                float radiusAtHeight = Mathf.Sqrt(1f - z * z);              // Get the radius of the ring at that point
-                float phi = UnityEngine.Random.Range(0f, 2f * Mathf.PI);    // Randomly pick an angle around the ring (polar coordinates)
-
-                // Convert to cartesian
-                Vector3 localDir = new Vector3(
-                    radiusAtHeight * Mathf.Cos(phi),
-                    radiusAtHeight * Mathf.Sin(phi),
-                    z
-                );
-
-                // Rotate to direction specified (prevent LookRotation(0,0,0) errors)
-                if (scanDirection != Vector3.forward)
-                {
-                    Quaternion lookRot = Quaternion.LookRotation(scanDirection);
-                    worldDir = lookRot * localDir;
-                }
-                else
-                {
-                    worldDir = localDir;
-                }
-            }
-
-            // Add combined package
-            currentRays.Add(new RayData{ origin = startOrigin, direction = worldDir, range = maxDistance });
-        }
+            seed = (uint)(Time.frameCount * 1000 + GetInstanceID()),
+            scanAngle = scanAngle,
+            scanDirection = scanDirection,
+            scanUniformity = scanUniformity,
+            maxDistance = maxDistance,
+            startOrigin = transform.position,   // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
+            rays = currentRays.AsArray()
+        };
+        JobHandle genHandle = genJob.Schedule(raysPerScan, 64);
+        genHandle.Complete();
 
 
         // Reflection loop
@@ -485,6 +441,75 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // --- Burst Jobs ---
+
+    [BurstCompile]
+    struct GenerateRaysJob : IJobParallelFor
+    {
+        public uint seed;
+        public float scanAngle;
+        public float scanUniformity;
+        public float3 scanDirection;
+        public float maxDistance;
+        public float3 startOrigin;
+        public NativeArray<RayData> rays;
+
+        public void Execute(int i)
+        {
+            // Each thread gets a unique, deterministic seed
+            var rng = new Unity.Mathematics.Random(math.hash(new uint2(seed, (uint)i)) | 1u);
+            float3 worldDir;
+
+            if (scanAngle >= 360f)
+            {
+                worldDir = rng.NextFloat3Direction();
+            }
+            else
+            {
+                // Uniform cone distribution math - using Archimedes theorem
+                // Any slice of a sphere with the same height, has the same surface area on the "crust" of the sphere
+                // Therefore if you imagine those heights getting really small ~ 0, it produces a circular ring on the sphere's surface
+                // If you uniformly pick  heights/rings, all of which have the same surface area, and uniformly pick points on the rings
+                // You will uniformly distribute points an the surface of the sphere
+                // And if you limit the height to be picked along a line from the sphere's centre, say 1 at surface of a unit sphere, to 0.866 
+                // Where the "width" of the sphere at that point corresponds to a 60 degree cone
+                // You can uniformly distribute rays within a cone without clumping at the centre/pole
+                // And then you can convert to the space of the "direction" of the cone
+
+                float halfAngleRad = math.radians(scanAngle * 0.5f);        // Split angle to half on either side of line and convert to radians
+                float minZ = math.cos(halfAngleRad);                        // Get the height corresponding to the angle of the cone on the sphere
+
+                float exponent = math.lerp(8.0f, 1.0f, scanUniformity);     // How clumped the rays should be
+
+                float biasedT = math.pow(rng.NextFloat(), 1.0f / exponent); // Warp random value using exponent, root effect for smooth hill like distribution
+
+                float z = math.lerp(minZ, 1.0f, biasedT);                   // Uniformity = 1 means exponent = 1 means 1 / exponent = 1 means even distribution, higher exponent/lower uniformity means more clumped
+
+                float radiusAtHeight = Mathf.Sqrt(1f - z * z);              // Get the radius of the ring at that point
+                float phi = rng.NextFloat() * math.PI2;                     // Randomly pick an angle around the ring (polar coordinates)
+
+                // Convert to cartesian
+                Vector3 localDir = new float3(
+                    radiusAtHeight * math.cos(phi),
+                    radiusAtHeight * math.sin(phi),
+                    z
+                );
+
+                // Rotate to direction specified (prevent LookRotation(0,0,0) errors)
+                if (!scanDirection.Equals(math.forward()))
+                {
+                    quaternion lookRot = quaternion.LookRotation(scanDirection, math.up());
+                    worldDir = math.rotate(lookRot, localDir);
+                }
+                else
+                {
+                    worldDir = localDir;
+                }
+            }
+
+            // Add combined package
+            rays[i] = new RayData{ origin = startOrigin, direction = worldDir, range = maxDistance };
+        }
+    }
 
     [BurstCompile]
     struct SetupRaycastJob : IJobParallelFor
