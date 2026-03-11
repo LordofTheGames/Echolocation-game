@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Audio;
+using UnityEngine.SceneManagement;
 
 public class MicInput : MonoBehaviour
 {
@@ -41,6 +42,14 @@ public class MicInput : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        if (SceneManager.GetActiveScene().name == "MVP" && highPitch == 0 && normalPitch == 0 && highVolume == 0 && normalVolume == 0)
+        {
+            // if no mic calibration, set default values
+            normalPitch = 50;
+            highPitch = 140 - normalPitch;
+            normalVolume = 0.2f;
+            highVolume = 0.97f - normalVolume;
+        }
         sampleRate = AudioSettings.outputSampleRate;
         audioSource = gameObject.AddComponent<AudioSource>();
         audioSource.loop = true;
