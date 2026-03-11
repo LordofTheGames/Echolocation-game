@@ -300,6 +300,10 @@ public class EcholocationManager : MonoBehaviour
 
         using (scanMarker.Auto())
         {
+            var qp = QueryParameters.Default;
+            qp.layerMask = scanLayers;
+            qp.hitBackfaces = false;
+
             for (int bounce = 0; bounce <= maxBounces; bounce++)
             {
                 int rayCount = currentRays.Length;   // Initialise to current number of rays in "generation"
@@ -313,7 +317,7 @@ public class EcholocationManager : MonoBehaviour
                 var setupJob = new SetupRaycastJob
                 {
                     rays = currentRays.AsArray(), // Pass the combined list
-                    layerMask = scanLayers, 
+                    qp = qp, 
                     commands = commands
                 };
                 JobHandle setupHandle = setupJob.Schedule(rayCount, 64, bounce == 0 ? genHandle : default); // Has dependancy - on the first bounce wait until intial ray generation job has completed 
@@ -526,14 +530,11 @@ public class EcholocationManager : MonoBehaviour
     struct SetupRaycastJob : IJobParallelFor
     {
         [ReadOnly] public NativeArray<RayData> rays;
-        public LayerMask layerMask;
+        public QueryParameters qp;
         public NativeArray<RaycastCommand> commands;
 
         public void Execute(int i)
         {
-            QueryParameters qp = QueryParameters.Default;
-            qp.layerMask = layerMask;   // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
-            qp.hitBackfaces = false;    // Dont't hit the insides of objects
             commands[i] = new RaycastCommand(rays[i].origin, rays[i].direction, qp, rays[i].range);
         }
 
