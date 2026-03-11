@@ -33,7 +33,6 @@ public class WaterInteraction : MonoBehaviour
     private RaycastHit waterHit;
     private LayerMask waterLayer;
 
-    // ------ Variables for Wade ripple type only
     private Vector3 playerPos;
     private float velocityXZ;
 
@@ -42,11 +41,12 @@ public class WaterInteraction : MonoBehaviour
         cc = GetComponent<CharacterController>();
         playerFootsteps = GetComponent<PlayerFootsteps>();
 
-        // waterLayer = LayerMask.GetMask("Water");
         lastPos = transform.position;
         playerPos = transform.position;
         WadeRipple = Instantiate(WadeRipplePrefab);
         StepsRipple = Instantiate(StepsRipplePrefab);
+
+        waterLayer = 1 << 4;
     }
 
     void Update()
@@ -84,12 +84,10 @@ public class WaterInteraction : MonoBehaviour
         }
         else if (waterRippleType == WaterRippleType.Wade)
         {
-            // Calculate Velocity (Exactly like your original script)
             velocityXZ = Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(playerPos.x, 0, playerPos.z));
             playerPos = transform.position;
             WadeRipple.transform.position = transform.position;
 
-            // Global Shader Variable
             Shader.SetGlobalVector("_Player", transform.position);
 
             CheckWater();
@@ -99,7 +97,14 @@ public class WaterInteraction : MonoBehaviour
 
     void CheckWater()
     {
-        inWater = playerFootsteps != null && playerFootsteps.currentSurface == SurfaceType.Water;
+        if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out waterHit, 1.5f, waterLayer, QueryTriggerInteraction.Collide))
+        {
+            inWater = true;
+        }
+        else
+        {
+            inWater = playerFootsteps != null && playerFootsteps.currentSurface == SurfaceType.Water;
+        }
 
         if (waterRippleType == WaterRippleType.Footsteps)
         {
@@ -181,7 +186,7 @@ public class WaterInteraction : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (waterRippleType == WaterRippleType.Wade && other.CompareTag("Water"))
+        if (waterRippleType == WaterRippleType.Wade && other.gameObject.layer == 4)
         {
             WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
         }
@@ -189,7 +194,7 @@ public class WaterInteraction : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (waterRippleType == WaterRippleType.Wade && other.CompareTag("Water"))
+        if (waterRippleType == WaterRippleType.Wade && other.gameObject.layer == 4)
         {
             WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
         }

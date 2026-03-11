@@ -65,7 +65,10 @@ public class PlayerFootsteps : MonoBehaviour
 
     void Start()
     {
-        lastPos = transform.position;
+        currentPos = transform.position;
+        currentPos.y = 0;
+        lastPos = currentPos;
+        
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         currentSettings = walk;
     }
@@ -95,7 +98,9 @@ public class PlayerFootsteps : MonoBehaviour
         if (hit.normal.y > 0.5f) // Gemini says this is better than using 
                                  //layermask.all for checking if we're on the ground
         {
-            switch (hit.collider.tag)
+            string surfaceTag = hit.collider.tag;
+
+            switch (surfaceTag)
             {
                 case "Water":
                     currentSurface = SurfaceType.Water;
