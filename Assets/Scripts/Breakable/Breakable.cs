@@ -1,17 +1,24 @@
 using UnityEngine;
 
 [SelectionBase]
-public class BreakableGlass : MonoBehaviour
+public class Breakable : MonoBehaviour
 {
     [SerializeField] GameObject box;
     [SerializeField] GameObject brokenBox;
+    [SerializeField] AudioClip breakSound;
     BoxCollider bc;
+    AudioSource _audioSource;
 
     private void Awake()
     {
         box.SetActive(true);
         brokenBox.SetActive(false);
         bc = GetComponent<BoxCollider>();
+        if (breakSound != null)
+        {
+            _audioSource = gameObject.AddComponent<AudioSource>();
+            _audioSource.playOnAwake = false;
+        }
     }
 
     private void OnMouseDown()
@@ -24,5 +31,7 @@ public class BreakableGlass : MonoBehaviour
         box.SetActive(false);
         brokenBox.SetActive(true);
         bc.enabled = false;
+        if (breakSound != null && _audioSource != null)
+            _audioSource.PlayOneShot(breakSound);
     }
 }

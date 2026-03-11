@@ -374,6 +374,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: fd7119992e189864d942ccaa79d4e2e7, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e040de0721fa2e0498948ffe2a719ac4, type: 2}
     - target: {fileID: 919132149155446097, guid: fd7119992e189864d942ccaa79d4e2e7, type: 3}
       propertyPath: m_Name
       value: box
@@ -441,10 +445,42 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -8056965079981208381, guid: a80dd7940d9536c4f9ef4c8cae55163a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e040de0721fa2e0498948ffe2a719ac4, type: 2}
+    - target: {fileID: -5103411483515222232, guid: a80dd7940d9536c4f9ef4c8cae55163a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e040de0721fa2e0498948ffe2a719ac4, type: 2}
+    - target: {fileID: -2475228211257641255, guid: a80dd7940d9536c4f9ef4c8cae55163a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e040de0721fa2e0498948ffe2a719ac4, type: 2}
     - target: {fileID: 919132149155446097, guid: a80dd7940d9536c4f9ef4c8cae55163a, type: 3}
       propertyPath: m_Name
       value: broken_box
       objectReference: {fileID: 0}
+    - target: {fileID: 1741506042474426101, guid: a80dd7940d9536c4f9ef4c8cae55163a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e040de0721fa2e0498948ffe2a719ac4, type: 2}
+    - target: {fileID: 4826995591024338243, guid: a80dd7940d9536c4f9ef4c8cae55163a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e040de0721fa2e0498948ffe2a719ac4, type: 2}
+    - target: {fileID: 5370479228720023273, guid: a80dd7940d9536c4f9ef4c8cae55163a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e040de0721fa2e0498948ffe2a719ac4, type: 2}
+    - target: {fileID: 5771879935722385197, guid: a80dd7940d9536c4f9ef4c8cae55163a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e040de0721fa2e0498948ffe2a719ac4, type: 2}
+    - target: {fileID: 8247850577448708049, guid: a80dd7940d9536c4f9ef4c8cae55163a, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: e040de0721fa2e0498948ffe2a719ac4, type: 2}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -704,8 +740,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1543670634}
-  - component: {fileID: 1543670633}
   - component: {fileID: 1543670632}
+  - component: {fileID: 1543670635}
   m_Layer: 0
   m_Name: Box
   m_TagString: Untagged
@@ -734,20 +770,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 2.525995, y: 2.345699, z: 3.342067}
   m_Center: {x: 0.052766442, y: 0.07023919, z: 0.40678895}
---- !u!114 &1543670633
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1543670631}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c276c0b555217a47affe361c8402e29, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  box: {fileID: 1038224774}
-  brokenBox: {fileID: 1098266027}
 --- !u!4 &1543670634
 Transform:
   m_ObjectHideFlags: 0
@@ -765,6 +787,20 @@ Transform:
   - {fileID: 1038224775}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1543670635
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1543670631}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c276c0b555217a47affe361c8402e29, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  box: {fileID: 1038224774}
+  brokenBox: {fileID: 1098266027}
 --- !u!54 &1649837650
 Rigidbody:
   m_ObjectHideFlags: 0
