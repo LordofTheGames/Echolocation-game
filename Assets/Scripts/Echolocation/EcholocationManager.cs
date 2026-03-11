@@ -293,6 +293,7 @@ public class EcholocationManager : MonoBehaviour
             rays = currentRays.AsArray()
         };
         JobHandle genHandle = genJob.Schedule(raysPerScan, 64);
+        genHandle.Complete();
 
         // Reflection loop
 
@@ -320,7 +321,7 @@ public class EcholocationManager : MonoBehaviour
                     qp = qp, 
                     commands = commands
                 };
-                JobHandle setupHandle = setupJob.Schedule(rayCount, 64, bounce == 0 ? genHandle : default); // Has dependancy - on the first bounce wait until intial ray generation job has completed 
+                JobHandle setupHandle = setupJob.Schedule(rayCount, 64);
 
                 // Run physics
                 JobHandle rayHandle = RaycastCommand.ScheduleBatch(commands, results, 1, setupHandle);  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
