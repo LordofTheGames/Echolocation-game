@@ -63,8 +63,8 @@ public class EcholocationManager : MonoBehaviour
     // NativeArray is a high-performance list used by the job system
     private NativeArray<RaycastCommand> commands;       // The "to do list" of raycasts
     private NativeArray<RaycastHit> results;            // The results
-    private Matrix4x4[] instanceMatrices;               // Holds position data before sending it to the GPU
-    private Vector4[] instanceColors;                   // Holds color data before sending it to GPU
+    private NativeArray<Matrix4x4> instanceMatrices;    // Holds position data before sending it to the GPU
+    private NativeArray<Vector4> instanceColors;        // Holds color data before sending it to GPU
     private uint[] args = new uint[5] { 0, 0, 0, 0, 0}; // Array of 5 uints required by "DrawMeshInstancedIndirect" command
     private int activeHitCount = 0; // A counter to keep track of how many rays have actually hit a wall this frame
 
@@ -98,6 +98,10 @@ public class EcholocationManager : MonoBehaviour
 
     // For profiling main loop - bounces and stuff
     static readonly ProfilerMarker scanMarker = new ProfilerMarker("Burst_HeavyScanLoop");
+
+
+    // Used to store render bounds so bounds aren't rebuilt every frame
+    private Bounds renderBounds;
 
     // A small data packet the job will send back to main thread
     public struct VisualHit
@@ -156,8 +160,8 @@ public class EcholocationManager : MonoBehaviour
         long totalMaxHits = (long) raysPerScan * (maxBounces + 1);      // Calculate max number of rays/hits, including initial pulse and subsequent reflections
         int safeBufferSize = (int)Mathf.Min(totalMaxHits, 1000000);     // Prevenet a single pulse event from taking up to much VRAM
 
-        instanceMatrices = new Matrix4x4[safeBufferSize];           // Intialise the array to hold "safeBufferSize" number of matrices (positions)
-        instanceColors = new Vector4[safeBufferSize];               // Intialise the array to hold "safeBufferSize" number of colors
+        instanceMatrices = new NativeArray<Matrix4x4>(safeBufferSize, Allocator.Persistent);    // Intialise the array to hold "safeBufferSize" number of matrices (positions)
+        instanceColors = new NativeArray<Vector4>(safeBufferSize, Allocator.Persistent);        // Intialise the array to hold "safeBufferSize" number of colors
         
         matrixBuffer = new ComputeBuffer(safeBufferSize, 64);                                                   // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
         colorBuffer = new ComputeBuffer(safeBufferSize, 16);                                                    // Create GPU buffer for colours, 16 = 4 floats * 4 bytes
@@ -444,6 +448,9 @@ public class EcholocationManager : MonoBehaviour
         // RenderVisuals is ran every frame and buffers don't change after initial setting
         instanceMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);  // Tell the material where to find the position data (the matrix buffer)
         instanceMaterial.SetBuffer("_InstanceColors", colorBuffer);     // Tell the material where to find the colours 
+
+        // Create render bounds
+        renderBounds = new Bounds(transform.position, Vector3.one * 1000);
     }
 
     // --- Burst Jobs ---
@@ -490,11 +497,11 @@ public class EcholocationManager : MonoBehaviour
 
                 float z = math.lerp(minZ, 1.0f, biasedT);                   // Uniformity = 1 means exponent = 1 means 1 / exponent = 1 means even distribution, higher exponent/lower uniformity means more clumped
 
-                float radiusAtHeight = Mathf.Sqrt(1f - z * z);              // Get the radius of the ring at that point
+                float radiusAtHeight = math.sqrt(1f - z * z);              // Get the radius of the ring at that point
                 float phi = rng.NextFloat() * math.PI2;                     // Randomly pick an angle around the ring (polar coordinates)
 
                 // Convert to cartesian
-                Vector3 localDir = new float3(
+                float3 localDir = new float3(
                     radiusAtHeight * math.cos(phi),
                     radiusAtHeight * math.sin(phi),
                     z
@@ -618,11 +625,11 @@ public class EcholocationManager : MonoBehaviour
         // Issue the draw command - "DrawMeshInstancedIndirect" is the most efficient way to draw lots of objects
         // Reads the count from args buffer instead of CPU telling it a number
         // In order parameters mean/are (use this shape, 0 - use the first sub-mesh, paint it with this shader, (explained below), use the argsBuffer to find how many to draw)
-        // "Bounds(transform.position, Vector3.one * 1000)" -  Is a safety net, normally Unity calculates the size of the object to decide if it's on screen, if it's behind you it culls it for performance
+        // "Bounds(transform.position, Vector3.one * 1000)" (now set at the end of PerformScan -  Is a safety net, normally Unity calculates the size of the object to decide if it's on screen, if it's behind you it culls it for performance
         // Due to Indirect, positions are calculated on the GPU, so Unity's CPU has no idea where dots/grid are (behind or in front)
         // Fix - create a giant, fake bounding box that is 1000 metres wide centered on the spawn point of the rays
         // Unity asks if this giant box is on screen, so the rest can easily be left to the GPU 
-        Graphics.DrawMeshInstancedIndirect(quadMesh, 0, instanceMaterial, new Bounds(transform.position, Vector3.one * 1000), argsBuffer);
+        Graphics.DrawMeshInstancedIndirect(quadMesh, 0, instanceMaterial, renderBounds, argsBuffer);
     }
 
     // Runs when the object is deleted or the game stops
@@ -632,5 +639,8 @@ public class EcholocationManager : MonoBehaviour
         if (matrixBuffer != null) matrixBuffer.Release();
         if (argsBuffer != null) argsBuffer.Release();
         if (colorBuffer != null) colorBuffer.Release();
+
+        if (instanceMatrices.IsCreated) instanceMatrices.Dispose();
+        if (instanceColors.IsCreated) instanceColors.Dispose();
     }
 }
