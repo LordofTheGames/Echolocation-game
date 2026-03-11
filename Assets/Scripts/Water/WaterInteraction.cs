@@ -25,7 +25,6 @@ public class WaterInteraction : MonoBehaviour
     private ParticleSystem StepsRipple;
     private ParticleSystem WadeRipple;
     private CharacterController cc;
-    private PlayerFootsteps playerFootsteps; 
     private Vector3 lastPos;
     private float distanceTraveled;
     public bool inWater;
@@ -39,14 +38,12 @@ public class WaterInteraction : MonoBehaviour
     void Start()
     {
         cc = GetComponent<CharacterController>();
-        playerFootsteps = GetComponent<PlayerFootsteps>();
 
         lastPos = transform.position;
         playerPos = transform.position;
         WadeRipple = Instantiate(WadeRipplePrefab);
         StepsRipple = Instantiate(StepsRipplePrefab);
-
-        waterLayer = 1 << 4;
+        waterLayer = LayerMask.GetMask("Water");
     }
 
     void Update()
@@ -97,24 +94,17 @@ public class WaterInteraction : MonoBehaviour
 
     void CheckWater()
     {
-        if (Physics.Raycast(transform.position + Vector3.up, Vector3.down, out waterHit, 1.5f, waterLayer, QueryTriggerInteraction.Collide))
-        {
-            inWater = true;
-        }
-        else
-        {
-            inWater = playerFootsteps != null && playerFootsteps.currentSurface == SurfaceType.Water;
-        }
-
+       inWater = playerIsInWater();
         if (waterRippleType == WaterRippleType.Footsteps)
         {
             if (StepsRipple.gameObject.activeSelf != inWater) 
-                StepsRipple.gameObject.SetActive(inWater);
+            StepsRipple.gameObject.SetActive(inWater);
         }
         else if (waterRippleType == WaterRippleType.Wade)
         {
-            if (WadeRipple.gameObject.activeSelf != inWater)
-                WadeRipple.gameObject.SetActive(inWater);
+            // Toggle ripple object based on water status
+            if (inWater) WadeRipple.gameObject.SetActive(true);
+            else WadeRipple.gameObject.SetActive(false);
         }
     }
 
@@ -186,17 +176,26 @@ public class WaterInteraction : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (waterRippleType == WaterRippleType.Wade && other.gameObject.layer == 4)
-        {
-            WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
+        if (waterRippleType == WaterRippleType.Wade){
+            if (((1 << other.gameObject.layer) & waterLayer) != 0)
+            {
+                WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
+            }
         }
     }
 
     private void OnTriggerExit(Collider other)
     {
-        if (waterRippleType == WaterRippleType.Wade && other.gameObject.layer == 4)
-        {
-            WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
-        }
+       if (waterRippleType == WaterRippleType.Wade){
+            if (((1 << other.gameObject.layer) & waterLayer) != 0)
+            {
+                WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
+            }
+       }
+    }
+
+    bool playerIsInWater(){
+        float height = cc.height + cc.radius;
+        return Physics.Raycast(transform.position + Vector3.up * height, Vector3.down, height * 2, waterLayer);
     }
 }

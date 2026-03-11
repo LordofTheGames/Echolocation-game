@@ -63,12 +63,15 @@ public class PlayerFootsteps : MonoBehaviour
     private MoveSettings currentSettings;
     private bool isRightFoot = false;
 
+    private WaterInteraction waterInteraction;
+
     void Start()
     {
         currentPos = transform.position;
         currentPos.y = 0;
         lastPos = currentPos;
         
+        waterInteraction = GetComponent<WaterInteraction>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         currentSettings = walk;
     }
@@ -79,6 +82,8 @@ public class PlayerFootsteps : MonoBehaviour
         currentPos = transform.position;
         currentPos.y = 0;
         float moveDistance = Vector3.Distance(currentPos, lastPos);
+
+        if (waterInteraction.inWater) currentSurface = SurfaceType.Water;
 
         UpdateCurrentSettings();
 
@@ -95,16 +100,13 @@ public class PlayerFootsteps : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
-        if (hit.normal.y > 0.5f) // Gemini says this is better than using 
-                                 //layermask.all for checking if we're on the ground
+        if (hit.normal.y > 0.5f) // better than using layermask.all for checking if we're on the ground
         {
             string surfaceTag = hit.collider.tag;
 
             switch (surfaceTag)
             {
-                case "Water":
-                    currentSurface = SurfaceType.Water;
-                    break;
+                // no water as that is handled by WaterInteraction
                 case "Metal":
                     currentSurface = SurfaceType.Metal;
                     break;

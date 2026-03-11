@@ -51,11 +51,9 @@ public class Tutorial : MonoBehaviour
 
     private void Loudness()
     {
-        var script = GameObject.Find("MicInput").GetComponent<MicInput>();
-
-        if(script == null) return;
-
-        loudness = script.loudness;
+        GameObject micInputObj = GameObject.Find("MicInput");
+        if (micInputObj == null) return;
+        loudness = micInputObj.GetComponent<MicInput>().loudness;
     }
 
     public void OnSkip(InputAction.CallbackContext context)
