@@ -4,8 +4,10 @@ using UnityEngine.Audio;
 public class MicInput : MonoBehaviour
 {
 
-    private float sensitivity = 3f;
-    public float loudness;
+    // [Range(0f,3f)]
+    // public float sensitivity = 3f;
+    public float volume;
+    public float relativeVolume;
     private int windowSize = 4096;
 
     private AudioSource audioSource;
@@ -13,6 +15,7 @@ public class MicInput : MonoBehaviour
     private float[] samples;
 
     public float pitchHz;
+    public float relativePitch;
     public SwiftF0Runner swiftF0;
     
     private int sampleRate;
@@ -21,6 +24,19 @@ public class MicInput : MonoBehaviour
     [SerializeField] private AudioMixerGroup micSilentGroup;
     [SerializeField] private string micVolumeParam = "MicSilentVolume";
 
+    private static float highPitch;
+    private static float normalPitch;
+    private static float highVolume;
+    private static float normalVolume;
+
+    [RuntimeInitializeOnLoadMethod]
+    static void InitialisePitches()
+    {
+        highPitch = 0;
+        normalPitch = 0;
+        highVolume = 0;
+        normalVolume = 0;
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -65,22 +81,29 @@ public class MicInput : MonoBehaviour
         }
         float rms = Mathf.Sqrt(sum / samples.Length);
 
-        float target = Mathf.Clamp01(rms * sensitivity);
-        if (target  < 0.05f){
-            target = 0f;
+        // float target = Mathf.Clamp01(rms * sensitivity);
+        // if (target  < 0.05f){
+        //     target = 0f;
+        // }
+
+        // loudness = target;
+        volume = rms;
+        if (volume  < 0.01f){
+            volume = 0f;
         }
+        relativeVolume = getRelativeVolume(volume);
 
-        loudness = target;
-
-        if (loudness == 0f){
+        if (volume == 0f){
             pitchHz = 0f;
             return;
         }
         
         if (swiftF0 != null){
             pitchHz = swiftF0.Run(samples);
+            relativePitch = getRelativePitch(pitchHz);
         } else{
             pitchHz = 0f;
+            relativePitch = 0;
         }
     }
 
@@ -88,5 +111,28 @@ public class MicInput : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(micDevice))
             Microphone.End(micDevice);
+    }
+
+    public void setPitchCalibrationValues(float highPitch, float normalPitch)
+    {
+        MicInput.normalPitch = normalPitch;
+        MicInput.highPitch = highPitch;
+    }
+    private float getRelativePitch(float pitch)
+    {
+        if (highPitch != 0)
+            return (pitch - normalPitch) / highPitch;
+        else return 0;
+    }
+    public void setVolumeCalibrationValues(float highVolume, float normalVolume)
+    {
+        MicInput.normalVolume = normalVolume;
+        MicInput.highVolume = highVolume;
+    }
+    private float getRelativeVolume(float volume)
+    {
+        if (highVolume != 0)
+            return (volume - normalVolume) / highVolume;
+        else return 0;
     }
 }
