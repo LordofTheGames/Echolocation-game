@@ -63,7 +63,7 @@ public class EcholocationManager : MonoBehaviour
     // NativeArray is a high-performance list used by the job system
     private NativeArray<RaycastCommand> commands;       // The "to do list" of raycasts
     private NativeArray<RaycastHit> results;            // The results
-    private NativeArray<Matrix4x4> instanceMatrices;    // Holds position data before sending it to the GPU
+    private NativeArray<float4x4> instanceMatrices;     // Holds position data before sending it to the GPU
     private NativeArray<Vector4> instanceColors;        // Holds color data before sending it to GPU
     private uint[] args = new uint[5] { 0, 0, 0, 0, 0}; // Array of 5 uints required by "DrawMeshInstancedIndirect" command
     private int activeHitCount = 0; // A counter to keep track of how many rays have actually hit a wall this frame
@@ -107,7 +107,7 @@ public class EcholocationManager : MonoBehaviour
     public struct VisualHit
     {
         public int originalRayIndex;
-        public Matrix4x4 matrix;
+        public float4x4 matrix;
         public int colorVariant; //  0, 1, or 2
     };
 
@@ -160,7 +160,7 @@ public class EcholocationManager : MonoBehaviour
         long totalMaxHits = (long) raysPerScan * (maxBounces + 1);      // Calculate max number of rays/hits, including initial pulse and subsequent reflections
         int safeBufferSize = (int)Mathf.Min(totalMaxHits, 1000000);     // Prevenet a single pulse event from taking up to much VRAM
 
-        instanceMatrices = new NativeArray<Matrix4x4>(safeBufferSize, Allocator.Persistent);    // Intialise the array to hold "safeBufferSize" number of matrices (positions)
+        instanceMatrices = new NativeArray<float4x4>(safeBufferSize, Allocator.Persistent);    // Intialise the array to hold "safeBufferSize" number of matrices (positions)
         instanceColors = new NativeArray<Vector4>(safeBufferSize, Allocator.Persistent);        // Intialise the array to hold "safeBufferSize" number of colors
         
         matrixBuffer = new ComputeBuffer(safeBufferSize, 64);                                                   // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
@@ -590,7 +590,7 @@ public class EcholocationManager : MonoBehaviour
                 visualHits.AddNoResize(new VisualHit
                 {
                     originalRayIndex = i, 
-                    matrix = Matrix4x4.TRS(pos, rot, new Vector3(scale, scale, scale)),
+                    matrix = float4x4.TRS(pos, rot, new float3(scale, scale, scale)),
                     colorVariant = colorVariant
                 });
             }
