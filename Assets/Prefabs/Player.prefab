@@ -435,31 +435,6 @@ MonoBehaviour:
   rippleLifetime: 0.5
   footstepWaterSound: {fileID: 8300000, guid: 28c38b101d76bb841941851d69b82999, type: 3}
   volume: 0.1
-  crouch:
-    name: Crouch
-    maxSpeed: 3
-    stepDistance: 1.2
-    volume: 2
-    echoRays: 1000
-    maxDistance: 5
-    volForMonster: 10
-  walk:
-    name: Walk
-    maxSpeed: 6
-    stepDistance: 2
-    volume: 5
-    echoRays: 3000
-    maxDistance: 10
-    volForMonster: 35
-  sprint:
-    name: Sprint
-    maxSpeed: 12
-    stepDistance: 3.5
-    volume: 10
-    echoRays: 5000
-    maxDistance: 20
-    volForMonster: 65
-  echoAngle: 360
   inWater: 0
 --- !u!114 &3073600552268709393
 MonoBehaviour:
@@ -989,13 +964,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 933aeb9c695107b4d923399996bbec46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  footstepSound: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
+  currentSurface: 0
+  CurrentState: 1
   audioSource: {fileID: 0}
+  defaultFootstep: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
+  metalFootstep: {fileID: 0}
+  woodFootstep: {fileID: 0}
+  dirtFootstep: {fileID: 0}
   footSeparation: 1
   echoAngle: 360
   crouch:
     name: Crouch
-    maxSpeed: 3
     stepDistance: 2
     volume: 0.2
     echoRays: 700
@@ -1003,7 +982,6 @@ MonoBehaviour:
     volForMonster: 0
   walk:
     name: Walk
-    maxSpeed: 6
     stepDistance: 4
     volume: 0.5
     echoRays: 2000
@@ -1011,11 +989,31 @@ MonoBehaviour:
     volForMonster: 25
   sprint:
     name: Sprint
-    maxSpeed: 12
     stepDistance: 5
     volume: 1
     echoRays: 5000
     maxDistance: 30
+    volForMonster: 50
+  waterCrouch:
+    name: Water Crouch
+    stepDistance: 1.2
+    volume: 2
+    echoRays: 1000
+    maxDistance: 5
+    volForMonster: 0
+  waterWalk:
+    name: Water Walk
+    stepDistance: 2
+    volume: 5
+    echoRays: 3000
+    maxDistance: 10
+    volForMonster: 25
+  waterSprint:
+    name: Water Sprint
+    stepDistance: 3.5
+    volume: 10
+    echoRays: 5000
+    maxDistance: 20
     volForMonster: 50
 --- !u!1 &5489064552480596990
 GameObject:
