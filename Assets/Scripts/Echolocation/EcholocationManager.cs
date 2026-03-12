@@ -46,10 +46,8 @@ public class EcholocationManager : MonoBehaviour
     public Color[] interactableColors = new Color[3] {Color.green, new Color(0f, 0.8f, 0f), new Color(0f, 0.6f, 0f)};
     public Color[] defaultColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
 
-    [Header("Layers To Detect (for different colour dots/squares)")]
-    public LayerMask monsterLayer;
-    public LayerMask interactableLayer;
-    public LayerMask outlinedObjectLayer;
+    // HashMap to store color (category) of every collider in the game
+    private NativeHashMap<int, int> colliderColorMap;
 
 
     // Hidden GPU variables
@@ -106,9 +104,9 @@ public class EcholocationManager : MonoBehaviour
     // A small data packet the job will send back to main thread
     public struct VisualHit
     {
-        public int originalRayIndex;
         public float4x4 matrix;
         public int colorVariant; //  0, 1, or 2
+        public int colorCategory; // 0 = default, 1 = monster, 2 = interactable
     };
 
     // Struct to hold ray data to prevent scrambling in paralllel section
@@ -204,7 +202,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float maxDist = 50f, float volume = 10f, bool isFootsteps = false)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float maxDist = 50f, float volume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -215,6 +213,7 @@ public class EcholocationManager : MonoBehaviour
         raysPerScan = Mathf.Clamp(numRays, 0, 100000);  // Make sure is in (currently chosen) valid range
         maxDistance = maxDist;
         objectToIgnore = ignoreMe;
+        colliderColorMap = colorMap;
         // TODO: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
         GameObject monster = GameObject.FindGameObjectWithTag("Monster");
@@ -353,6 +352,7 @@ public class EcholocationManager : MonoBehaviour
 
                     visualiseAllBounces = visualiseAllBounces,
 
+                    colliderColorMap = colliderColorMap,
                     nextRays = nextRays.AsParallelWriter(),
                     hitIndices = hitIndices.AsParallelWriter(),
                     visualHits = visualHits.AsParallelWriter(),
@@ -376,22 +376,13 @@ public class EcholocationManager : MonoBehaviour
 
                     instanceMatrices[globalIndex] = vHit.matrix;
 
-                    RaycastHit hit = results[vHit.originalRayIndex];
-                    int hitLayerMask = 1 << hit.collider.gameObject.layer;  // Get hit layer and convert to bitmask
-                    int variantIndex = vHit.colorVariant;                   // Get random index for colour within monster/interactable/default colours
-
-                    if ((monsterLayer.value & hitLayerMask) > 0) // Bit wise comparison
+                    // Assign colour
+                    instanceColors[globalIndex] = vHit.colorCategory switch
                     {
-                        instanceColors[globalIndex] = monsterColors[variantIndex];
-                    }
-                    else if ((interactableLayer.value & hitLayerMask) > 0 || (outlinedObjectLayer.value & hitLayerMask) > 0) // Check if interactable or currently outlined (only happens to interactables)
-                    {
-                        instanceColors[globalIndex] = interactableColors[variantIndex];
-                    }
-                    else
-                    {
-                        instanceColors[globalIndex] = defaultColors[variantIndex];
-                    }
+                        1 => monsterColors[vHit.colorVariant],
+                        2 => interactableColors[vHit.colorVariant],
+                        _ => defaultColors[vHit.colorVariant]
+                    };
                 }
 
                 activeHitCount += currentBounceHits;
@@ -546,6 +537,7 @@ public class EcholocationManager : MonoBehaviour
     {
         [ReadOnly] public NativeArray<RaycastHit> results;
         [ReadOnly] public NativeArray<RayData> currentRays;
+        [ReadOnly] public NativeHashMap<int, int> colliderColorMap;
 
         public int bounce;
         public int maxBounces;
@@ -587,12 +579,16 @@ public class EcholocationManager : MonoBehaviour
                 uint hash = math.hash(new int2(i, bounce));
                 int colorVariant = (int)(hash % 3); 
 
+                // Get color/category for this collider
+                int colorCategory = 0;
+                if (colliderColorMap.IsCreated) colliderColorMap.TryGetValue(hit.colliderInstanceID, out colorCategory);
+
                 // Save indices so main thread can do layer detection for applying colour correctly
                 visualHits.AddNoResize(new VisualHit
                 {
-                    originalRayIndex = i, 
                     matrix = float4x4.TRS(pos, rot, new float3(scale, scale, scale)),
-                    colorVariant = colorVariant
+                    colorVariant = colorVariant,
+                    colorCategory = colorCategory
                 });
             }
 
