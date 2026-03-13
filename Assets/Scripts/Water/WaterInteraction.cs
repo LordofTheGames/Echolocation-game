@@ -18,10 +18,6 @@ public class WaterInteraction : MonoBehaviour
     public float rippleSize = 1.5f;
     public float rippleLifetime = 0.5f;
 
-    [Header("Audio Settings")]
-    public AudioClip footstepWaterSound; 
-    public float volume = 0.8f;
-
     private ParticleSystem StepsRipple;
     private ParticleSystem WadeRipple;
     private CharacterController cc;
@@ -35,6 +31,8 @@ public class WaterInteraction : MonoBehaviour
     private Vector3 playerPos;
     private float velocityXZ;
 
+    private PlayerFootsteps footstepsScript;
+
     void Start()
     {
         cc = GetComponent<CharacterController>();
@@ -44,6 +42,7 @@ public class WaterInteraction : MonoBehaviour
         WadeRipple = Instantiate(WadeRipplePrefab);
         StepsRipple = Instantiate(StepsRipplePrefab);
         waterLayer = LayerMask.GetMask("Water");
+        footstepsScript = gameObject.GetComponent<PlayerFootsteps>();
     }
 
     void Update()
@@ -94,7 +93,8 @@ public class WaterInteraction : MonoBehaviour
 
     void CheckWater()
     {
-       inWater = playerIsInWater();
+        inWater = footstepsScript.currentSurface == SurfaceType.Water;
+
         if (waterRippleType == WaterRippleType.Footsteps)
         {
             if (StepsRipple.gameObject.activeSelf != inWater) 
@@ -141,10 +141,6 @@ public class WaterInteraction : MonoBehaviour
 
         StepsRipple.Emit(emitParams, 1);
 
-        if (footstepWaterSound != null)
-        {
-            AudioSource.PlayClipAtPoint(footstepWaterSound, spawnPos, volume);
-        }
         isRightFoot = !isRightFoot;
     }
 
@@ -192,10 +188,5 @@ public class WaterInteraction : MonoBehaviour
                 WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
             }
        }
-    }
-
-    bool playerIsInWater(){
-        float height = cc.height + cc.radius;
-        return Physics.Raycast(transform.position + Vector3.up * height, Vector3.down, height * 2, waterLayer);
     }
 }

@@ -14,7 +14,7 @@ public struct MoveSettings
 {
     public string name;
     public float stepDistance;
-    [Range(0f, 30f)] public float volume;
+    [Range(0f, 1f)] public float volume;
     public int echoRays;            // Number of rays for the effect
     [Range(0f, 50f)]
     public float maxDistance;       // Max Distance rays travel
@@ -39,6 +39,7 @@ public class PlayerFootsteps : MonoBehaviour
 
     [Header("Audio Clips by Surface")]
     public AudioClip defaultFootstep;
+    public AudioClip waterFootstep;
     public AudioClip metalFootstep;
     public AudioClip woodFootstep;
     public AudioClip dirtFootstep;
@@ -48,14 +49,29 @@ public class PlayerFootsteps : MonoBehaviour
     public float echoAngle = 360f;      // 360 for a full ripple around the foot
 
     [Header("Movement - Default")]
-    public MoveSettings crouch = new MoveSettings { name = "Crouch", stepDistance = 1.2f, volume = 2f, echoRays = 1000, maxDistance = 5f, volForMonster = 0f };
-    public MoveSettings walk = new MoveSettings { name = "Walk", stepDistance = 2.0f, volume = 5f, echoRays = 3000, maxDistance = 10f, volForMonster = 25f };
-    public MoveSettings sprint = new MoveSettings { name = "Sprint", stepDistance = 3.5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 50f };
+    public MoveSettings crouch = new MoveSettings { name = "Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
+    public MoveSettings walk = new MoveSettings { name = "Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
+    public MoveSettings sprint = new MoveSettings { name = "Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
     
     [Header("Movement - Water")]
-    public MoveSettings waterCrouch = new MoveSettings { name = "Water Crouch", stepDistance = 1.2f, volume = 2f, echoRays = 1000, maxDistance = 5f, volForMonster = 0f };
-    public MoveSettings waterWalk = new MoveSettings { name = "Water Walk", stepDistance = 2.0f, volume = 5f, echoRays = 3000, maxDistance = 10f, volForMonster = 25f };
-    public MoveSettings waterSprint = new MoveSettings { name = "Water Sprint", stepDistance = 3.5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 50f };
+    public MoveSettings waterCrouch = new MoveSettings { name = "Water Crouch", stepDistance = 2f, volume = 0.07f, echoRays = 1000, maxDistance = 8f, volForMonster = 10f };
+    public MoveSettings waterWalk = new MoveSettings { name = "Water Walk", stepDistance = 4f, volume = 0.15f, echoRays = 2700, maxDistance = 15f, volForMonster = 35f };
+    public MoveSettings waterSprint = new MoveSettings { name = "Water Sprint", stepDistance = 5f, volume = 0.35f, echoRays = 7000, maxDistance = 35f, volForMonster = 70f };
+
+    [Header("Movement - Metal")]
+    public MoveSettings metalCrouch = new MoveSettings { name = "Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
+    public MoveSettings metalWalk = new MoveSettings { name = "Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
+    public MoveSettings metalSprint = new MoveSettings { name = "Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
+
+    [Header("Movement - Wood")]
+    public MoveSettings woodCrouch = new MoveSettings { name = "Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
+    public MoveSettings woodWalk = new MoveSettings { name = "Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
+    public MoveSettings woodSprint = new MoveSettings { name = "Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
+
+    [Header("Movement - Dirt")]
+    public MoveSettings dirtCrouch = new MoveSettings { name = "Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
+    public MoveSettings dirtWalk = new MoveSettings { name = "Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
+    public MoveSettings dirtSprint = new MoveSettings { name = "Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
 
     private Vector3 lastPos;
     private Vector3 currentPos;
@@ -63,15 +79,12 @@ public class PlayerFootsteps : MonoBehaviour
     private MoveSettings currentSettings;
     private bool isRightFoot = false;
 
-    private WaterInteraction waterInteraction;
-
     void Start()
     {
         currentPos = transform.position;
         currentPos.y = 0;
         lastPos = currentPos;
         
-        waterInteraction = GetComponent<WaterInteraction>();
         if (audioSource == null) audioSource = gameObject.AddComponent<AudioSource>();
         currentSettings = walk;
     }
@@ -82,8 +95,6 @@ public class PlayerFootsteps : MonoBehaviour
         currentPos = transform.position;
         currentPos.y = 0;
         float moveDistance = Vector3.Distance(currentPos, lastPos);
-
-        if (waterInteraction.inWater) currentSurface = SurfaceType.Water;
 
         UpdateCurrentSettings();
 
@@ -100,13 +111,15 @@ public class PlayerFootsteps : MonoBehaviour
 
     private void OnControllerColliderHit(ControllerColliderHit hit)
     {
+        // In Scripts/Water/DetectPlayer.cs, surface type is set to water when player enters water, and set back to previous value when player leaves
+        if (currentSurface == SurfaceType.Water) return;
+
         if (hit.normal.y > 0.5f) // better than using layermask.all for checking if we're on the ground
         {
             string surfaceTag = hit.collider.tag;
 
             switch (surfaceTag)
             {
-                // no water as that is handled by WaterInteraction
                 case "Metal":
                     currentSurface = SurfaceType.Metal;
                     break;
@@ -132,11 +145,21 @@ public class PlayerFootsteps : MonoBehaviour
                 else if (CurrentState == MoveState.WALK) currentSettings = waterWalk;
                 else if (CurrentState == MoveState.SPRINT) currentSettings = waterSprint;
                 break;
-
             case SurfaceType.Metal:
+                if (CurrentState == MoveState.CROUCH) currentSettings = metalCrouch;
+                else if (CurrentState == MoveState.WALK) currentSettings = metalWalk;
+                else if (CurrentState == MoveState.SPRINT) currentSettings = metalSprint;
+                break;
             case SurfaceType.Wood:
+                if (CurrentState == MoveState.CROUCH) currentSettings = woodCrouch;
+                else if (CurrentState == MoveState.WALK) currentSettings = woodWalk;
+                else if (CurrentState == MoveState.SPRINT) currentSettings = woodSprint;
+                break;
             case SurfaceType.Dirt:
-            case SurfaceType.Default:
+                if (CurrentState == MoveState.CROUCH) currentSettings = dirtCrouch;
+                else if (CurrentState == MoveState.WALK) currentSettings = dirtWalk;
+                else if (CurrentState == MoveState.SPRINT) currentSettings = dirtSprint;
+                break;
             default:
                 if (CurrentState == MoveState.CROUCH) currentSettings = crouch;
                 else if (CurrentState == MoveState.WALK) currentSettings = walk;
@@ -147,32 +170,28 @@ public class PlayerFootsteps : MonoBehaviour
 
     void PlayStep()
     {
-        if (currentSurface != SurfaceType.Water)
+        AudioClip clipToPlay;
+        switch (currentSurface)
         {
-            AudioClip clipToPlay = defaultFootstep;  
-            switch (currentSurface)
-            {
-                case SurfaceType.Dirt:
-                    clipToPlay = dirtFootstep;
-                    break;
-                case SurfaceType.Wood:
-                    clipToPlay = woodFootstep;
-                    break;
-                case SurfaceType.Metal:
-                    clipToPlay = metalFootstep;
-                    break;
-                case SurfaceType.Default:
-                default:
-                    clipToPlay = defaultFootstep;
-                    break;
-            }
-
-            if (clipToPlay != null)
-            {
-                audioSource.pitch = Random.Range(0.92f, 1.08f);
-                audioSource.PlayOneShot(clipToPlay, currentSettings.volume);
-            }
+            case SurfaceType.Water:
+                clipToPlay = waterFootstep;
+                break;
+            case SurfaceType.Dirt:
+                clipToPlay = dirtFootstep;
+                break;
+            case SurfaceType.Wood:
+                clipToPlay = woodFootstep;
+                break;
+            case SurfaceType.Metal:
+                clipToPlay = metalFootstep;
+                break;
+            default:
+                clipToPlay = defaultFootstep;
+                break;
         }
+
+        audioSource.pitch = Random.Range(0.92f, 1.08f);
+        audioSource.PlayOneShot(clipToPlay, currentSettings.volume);
 
         // Calculate Foot Position
         isRightFoot = !isRightFoot; 
