@@ -97,6 +97,15 @@ public class Tutorial : MonoBehaviour
             animator.SetTrigger("Change");
     }
 
+    public void OnCrouch(InputAction.CallbackContext context)
+    {
+        var script = player.GetComponent<PlayerMovement>();
+
+        //switch when you uncrouch
+        if(context.performed && animator.GetCurrentAnimatorStateInfo(0).IsName("crouch") && !script.GetCrouch()) 
+            animator.SetTrigger("Change");
+    }
+
     public void OnSprint()
     {
         var script = player.GetComponent<PlayerMovement>();
@@ -126,11 +135,11 @@ public class Tutorial : MonoBehaviour
         }
     }
 
-    public void OnOpen(InputAction.CallbackContext context)
-    {
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("openinventory")) 
-            animator.SetTrigger("Change");
-    }
+    // public void OnOpen(InputAction.CallbackContext context)
+    // {
+    //     if(animator.GetCurrentAnimatorStateInfo(0).IsName("openinventory")) 
+    //         animator.SetTrigger("Change");
+    // }
 
     public void OnChoose(InputAction.CallbackContext context)
     {
@@ -138,10 +147,10 @@ public class Tutorial : MonoBehaviour
             animator.SetTrigger("Change");
     }
 
-    public void OnSelect(InputAction.CallbackContext context)
-    {
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("select")) 
-            animator.SetTrigger("Change");
-    }
+    // public void OnSelect(InputAction.CallbackContext context)
+    // {
+    //     if(animator.GetCurrentAnimatorStateInfo(0).IsName("select")) 
+    //         animator.SetTrigger("Change");
+    // }
 
 }
