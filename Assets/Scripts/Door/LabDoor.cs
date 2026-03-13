@@ -3,15 +3,17 @@ using UnityEngine;
 
 public class LabDoor : MonoBehaviour
 {
+    [Header("Door Hinges")]
     [SerializeField] private Transform leftDoorHinge;
     [SerializeField] private Transform rightDoorHinge;
 
+    [Header("Angles")]
     [SerializeField] private float leftOpenY = 85f;
     [SerializeField] private float rightOpenY = -85f;
     [SerializeField] private float closedY = 0f;
 
+    [Header("Animation")]
     [SerializeField] private float rotateSpeed = 180f;
-    [SerializeField] private float autoCloseDelay = 1.5f;
 
     private Quaternion leftClosedRot;
     private Quaternion rightClosedRot;
@@ -19,24 +21,18 @@ public class LabDoor : MonoBehaviour
     private Quaternion rightOpenRot;
 
     private Coroutine rotateRoutine;
-    private Coroutine closeRoutine;
 
     private bool isOpen;
     private bool isMoving;
 
-    private int openedFromSide = 0; // -1 or +1
-
-    private bool waitingForPass = false;
-
     public bool IsOpen => isOpen;
     public bool IsMoving => isMoving;
-    public bool WaitingForPass => waitingForPass;
-    public int OpenedFromSide => openedFromSide;
 
     private void Awake()
     {
         if (leftDoorHinge == null || rightDoorHinge == null)
         {
+            Debug.LogError($"[{name}] LabDoor is missing hinge references.");
             enabled = false;
             return;
         }
@@ -52,94 +48,34 @@ public class LabDoor : MonoBehaviour
 
         isOpen = false;
         isMoving = false;
-        waitingForPass = false;
     }
 
-    public void Interact(Transform player)
+    public void Interact()
     {
         if (isMoving) return;
-        if (player == null) return;
 
-        if (!isOpen)
-        {
-            openedFromSide = GetPlayerSide(player.position);
+        if (isOpen)
+            CloseDoors();
+        else
             OpenDoors();
-        }
-    }
-
-    private int GetPlayerSide(Vector3 worldPos)
-    {
-        Vector3 localPos = transform.InverseTransformPoint(worldPos);
-
-        return localPos.z >= 0f ? 1 : -1;
     }
 
     public void OpenDoors()
     {
-        CancelAutoClose();
-
         if (rotateRoutine != null)
             StopCoroutine(rotateRoutine);
 
         isOpen = true;
-        waitingForPass = true;
-
         rotateRoutine = StartCoroutine(RotateDoors(leftOpenRot, rightOpenRot));
     }
 
     public void CloseDoors()
     {
-        CancelAutoClose();
-
         if (rotateRoutine != null)
             StopCoroutine(rotateRoutine);
 
         isOpen = false;
-        waitingForPass = false;
-
         rotateRoutine = StartCoroutine(RotateDoors(leftClosedRot, rightClosedRot));
-    }
-
-    public void TryMarkPassed(Transform player)
-    {
-        if (!isOpen) return;
-        if (!waitingForPass) return;
-        if (player == null) return;
-
-        int currentSide = GetPlayerSide(player.position);
-
-        if (currentSide != openedFromSide)
-        {
-            waitingForPass = false;
-            CloseAfterDelay();
-        }
-    }
-
-    public void CloseAfterDelay()
-    {
-        CancelAutoClose();
-        closeRoutine = StartCoroutine(CloseAfterDelayRoutine());
-    }
-
-    public void CancelAutoClose()
-    {
-        if (closeRoutine != null)
-        {
-            StopCoroutine(closeRoutine);
-            closeRoutine = null;
-        }
-    }
-
-    private IEnumerator CloseAfterDelayRoutine()
-    {
-        yield return new WaitForSeconds(autoCloseDelay);
-
-        if (isOpen && !isMoving)
-        {
-            CloseDoors();
-        }
-
-        closeRoutine = null;
     }
 
     private IEnumerator RotateDoors(Quaternion leftTarget, Quaternion rightTarget)
