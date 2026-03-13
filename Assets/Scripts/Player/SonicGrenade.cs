@@ -83,4 +83,16 @@ public class SonicGrenade : MonoBehaviour
 
         Destroy(gameObject);
     }
+
+    private void OnDestroy()
+    {
+        // Unregister item when destroyed
+        if (GlobalEchoSystem.Instance != null)
+        {
+            foreach (Collider col in GetComponentsInChildren<Collider>())
+            {
+                GlobalEchoSystem.Instance.UnregisterCollider(col);
+            }
+        }
+    }
 }
