@@ -15,6 +15,7 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject pullPanel; 
     [SerializeField] private GameObject gateHintPanel;   
     [SerializeField] private GameObject gateUnlockPanel;
+    [SerializeField] private GameObject doorOpenPanel;
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
@@ -27,6 +28,7 @@ public class DetectObjectOutline : MonoBehaviour
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (doorOpenPanel) doorOpenPanel.SetActive(false);
 
     currentPanel = pickupPanel;
     }
@@ -36,6 +38,7 @@ public class DetectObjectOutline : MonoBehaviour
     if (pullPanel) pullPanel.SetActive(false);
     if (gateHintPanel) gateHintPanel.SetActive(false);
     if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+    if (doorOpenPanel) doorOpenPanel.SetActive(false);
 
     currentPanel = panel;
     if (currentPanel) currentPanel.SetActive(true);
@@ -66,6 +69,17 @@ public class DetectObjectOutline : MonoBehaviour
     {
         currentPanel.SetActive(false);
         current.SetOutlined(false);
+
+        var door = current.GetComponent<LabDoor>();
+        if (!door) door = current.GetComponentInParent<LabDoor>();
+        if (!door) door = current.GetComponentInChildren<LabDoor>();
+
+        if (door != null)
+        {
+            door.Interact(transform);
+            current = null;
+            return;
+        }
 
         var pickup = current.GetComponent<PickupItem>();
         if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
@@ -102,7 +116,23 @@ public class DetectObjectOutline : MonoBehaviour
                 }
                 else
                 {
-                    ShowOnly(pickupPanel);
+                    var door = best.GetComponentInParent<LabDoor>();
+                    if (door != null)
+                    {
+                        if (!door.IsOpen)
+                        {
+                            ShowOnly(doorOpenPanel);
+                        }
+                        else
+                        {
+                            ShowOnly(null);
+                        }
+                    }
+                    else
+                    {
+                        ShowOnly(pickupPanel);
+                    }
+                    // ShowOnly(pickupPanel);
                 }
             }
         }
