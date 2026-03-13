@@ -13,6 +13,7 @@ public class Breakable : MonoBehaviour
     [SerializeField] float minVolumeToBreak = 0.4f;
     [SerializeField] float minPitchToBreak = 100f;
     [SerializeField] float holdTimeToBreak = 1.2f;
+    [SerializeField] float maxDistanceToMic = 5f;
 
     BoxCollider bc;
     AudioSource _audioSource;
@@ -34,6 +35,12 @@ public class Breakable : MonoBehaviour
     private void Update()
     {
         if (_hasBroken || micInput == null) return;
+
+        if (Vector3.Distance(transform.position, micInput.transform.position) > maxDistanceToMic)
+        {
+            _holdTimer = 0f;
+            return;
+        }
 
         bool conditionMet = false;
 
