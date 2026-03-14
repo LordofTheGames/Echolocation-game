@@ -55,6 +55,7 @@ public class InventoryToggleCursor : MonoBehaviour
         //if (playerLook) playerLook.enabled = !open;
         if (outlineDetector) outlineDetector.SetEnabled(!open);
 
+        // TODO: comment this for BETA
         Cursor.visible = open;
         Cursor.lockState = open ? CursorLockMode.None : CursorLockMode.Locked;
 

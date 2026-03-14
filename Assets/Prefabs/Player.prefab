@@ -239,6 +239,7 @@ MonoBehaviour:
   mouseSensitivity: 150
   playerBody: {fileID: 3853411543216132462}
   lightTransform: {fileID: 7770523898133361850}
+  isHiding: 0
 --- !u!1 &5235627052445221193
 GameObject:
   m_ObjectHideFlags: 0
@@ -412,6 +413,7 @@ MonoBehaviour:
   pullPanel: {fileID: 0}
   gateHintPanel: {fileID: 0}
   gateUnlockPanel: {fileID: 0}
+  hidePanel: {fileID: 0}
   ignoreLiftChain: 0
 --- !u!114 &6448768869653819886
 MonoBehaviour:
@@ -953,6 +955,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 0731e808-d7be-4032-b59e-18b6f935ba9b
     m_ActionName: 'Player/Previous[/XInputControllerWindows/leftShoulder,/Keyboard/1]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3677165169037684896}
+        m_TargetAssemblyTypeName: MouseLook, Assembly-CSharp
+        m_MethodName: OnLook
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: be23a6ab-dd35-4a11-b587-246c34ccb038
+    m_ActionName: 'Inventory/Look[/XInputControllerWindows/rightStick,/Mouse/delta]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
