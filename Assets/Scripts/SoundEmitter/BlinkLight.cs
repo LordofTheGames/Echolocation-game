@@ -1,32 +1,30 @@
+using System.Collections;
 using UnityEngine;
 
 [RequireComponent(typeof(Light))]
 public class BlinkRealLight : MonoBehaviour
 {
-    public float TimeOn = 0.5f;
-    public float TimeOff = 1.0f;
-
-    private float timePassed = 0f;
+    [Tooltip("How long the light stays on during a ping")]
+    public float flashDuration = 0.5f; 
+    
     private Light myLight;
 
-    void Start()
+    void Awake()
     {
         myLight = GetComponent<Light>();
+        myLight.enabled = false; 
+    }    
+    
+    public void TriggerFlash()
+    {
+        StopAllCoroutines(); 
+        StartCoroutine(FlashRoutine());
     }
 
-    void Update()
+    private IEnumerator FlashRoutine()
     {
-        timePassed += Time.deltaTime;
-
-        if (myLight.enabled && timePassed >= TimeOn)
-        {
-            myLight.enabled = false;
-            timePassed = 0f;
-        }
-        else if (!myLight.enabled && timePassed >= TimeOff)
-        {
-            myLight.enabled = true;
-            timePassed = 0f;
-        }
+        myLight.enabled = true;
+        yield return new WaitForSeconds(flashDuration);
+        myLight.enabled = false;
     }
 }

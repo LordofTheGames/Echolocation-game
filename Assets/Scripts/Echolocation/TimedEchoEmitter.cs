@@ -9,10 +9,8 @@ public class TimedEchoEmitter : MonoBehaviour
     public float soundVolume = 1f;
 
     public float initialDelay = 0.2f;
-
-    public float pingInterval = 2f;
-
-    public int maxPings = 5;
+    public float pingInterval = 3f;
+    public int maxPings = 10;
 
     public float angle = 360f;
     public float uniformity = 1f;
@@ -26,6 +24,13 @@ public class TimedEchoEmitter : MonoBehaviour
     private Coroutine pingRoutine;
     private bool armOnNextCollision;
     private float armOnNextCollisionTime;
+    
+    private BlinkRealLight[] childLights;
+
+    private void Awake()
+    {
+        childLights = GetComponentsInChildren<BlinkRealLight>();
+    }
 
     public void SetArmOnNextCollision()
     {
@@ -82,6 +87,13 @@ public class TimedEchoEmitter : MonoBehaviour
         while (armed && emitted < maxPings)
         {
             Vector3 position = transform.position;
+            foreach (BlinkRealLight light in childLights)
+            {
+                if (light != null)
+                {
+                    light.TriggerFlash();
+                }
+            }
 
             if (pingSound != null)
             {
@@ -119,4 +131,3 @@ public class TimedEchoEmitter : MonoBehaviour
         armOnNextCollision = false;
     }
 }
-
