@@ -248,6 +248,14 @@ public class EcholocationManager : MonoBehaviour
         colliderColorMap = colorMap;
         initialVolume = volume;
         isFootstepsScan = isFootsteps;
+
+        // TODO: remove this when multiple ray bounces have been implemented
+        // for now just make the monster hear the sound
+        GameObject monster = GameObject.FindGameObjectWithTag("Monster");
+        if (monster != null) {
+            INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
+            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, volume, isFootsteps);
+        }
     }
 
 
@@ -427,7 +435,7 @@ public class EcholocationManager : MonoBehaviour
 
                 activeHitCount += currentBounceHits;
                         
-                // TODO: add this when we have multiple ray bounces working
+                // //TODO: add this when we have multiple ray bounces working
                 // for (int k = 0; k < monsterHits.Length; k++)
                 // {
                 //     int originalRayIndex = monsterHits[k].originalRayIndex;
@@ -439,6 +447,7 @@ public class EcholocationManager : MonoBehaviour
                 //     if (sensitiveTarget != null)
                 //     {
                 //         sensitiveTarget.OnHeardScan(sourceObj.transform, hitVolume, isFootstepsScan);
+                //         Debug.Log("Volume: " + hitVolume);
                 //     }
                 // }
 
