@@ -17,6 +17,12 @@ public class EcholocationManager : MonoBehaviour
     public float maxDistance = 50f;     // Max distance rays can travel
     public LayerMask scanLayers;
 
+    [Header("Sound Propagation")]
+    [Tooltip("Speed of 'sound' for animation (Rays are still instant, dots are revealed at different times)")]
+    public float soundSpeed = 10f;
+    [Tooltip("If disabled, all hits appear instantly as before")]
+    public bool useSoundPropagation = true;
+
     [Header("Reflection Settings")]
     [Tooltip("Maximum number of times sound rays will bounce before stopping")]
     public int maxBounces = 2;
@@ -56,6 +62,7 @@ public class EcholocationManager : MonoBehaviour
     private ComputeBuffer argsBuffer;       // Holds arguments for drawing (how many meshes to draw)
     private ComputeBuffer matrixBuffer;     // Holds the position/rotation/scale of every single mesh
     private ComputeBuffer colorBuffer;      // Holds the colour for each dot/square
+    private ComputeBuffer revealTimeBuffer; // Holds time each dot should be revealed for propagation animation
 
 
     // NativeArray is a high-performance list used by the job system
@@ -63,6 +70,7 @@ public class EcholocationManager : MonoBehaviour
     private NativeArray<RaycastHit> results;            // The results
     private NativeArray<float4x4> instanceMatrices;     // Holds position data before sending it to the GPU
     private NativeArray<Vector4> instanceColors;        // Holds color data before sending it to GPU
+    private NativeArray<float> instanceRevealTimes;     // Holds reveal time data before sending it to GPU
     private uint[] args = new uint[5] { 0, 0, 0, 0, 0}; // Array of 5 uints required by "DrawMeshInstancedIndirect" command
     private int activeHitCount = 0; // A counter to keep track of how many rays have actually hit a wall this frame
 
@@ -107,6 +115,7 @@ public class EcholocationManager : MonoBehaviour
         public float4x4 matrix;
         public int colorVariant; //  0, 1, or 2
         public int colorCategory; // 0 = default, 1 = monster, 2 = interactable
+        public float travelDistance; // Total distance ray travelled to reach this hit point
     };
 
     // Struct to hold ray data to prevent scrambling in paralllel section
@@ -115,6 +124,7 @@ public class EcholocationManager : MonoBehaviour
         public Vector3 origin;
         public Vector3 direction;
         public float range;
+        public float distanceTravelled; // Cumulative distance travelled across all bounces up to that point 
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -158,15 +168,18 @@ public class EcholocationManager : MonoBehaviour
         long totalMaxHits = (long) raysPerScan * (maxBounces + 1);      // Calculate max number of rays/hits, including initial pulse and subsequent reflections
         int safeBufferSize = (int)Mathf.Min(totalMaxHits, 1000000);     // Prevenet a single pulse event from taking up to much VRAM
 
-        instanceMatrices = new NativeArray<float4x4>(safeBufferSize, Allocator.Persistent);    // Intialise the array to hold "safeBufferSize" number of matrices (positions)
+        instanceMatrices = new NativeArray<float4x4>(safeBufferSize, Allocator.Persistent);     // Intialise the array to hold "safeBufferSize" number of matrices (positions)
         instanceColors = new NativeArray<Vector4>(safeBufferSize, Allocator.Persistent);        // Intialise the array to hold "safeBufferSize" number of colors
-        
+        instanceRevealTimes = new NativeArray<float>(safeBufferSize, Allocator.Persistent);     // Intialise the array to hold "safeBufferSize" number of reveal times
+
         matrixBuffer = new ComputeBuffer(safeBufferSize, 64);                                                   // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
         colorBuffer = new ComputeBuffer(safeBufferSize, 16);                                                    // Create GPU buffer for colours, 16 = 4 floats * 4 bytes
+        revealTimeBuffer = new ComputeBuffer(safeBufferSize, 4);                                                // Create GPU buffer for reveal times, 4 = 1 float (4 bytes)
         argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);     // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
 
         PerformScan();
-        Destroy(gameObject, pulseDuration); // Destory this instance once the pulse duration has ended
+        float propagationDelay = useSoundPropagation ? maxDistance / soundSpeed : 0f;
+        Destroy(gameObject, pulseDuration + propagationDelay); // Destory this instance once the pulse duration + any delay to propagation animation has ended
     }
 
     // Update is called once per frame
@@ -174,11 +187,7 @@ public class EcholocationManager : MonoBehaviour
     {
         if (activeHitCount <= 0 || instanceMaterial == null) return;
 
-        // Fade out over time
-        float lifePercent = (Time.time - spawnTime) / pulseDuration;
-        float currentAlpha = Mathf.Lerp(1.0f, 0.0f, lifePercent);
-
-        instanceMaterial.SetFloat("_GlobalVisibility", currentAlpha);
+        instanceMaterial.SetFloat("_ElapsedTime", Time.time - spawnTime);
         RenderVisuals();
     }
 
@@ -383,6 +392,9 @@ public class EcholocationManager : MonoBehaviour
                         2 => interactableColors[vHit.colorVariant],
                         _ => defaultColors[vHit.colorVariant]
                     };
+
+                    // Calculate reveal time
+                    instanceRevealTimes[globalIndex] = useSoundPropagation ? vHit.travelDistance / soundSpeed : 0f;
                 }
 
                 activeHitCount += currentBounceHits;
@@ -432,8 +444,9 @@ public class EcholocationManager : MonoBehaviour
         if (activeHitCount > 0)
         {
             // Zeroes are, respectively, source index (start reading at beginning of C# array) and destination index (start writing at the beginning of the GPU buffer)
-            matrixBuffer.SetData(instanceMatrices, 0, 0, activeHitCount);   // Send the matrices to the GPU buffer
-            colorBuffer.SetData(instanceColors, 0, 0, activeHitCount);      // Send the colours to the GPU buffer
+            matrixBuffer.SetData(instanceMatrices, 0, 0, activeHitCount);           // Send the matrices to the GPU buffer
+            colorBuffer.SetData(instanceColors, 0, 0, activeHitCount);              // Send the colours to the GPU buffer
+            revealTimeBuffer.SetData(instanceRevealTimes, 0, 0, activeHitCount);    // Send the reveal times to the GPU buffer
         }
 
         //Debug.Log("Scan fired! Hits: " + activeHitCount);
@@ -442,6 +455,8 @@ public class EcholocationManager : MonoBehaviour
         // RenderVisuals is ran every frame and buffers don't change after initial setting
         instanceMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);  // Tell the material where to find the position data (the matrix buffer)
         instanceMaterial.SetBuffer("_InstanceColors", colorBuffer);     // Tell the material where to find the colours 
+        instanceMaterial.SetBuffer("_RevealTimes", revealTimeBuffer);   // Tell the material the time to reveal the dot
+        instanceMaterial.SetFloat("_PulseDuration", pulseDuration);     // Tell the material how long each dot should be active for
 
         // Create render bounds
         renderBounds = new Bounds(transform.position, Vector3.one * 1000);
@@ -514,7 +529,7 @@ public class EcholocationManager : MonoBehaviour
             }
 
             // Add combined package
-            rays[i] = new RayData{ origin = startOrigin, direction = worldDir, range = maxDistance };
+            rays[i] = new RayData{ origin = startOrigin, direction = worldDir, range = maxDistance, distanceTravelled = 0f };
         }
     }
 
@@ -560,6 +575,8 @@ public class EcholocationManager : MonoBehaviour
 
             hitIndices.AddNoResize(i);
 
+            float totalDistance = currentRays[i].distanceTravelled + hit.distance;  // Calculate total distance ray has travelled to reach this hit point
+
             if ((bounce == 0 && !visualiseAllBounces) || visualiseAllBounces)
             {
                 // High performance SIMD math
@@ -588,7 +605,8 @@ public class EcholocationManager : MonoBehaviour
                 {
                     matrix = float4x4.TRS(pos, rot, new float3(scale, scale, scale)),
                     colorVariant = colorVariant,
-                    colorCategory = colorCategory
+                    colorCategory = colorCategory,
+                    travelDistance = totalDistance
                 });
             }
 
@@ -606,7 +624,8 @@ public class EcholocationManager : MonoBehaviour
                     {
                         origin = hit.point + (hit.normal * 0.01f),
                         direction = reflected,
-                        range = remainingRange
+                        range = remainingRange,
+                        distanceTravelled = totalDistance
                     });
                 }
             }
@@ -635,8 +654,10 @@ public class EcholocationManager : MonoBehaviour
         if (matrixBuffer != null) matrixBuffer.Release();
         if (argsBuffer != null) argsBuffer.Release();
         if (colorBuffer != null) colorBuffer.Release();
+        if (revealTimeBuffer != null) revealTimeBuffer.Release();
 
         if (instanceMatrices.IsCreated) instanceMatrices.Dispose();
         if (instanceColors.IsCreated) instanceColors.Dispose();
+        if (instanceRevealTimes.IsCreated) instanceRevealTimes.Dispose();
     }
 }
