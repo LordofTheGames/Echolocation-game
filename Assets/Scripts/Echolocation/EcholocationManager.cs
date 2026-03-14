@@ -25,6 +25,9 @@ public class EcholocationManager : MonoBehaviour
     public float volumeLossPerMeter = 2.0f;
     [Tooltip("Universal max volume benchmark for starting dot/quad brightness (e.g. 300 for shouting as loud as you possibly can) - Everything higher is just started at max brightness")]
     public float maxPossibleVolume = 300f;
+    [Tooltip("The minimum starting brightness for each dot/square so that all are clearly visible at least at start.")]
+    [Range(0f, 1f)]
+    public float minStartingBrightness = 0.2f;
 
     [Header("Reflection Settings")]
     [Tooltip("Maximum number of times sound rays will bounce before stopping")]
@@ -413,7 +416,10 @@ public class EcholocationManager : MonoBehaviour
 
                     float normalisedVolume = Mathf.Clamp01(vHit.hitVolume / maxPossibleVolume); // Clamped to 1 if hit volume > maxPossibleVolume - starts at max brightness
 
-                    instanceColors[globalIndex] = new Vector4(baseColor.r, baseColor.g, baseColor.b, normalisedVolume);
+                    // Introduce a minimum starting brightness, but use lerp to keep relativeness
+                    float finalAlpha = Mathf.Lerp(minStartingBrightness, 1.0f, normalisedVolume);
+
+                    instanceColors[globalIndex] = new Vector4(baseColor.r, baseColor.g, baseColor.b, finalAlpha);
 
                     // Calculate reveal time
                     instanceRevealTimes[globalIndex] = useSoundPropagation ? vHit.travelDistance / soundSpeed : 0f;
