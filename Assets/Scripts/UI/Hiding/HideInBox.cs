@@ -44,6 +44,7 @@ public class HideInBox : MonoBehaviour
         player.GetComponentInChildren<MouseLook>().isHiding = true; 
         player.GetComponentInChildren<MouseLook>().enabled = false;
 
+
         // Save the FPC camera's local rotation to restore upon exit
         originalCamLocalRot = playerMainCamera.transform.localRotation;
 
