@@ -140,6 +140,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Previous",
+                    "type": "Button",
+                    "id": "0731e808-d7be-4032-b59e-18b6f935ba9b",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "Next",
+                    "type": "Button",
+                    "id": "988dcee3-b2e5-4073-9cc5-6108a8870463",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -272,6 +290,50 @@
                     "processors": "",
                     "groups": "Joystick",
                     "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d87bd483-298d-48fb-a623-c03d1c2f3572",
+                    "path": "<Gamepad>/leftShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Previous",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "af5db2d3-579d-4e1f-b0d4-e0169f9e3866",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Previous",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "0486f653-07f2-408e-a611-afd41790d42a",
+                    "path": "<Gamepad>/rightShoulder",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "Next",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "56075115-72dd-428e-9061-4ecb799b7866",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Next",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -497,17 +559,6 @@
                 },
                 {
                     "name": "",
-                    "id": "9508693a-79ec-4663-aee5-bfb2aecf9f3f",
-                    "path": "<Gamepad>/buttonNorth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Open Inventory",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "6cbfbc96-828a-4399-adb5-9a002bbf019e",
                     "path": "<Mouse>/leftButton",
                     "interactions": "",
@@ -690,7 +741,7 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Select",
+                    "name": "CloseInventory",
                     "type": "Button",
                     "id": "e40a1bc3-da6a-4e16-9488-049f2509acf4",
                     "expectedControlType": "",
@@ -944,23 +995,12 @@
                 },
                 {
                     "name": "",
-                    "id": "8b5c5700-1683-4af2-b18d-9ca63994e7b4",
-                    "path": "<Gamepad>/buttonNorth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "Select",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "3ff344ad-f357-4d63-b6c2-668830acf8e9",
                     "path": "<Keyboard>/tab",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
-                    "action": "Select",
+                    "action": "CloseInventory",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
