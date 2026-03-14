@@ -15,6 +15,7 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject pullPanel; 
     [SerializeField] private GameObject gateHintPanel;   
     [SerializeField] private GameObject gateUnlockPanel;
+    [SerializeField] private GameObject hidePanel;
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
@@ -27,6 +28,7 @@ public class DetectObjectOutline : MonoBehaviour
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (hidePanel) hidePanel.SetActive(false);
 
     currentPanel = pickupPanel;
     }
@@ -36,6 +38,7 @@ public class DetectObjectOutline : MonoBehaviour
     if (pullPanel) pullPanel.SetActive(false);
     if (gateHintPanel) gateHintPanel.SetActive(false);
     if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+    if (hidePanel) hidePanel.SetActive(false);
 
     currentPanel = panel;
     if (currentPanel) currentPanel.SetActive(true);
@@ -72,9 +75,17 @@ public class DetectObjectOutline : MonoBehaviour
         if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
         if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
 
+        var hide = current.GetComponent<HideInBox>();
+        if (!hide) hide = current.GetComponentInParent<HideInBox>();
+        if (!hide) hide = current.GetComponentInChildren<HideInBox>();
+
         if (pickup != null)
         {
             pickup.Interact();
+        }
+        else if (hide != null)
+        {
+            hide.Interact(this.transform.root.gameObject);
         }
 
         current = null;
@@ -93,6 +104,10 @@ public class DetectObjectOutline : MonoBehaviour
             if (best.gameObject.name == "Lift chain")
             {
                 ShowOnly(pullPanel);
+            }
+            else if (best.gameObject.name == "Hide Trigger")
+            {
+                ShowOnly(hidePanel);
             }
             else
             {
