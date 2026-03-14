@@ -73,7 +73,6 @@ public class SonicGrenade : MonoBehaviour
                 360f,
                 1f,
                 echoNumRays,
-                echoMaxDistance,
                 echoMonsterVolume
             );
         }

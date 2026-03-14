@@ -90,7 +90,7 @@ public class TimedEchoEmitter : MonoBehaviour
 
             if (GlobalEchoSystem.Instance != null)
             {
-                GlobalEchoSystem.Ping(gameObject, position, Vector3.forward, angle, uniformity, numRays, maxDistance, monsterVolume);
+                GlobalEchoSystem.Ping(gameObject, position, Vector3.forward, angle, uniformity, numRays, monsterVolume);
             }
 
             emitted++;

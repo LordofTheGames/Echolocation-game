@@ -199,7 +199,7 @@ Shader "Echolocation/EcholocationProjector"
 
                     col = i.color;  // Apply instance color
 
-                    col.a *= alpha;     // Apply fading effect
+                    col.a = alpha * i.color.a; // Apply fading effect - starting 'a' as given by volume of sound source is included
                 }
 
                 return col;
