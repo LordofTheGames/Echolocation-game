@@ -48,21 +48,22 @@ public class DetectObjectOutline : MonoBehaviour
     {
         if (context.performed && current != null)
         {
-            PerformInteract();
+            var gate = current.GetComponentInParent<Gate>();
+            if(gate == null) PerformInteract();
         }
     }
     public void OnUnlock(InputAction.CallbackContext context)
     {
-    if (!context.performed || current == null) return;
+        if (!context.performed || current == null) return;
 
-    if (currentPanel) currentPanel.SetActive(false);
-    current.SetOutlined(false);
+        if (currentPanel) currentPanel.SetActive(false);
+        current.SetOutlined(false);
 
-    var gate = current.GetComponentInParent<Gate>();
-    if (gate != null)
-        gate.TryUnlock();
+        var gate = current.GetComponentInParent<Gate>();
+        if (gate != null)
+            gate.TryUnlock();
 
-    current = null;
+        current = null;
     }
 
     private void PerformInteract()
