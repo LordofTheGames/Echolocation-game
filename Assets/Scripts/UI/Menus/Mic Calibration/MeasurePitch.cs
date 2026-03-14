@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,8 @@ public class MeasurePitch : MonoBehaviour
     public GameObject Button;
     public GameObject SkipButton;
     public MicInput MicInput;
+
+    public TMP_Text Number;
 
     public float consistencyRange = 8;
     public float maxConsistentTimeSecs = 2;
@@ -39,6 +42,7 @@ public class MeasurePitch : MonoBehaviour
         elapsedTimeSecs += Time.deltaTime;
 
         currPitch[idx] = MicInput.pitchHz;
+        Number.text = Mathf.RoundToInt(MicInput.pitchHz).ToString();
         if (currPitch[idx] != 0 && checkConsistency())
         {
             consistentTimeSecs += Time.deltaTime;
@@ -67,6 +71,7 @@ public class MeasurePitch : MonoBehaviour
         {
             if (SkipButton != null) SkipButton.SetActive(false);
             changePrompt(Good);
+            Number.text = "";
             Button.SetActive(true);
             StartCoroutine(SelectButtonLater(Button));
             return currPitch.Sum() / currPitch.Length;

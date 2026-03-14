@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -10,6 +11,8 @@ public class MeasureVolume : MonoBehaviour
     public GameObject Good;
     public GameObject Button;
     public MicInput MicInput;
+
+    public TMP_Text Number;
 
     public float consistencyRange = 0.05f;
     public float maxConsistentTimeSecs = 2;
@@ -38,6 +41,7 @@ public class MeasureVolume : MonoBehaviour
         elapsedTimeSecs += Time.deltaTime;
 
         currVolume[idx] = MicInput.volume;
+        Number.text = Mathf.RoundToInt(MicInput.volume * 100).ToString();
         if (currVolume[idx] != 0 && checkConsistency())
         {
             consistentTimeSecs += Time.deltaTime;
@@ -60,6 +64,7 @@ public class MeasureVolume : MonoBehaviour
         if (consistentTimeSecs >= maxConsistentTimeSecs)
         {
             changePrompt(Good);
+            Number.text = "";
             Button.SetActive(true);
             StartCoroutine(SelectButtonLater());
             return currVolume.Sum() / currVolume.Length;

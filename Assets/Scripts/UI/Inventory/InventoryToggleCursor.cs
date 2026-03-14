@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,7 +12,7 @@ public class InventoryToggleCursor : MonoBehaviour
     [SerializeField] private MouseLook playerLook;
     [SerializeField] private DetectObjectOutline outlineDetector;
 
-    private bool isOpen;
+    private bool isOpen = false;
 
     private void Start()
     {
@@ -34,11 +35,19 @@ public class InventoryToggleCursor : MonoBehaviour
         }
     }
     
-    public void CloseInventory() => SetOpen(false);
-    public void OpenInventory()  => SetOpen(true);
+    public void CloseInventory() 
+    {
+        if (isOpen) SetOpen(false);
+    }
+
+    public void OpenInventory() 
+    {
+        if (!isOpen) SetOpen(true);
+    }
 
     private void SetOpen(bool open)
     {
+
         isOpen = open;
 
         if (inventoryUI) inventoryUI.SetActive(open);
@@ -46,6 +55,7 @@ public class InventoryToggleCursor : MonoBehaviour
         //if (playerLook) playerLook.enabled = !open;
         if (outlineDetector) outlineDetector.SetEnabled(!open);
 
+        // TODO: comment this for BETA
         Cursor.visible = open;
         Cursor.lockState = open ? CursorLockMode.None : CursorLockMode.Locked;
 

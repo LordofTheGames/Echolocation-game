@@ -17,11 +17,15 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject gateUnlockPanel;
     [SerializeField] private GameObject breakablePitchPanel;
     [SerializeField] private GameObject breakableVolumePanel;
+    [SerializeField] private GameObject hidePanel;
+    [SerializeField] private GameObject exitHidePanel;
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
     private float lastValidHitTime;
     private GameObject currentPanel;
+    private bool isHiding;
+    private HideInBox currHideBox;
 
     private void Awake()
     {
@@ -31,6 +35,8 @@ public class DetectObjectOutline : MonoBehaviour
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
         if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
         if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
+        if (hidePanel) hidePanel.SetActive(false);
+        if (exitHidePanel) exitHidePanel.SetActive(false);
 
         currentPanel = pickupPanel;
     }
@@ -43,6 +49,8 @@ public class DetectObjectOutline : MonoBehaviour
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
         if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
         if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
+        if (hidePanel) hidePanel.SetActive(false);
+        if (exitHidePanel) exitHidePanel.SetActive(false);
 
         currentPanel = panel;
         if (currentPanel) currentPanel.SetActive(true);
@@ -52,7 +60,14 @@ public class DetectObjectOutline : MonoBehaviour
     {
         if (context.performed && current != null)
         {
-            PerformInteract();
+            var gate = current.GetComponentInParent<Gate>();
+            if(gate == null) PerformInteract();
+        }
+        else if (context.started && isHiding == true && current == null)
+        {
+            currHideBox.Interact();
+            isHiding = false; 
+            ShowOnly(null);
         }
     }
     public void OnUnlock(InputAction.CallbackContext context)
@@ -78,9 +93,19 @@ public class DetectObjectOutline : MonoBehaviour
         if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
         if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
 
+        var hide = current.GetComponent<HideInBox>();
+        if (!hide) hide = current.GetComponentInParent<HideInBox>();
+        if (!hide) hide = current.GetComponentInChildren<HideInBox>();
+
         if (pickup != null)
         {
             pickup.Interact();
+        }
+        else if (hide != null && isHiding == false)
+        {
+            currHideBox = hide;
+            hide.Interact();
+            isHiding = true;
         }
 
         current = null;
@@ -88,7 +113,6 @@ public class DetectObjectOutline : MonoBehaviour
 
     private void Update()
     {
-
         // create a ray from the center of the screen
         var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
@@ -108,6 +132,10 @@ public class DetectObjectOutline : MonoBehaviour
             {
                 ShowOnly(breakableVolumePanel);
             }
+            else if (best.gameObject.CompareTag("Hide"))
+            {
+                ShowOnly(hidePanel);
+            }
             else
             {
                 var gate = best.GetComponentInParent<Gate>();
@@ -120,6 +148,10 @@ public class DetectObjectOutline : MonoBehaviour
                     ShowOnly(pickupPanel);
                 }
             }
+        }
+        else if (isHiding)
+        {
+            ShowOnly(exitHidePanel);
         }
 
         if (best != null)
