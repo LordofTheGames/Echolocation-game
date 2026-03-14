@@ -36,9 +36,9 @@ public class MicToEcholocation : MonoBehaviour
         if(!micToEchoEnabled) return;
         if (timer < interval) return;
         timer = 0f;
-        if (mic.loudness < 0.05f) return;
+        if (mic.volume < 0.05f) return;
 
-        int rays = Mathf.RoundToInt(mic.loudness * maxRays * numRaysScale);
+        int rays = Mathf.RoundToInt(mic.volume * maxRays * numRaysScale);
         rays = Mathf.Clamp(rays, minRays, maxRays);
 
         proportion = ((float) rays / maxRays);
