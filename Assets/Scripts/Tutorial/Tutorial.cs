@@ -40,13 +40,15 @@ public class Tutorial : MonoBehaviour
         animator.SetBool("Tutorial", tutorial);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         Loudness();
 
         if(loudness > 0.1 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) {
             animator.SetTrigger("Change");
         }
+
+        if(animator.GetBool("Next")) animator.SetBool("Next", false);
     }
 
     private void Loudness()
@@ -62,12 +64,14 @@ public class Tutorial : MonoBehaviour
         {
             animator.SetBool("Tutorial", false);
             tutorial = false;
+            Debug.Log("Skip");
         }
     }
 
     public void OnNext(InputAction.CallbackContext context)
     {
-        if(context.performed) animator.SetTrigger("Next");
+        
+        if(context.performed) animator.SetBool("Next", true);
     }
 
     public void OnEcho(InputAction.CallbackContext context)
