@@ -256,7 +256,7 @@ GameObject:
   - component: {fileID: 6448768869653819886}
   - component: {fileID: 3073600552268709393}
   - component: {fileID: 896755040844005566}
-  - component: {fileID: 1318630112358169782}
+  - component: {fileID: 7401529261617155565}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -297,7 +297,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 16
+    m_Bits: 0
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -433,8 +433,6 @@ MonoBehaviour:
   forwardOffset: 2.3
   rippleSize: 1.5
   rippleLifetime: 0.5
-  footstepWaterSound: {fileID: 8300000, guid: 28c38b101d76bb841941851d69b82999, type: 3}
-  volume: 0.1
   inWater: 0
 --- !u!114 &3073600552268709393
 MonoBehaviour:
@@ -952,7 +950,7 @@ MonoBehaviour:
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &1318630112358169782
+--- !u!114 &7401529261617155565
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -964,13 +962,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 933aeb9c695107b4d923399996bbec46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  footstepSound: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
+  currentSurface: 0
+  CurrentState: 1
   audioSource: {fileID: 0}
+  defaultFootstep: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
+  waterFootstep: {fileID: 8300000, guid: 28c38b101d76bb841941851d69b82999, type: 3}
+  metalFootstep: {fileID: 0}
+  woodFootstep: {fileID: 0}
+  dirtFootstep: {fileID: 0}
   footSeparation: 1
   echoAngle: 360
   crouch:
     name: Crouch
-    maxSpeed: 3
     stepDistance: 2
     volume: 0.2
     echoRays: 700
@@ -978,7 +981,6 @@ MonoBehaviour:
     volForMonster: 0
   walk:
     name: Walk
-    maxSpeed: 6
     stepDistance: 4
     volume: 0.5
     echoRays: 2000
@@ -986,7 +988,90 @@ MonoBehaviour:
     volForMonster: 25
   sprint:
     name: Sprint
-    maxSpeed: 12
+    stepDistance: 5
+    volume: 1
+    echoRays: 5000
+    maxDistance: 30
+    volForMonster: 50
+  waterCrouch:
+    name: Water Crouch
+    stepDistance: 2
+    volume: 0.07
+    echoRays: 1000
+    maxDistance: 8
+    volForMonster: 10
+  waterWalk:
+    name: Water Walk
+    stepDistance: 4
+    volume: 0.15
+    echoRays: 2700
+    maxDistance: 15
+    volForMonster: 35
+  waterSprint:
+    name: Water Sprint
+    stepDistance: 5
+    volume: 0.35
+    echoRays: 7000
+    maxDistance: 35
+    volForMonster: 70
+  metalCrouch:
+    name: Crouch
+    stepDistance: 2
+    volume: 0.2
+    echoRays: 700
+    maxDistance: 6
+    volForMonster: 0
+  metalWalk:
+    name: Walk
+    stepDistance: 4
+    volume: 0.5
+    echoRays: 2000
+    maxDistance: 12
+    volForMonster: 25
+  metalSprint:
+    name: Sprint
+    stepDistance: 5
+    volume: 1
+    echoRays: 5000
+    maxDistance: 30
+    volForMonster: 50
+  woodCrouch:
+    name: Crouch
+    stepDistance: 2
+    volume: 0.2
+    echoRays: 700
+    maxDistance: 6
+    volForMonster: 0
+  woodWalk:
+    name: Walk
+    stepDistance: 4
+    volume: 0.5
+    echoRays: 2000
+    maxDistance: 12
+    volForMonster: 25
+  woodSprint:
+    name: Sprint
+    stepDistance: 5
+    volume: 1
+    echoRays: 5000
+    maxDistance: 30
+    volForMonster: 50
+  dirtCrouch:
+    name: Crouch
+    stepDistance: 2
+    volume: 0.2
+    echoRays: 700
+    maxDistance: 6
+    volForMonster: 0
+  dirtWalk:
+    name: Walk
+    stepDistance: 4
+    volume: 0.5
+    echoRays: 2000
+    maxDistance: 12
+    volForMonster: 25
+  dirtSprint:
+    name: Sprint
     stepDistance: 5
     volume: 1
     echoRays: 5000
