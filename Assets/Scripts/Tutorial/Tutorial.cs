@@ -39,22 +39,22 @@ public class Tutorial : MonoBehaviour
         animator.SetBool("Tutorial", tutorial);
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         MicVolume();
 
         if(micVolume > 0.1 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) {
             animator.SetTrigger("Change");
         }
+
+        if(animator.GetBool("Next")) animator.SetBool("Next", false);
     }
 
     private void MicVolume()
     {
-        var script = GameObject.Find("MicInput").GetComponent<MicInput>();
-
-        if(script == null) return;
-
-        micVolume = script.volume;
+        GameObject micInputObj = GameObject.Find("MicInput");
+        if (micInputObj == null) return;
+        micVolume = micInputObj.GetComponent<MicInput>().volume;
     }
 
     public void OnSkip(InputAction.CallbackContext context)
@@ -63,12 +63,14 @@ public class Tutorial : MonoBehaviour
         {
             animator.SetBool("Tutorial", false);
             tutorial = false;
+            Debug.Log("Skip");
         }
     }
 
     public void OnNext(InputAction.CallbackContext context)
     {
-        if(context.performed) animator.SetTrigger("Next");
+        
+        if(context.performed) animator.SetBool("Next", true);
     }
 
     public void OnEcho(InputAction.CallbackContext context)
@@ -89,6 +91,15 @@ public class Tutorial : MonoBehaviour
     {
         var script = player.GetComponent<PlayerMovement>();
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("walk") && !script.GetSprint()) 
+            animator.SetTrigger("Change");
+    }
+
+    public void OnCrouch(InputAction.CallbackContext context)
+    {
+        var script = player.GetComponent<PlayerMovement>();
+
+        //switch when you uncrouch
+        if(context.performed && animator.GetCurrentAnimatorStateInfo(0).IsName("crouch") && !script.GetCrouch()) 
             animator.SetTrigger("Change");
     }
 
@@ -121,11 +132,11 @@ public class Tutorial : MonoBehaviour
         }
     }
 
-    public void OnOpen(InputAction.CallbackContext context)
-    {
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("openinventory")) 
-            animator.SetTrigger("Change");
-    }
+    // public void OnOpen(InputAction.CallbackContext context)
+    // {
+    //     if(animator.GetCurrentAnimatorStateInfo(0).IsName("openinventory")) 
+    //         animator.SetTrigger("Change");
+    // }
 
     public void OnChoose(InputAction.CallbackContext context)
     {
@@ -133,10 +144,10 @@ public class Tutorial : MonoBehaviour
             animator.SetTrigger("Change");
     }
 
-    public void OnSelect(InputAction.CallbackContext context)
-    {
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("select")) 
-            animator.SetTrigger("Change");
-    }
+    // public void OnSelect(InputAction.CallbackContext context)
+    // {
+    //     if(animator.GetCurrentAnimatorStateInfo(0).IsName("select")) 
+    //         animator.SetTrigger("Change");
+    // }
 
 }
