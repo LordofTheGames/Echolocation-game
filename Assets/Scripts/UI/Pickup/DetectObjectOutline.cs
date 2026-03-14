@@ -15,6 +15,8 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject pullPanel; 
     [SerializeField] private GameObject gateHintPanel;   
     [SerializeField] private GameObject gateUnlockPanel;
+    [SerializeField] private GameObject breakablePitchPanel;
+    [SerializeField] private GameObject breakableVolumePanel;
     [SerializeField] private GameObject hidePanel;
     [SerializeField] private GameObject exitHidePanel;
     public bool ignoreLiftChain;
@@ -31,7 +33,10 @@ public class DetectObjectOutline : MonoBehaviour
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
+        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
         if (hidePanel) hidePanel.SetActive(false);
+        if (exitHidePanel) exitHidePanel.SetActive(false);
 
         currentPanel = pickupPanel;
     }
@@ -42,6 +47,8 @@ public class DetectObjectOutline : MonoBehaviour
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
+        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
         if (hidePanel) hidePanel.SetActive(false);
         if (exitHidePanel) exitHidePanel.SetActive(false);
 
@@ -116,6 +123,14 @@ public class DetectObjectOutline : MonoBehaviour
             if (best.gameObject.name == "Lift chain")
             {
                 ShowOnly(pullPanel);
+            }
+            else if (best.gameObject.CompareTag("BreakablePitch"))
+            {
+                ShowOnly(breakablePitchPanel);
+            }
+            else if (best.gameObject.CompareTag("BreakableVolume"))
+            {
+                ShowOnly(breakableVolumePanel);
             }
             else if (best.gameObject.CompareTag("Hide"))
             {
