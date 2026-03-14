@@ -3,53 +3,45 @@ using UnityEngine;
 [SelectionBase]
 public class Breakable : MonoBehaviour
 {
-    public enum BreakableType { Rock, Glass }
 
-    [SerializeField] GameObject box;
-    [SerializeField] GameObject brokenBox;
+    [SerializeField] GameObject IntactObject;
+    [SerializeField] GameObject BrokenObject;
     [SerializeField] AudioClip breakSound;
-    [SerializeField] BreakableType breakableType = BreakableType.Rock;
-    [SerializeField] MicInput micInput;
-    [SerializeField] float minVolumeToBreak = 0.4f;
-    [SerializeField] float minPitchToBreak = 100f;
+    [SerializeField] float breakSoundVolume = 1f;
+    [Range(0,1)]
+    [SerializeField] float minRelativeVolume = 0.5f;
+    [Range(0,1)]
+    [SerializeField] float minRelativePitch = 0.5f;
     [SerializeField] float holdTimeToBreak = 1.2f;
     [SerializeField] float maxDistanceToMic = 5f;
+    [SerializeField] float secondsUntilDestroy = 5f;
 
-    BoxCollider bc;
-    AudioSource _audioSource;
+    [SerializeField] AudioSource audioSource;
     bool _hasBroken;
     float _holdTimer;
 
+    private GameObject player;
+    private MicInput micInput;
+
     private void Awake()
     {
-        box.SetActive(true);
-        brokenBox.SetActive(false);
-        bc = GetComponent<BoxCollider>();
-        if (breakSound != null)
-        {
-            _audioSource = gameObject.AddComponent<AudioSource>();
-            _audioSource.playOnAwake = false;
-        }
+        micInput = GameObject.Find("MicInput").GetComponent<MicInput>();
+        player = GameObject.FindGameObjectWithTag("Player");
+        IntactObject.SetActive(true);
+        BrokenObject.SetActive(false);
     }
 
     private void Update()
     {
         if (_hasBroken || micInput == null) return;
 
-        if (Vector3.Distance(transform.position, micInput.transform.position) > maxDistanceToMic)
+        if (Vector3.Distance(transform.position, player.transform.position) > maxDistanceToMic)
         {
             _holdTimer = 0f;
             return;
         }
 
-        bool conditionMet = false;
-
-        if (breakableType == BreakableType.Rock && micInput.volume >= minVolumeToBreak)
-            conditionMet = true;
-        else if (breakableType == BreakableType.Glass && micInput.pitchHz >= minPitchToBreak)
-            conditionMet = true;
-
-        if (conditionMet)
+        if (micInput.relativePitch >= minRelativePitch && micInput.relativeVolume >= minRelativeVolume)
         {
             _holdTimer += Time.deltaTime;
             if (_holdTimer >= holdTimeToBreak)
@@ -64,10 +56,10 @@ public class Breakable : MonoBehaviour
     private void Break()
     {
         _hasBroken = true;
-        box.SetActive(false);
-        brokenBox.SetActive(true);
-        bc.enabled = false;
-        if (breakSound != null && _audioSource != null)
-            _audioSource.PlayOneShot(breakSound);
+        IntactObject.SetActive(false);
+        BrokenObject.SetActive(true);
+        audioSource.PlayOneShot(breakSound, breakSoundVolume);
+
+        Destroy(gameObject, secondsUntilDestroy);
     }
 }

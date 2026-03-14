@@ -15,6 +15,8 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject pullPanel; 
     [SerializeField] private GameObject gateHintPanel;   
     [SerializeField] private GameObject gateUnlockPanel;
+    [SerializeField] private GameObject breakablePitchPanel;
+    [SerializeField] private GameObject breakableVolumePanel;
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
@@ -27,18 +29,23 @@ public class DetectObjectOutline : MonoBehaviour
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
+        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
 
-    currentPanel = pickupPanel;
+        currentPanel = pickupPanel;
     }
+
     private void ShowOnly(GameObject panel)
     {
-    if (pickupPanel) pickupPanel.SetActive(false);
-    if (pullPanel) pullPanel.SetActive(false);
-    if (gateHintPanel) gateHintPanel.SetActive(false);
-    if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (pickupPanel) pickupPanel.SetActive(false);
+        if (pullPanel) pullPanel.SetActive(false);
+        if (gateHintPanel) gateHintPanel.SetActive(false);
+        if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
+        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
 
-    currentPanel = panel;
-    if (currentPanel) currentPanel.SetActive(true);
+        currentPanel = panel;
+        if (currentPanel) currentPanel.SetActive(true);
     }
 
     public void OnInteract(InputAction.CallbackContext context)
@@ -92,6 +99,14 @@ public class DetectObjectOutline : MonoBehaviour
             if (best.gameObject.name == "Lift chain")
             {
                 ShowOnly(pullPanel);
+            }
+            else if (best.gameObject.CompareTag("BreakablePitch"))
+            {
+                ShowOnly(breakablePitchPanel);
+            }
+            else if (best.gameObject.CompareTag("BreakableVolume"))
+            {
+                ShowOnly(breakableVolumePanel);
             }
             else
             {
