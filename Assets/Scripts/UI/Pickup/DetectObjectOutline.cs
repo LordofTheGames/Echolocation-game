@@ -15,6 +15,8 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject pullPanel; 
     [SerializeField] private GameObject gateHintPanel;   
     [SerializeField] private GameObject gateUnlockPanel;
+    [SerializeField] private GameObject doorOpenPanel;
+    [SerializeField] private GameObject doorClosePanel;
     [SerializeField] private GameObject breakablePitchPanel;
     [SerializeField] private GameObject breakableVolumePanel;
     [SerializeField] private GameObject hidePanel;
@@ -33,6 +35,8 @@ public class DetectObjectOutline : MonoBehaviour
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (doorOpenPanel) doorOpenPanel.SetActive(false);
+        if (doorClosePanel) doorClosePanel.SetActive(false);
         if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
         if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
         if (hidePanel) hidePanel.SetActive(false);
@@ -51,6 +55,8 @@ public class DetectObjectOutline : MonoBehaviour
         if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
         if (hidePanel) hidePanel.SetActive(false);
         if (exitHidePanel) exitHidePanel.SetActive(false);
+        if (doorOpenPanel) doorOpenPanel.SetActive(false);
+        if (doorClosePanel) doorClosePanel.SetActive(false);
 
         currentPanel = panel;
         if (currentPanel) currentPanel.SetActive(true);
@@ -88,6 +94,17 @@ public class DetectObjectOutline : MonoBehaviour
     {
         currentPanel.SetActive(false);
         current.SetOutlined(false);
+
+        var door = current.GetComponent<LabDoor>();
+        if (!door) door = current.GetComponentInParent<LabDoor>();
+        if (!door) door = current.GetComponentInChildren<LabDoor>();
+
+        if (door != null)
+        {
+            door.Interact();
+            current = null;
+            return;
+        }
 
         var pickup = current.GetComponent<PickupItem>();
         if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
@@ -145,7 +162,26 @@ public class DetectObjectOutline : MonoBehaviour
                 }
                 else
                 {
-                    ShowOnly(pickupPanel);
+                    var door = best.GetComponentInParent<LabDoor>();
+                    if (door != null)
+                    {
+                        if (door.IsMoving)
+                        {
+                            ShowOnly(null);
+                        }
+                        else if (door.IsOpen)
+                        {
+                            ShowOnly(doorClosePanel);
+                        }
+                        else
+                        {
+                            ShowOnly(doorOpenPanel);
+                        }
+                    }
+                    else
+                    {
+                        ShowOnly(pickupPanel);
+                    }
                 }
             }
         }
