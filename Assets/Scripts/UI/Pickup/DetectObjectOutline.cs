@@ -45,7 +45,8 @@ public class DetectObjectOutline : MonoBehaviour
     {
         if (context.performed && current != null)
         {
-            PerformInteract();
+            var gate = current.GetComponentInParent<Gate>();
+            if(gate == null) PerformInteract();
         }
     }
     public void OnUnlock(InputAction.CallbackContext context)

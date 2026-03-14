@@ -123,4 +123,9 @@ public class PlayerMovement : MonoBehaviour
     {
         return isSprinting;
     }
+
+    public bool GetCrouch()
+    {
+        return isCrouching;
+    }
 }
