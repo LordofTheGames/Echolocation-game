@@ -16,11 +16,14 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject gateHintPanel;   
     [SerializeField] private GameObject gateUnlockPanel;
     [SerializeField] private GameObject hidePanel;
+    [SerializeField] private GameObject exitHidePanel;
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
     private float lastValidHitTime;
     private GameObject currentPanel;
+    private bool isHiding;
+    private HideInBox currHideBox;
 
     private void Awake()
     {
@@ -30,18 +33,20 @@ public class DetectObjectOutline : MonoBehaviour
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
         if (hidePanel) hidePanel.SetActive(false);
 
-    currentPanel = pickupPanel;
+        currentPanel = pickupPanel;
     }
+
     private void ShowOnly(GameObject panel)
     {
-    if (pickupPanel) pickupPanel.SetActive(false);
-    if (pullPanel) pullPanel.SetActive(false);
-    if (gateHintPanel) gateHintPanel.SetActive(false);
-    if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
-    if (hidePanel) hidePanel.SetActive(false);
+        if (pickupPanel) pickupPanel.SetActive(false);
+        if (pullPanel) pullPanel.SetActive(false);
+        if (gateHintPanel) gateHintPanel.SetActive(false);
+        if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (hidePanel) hidePanel.SetActive(false);
+        if (exitHidePanel) exitHidePanel.SetActive(false);
 
-    currentPanel = panel;
-    if (currentPanel) currentPanel.SetActive(true);
+        currentPanel = panel;
+        if (currentPanel) currentPanel.SetActive(true);
     }
 
     public void OnInteract(InputAction.CallbackContext context)
@@ -50,6 +55,12 @@ public class DetectObjectOutline : MonoBehaviour
         {
             var gate = current.GetComponentInParent<Gate>();
             if(gate == null) PerformInteract();
+        }
+        else if (context.started && isHiding == true && current == null)
+        {
+            currHideBox.Interact();
+            isHiding = false; 
+            ShowOnly(null);
         }
     }
     public void OnUnlock(InputAction.CallbackContext context)
@@ -83,9 +94,11 @@ public class DetectObjectOutline : MonoBehaviour
         {
             pickup.Interact();
         }
-        else if (hide != null)
+        else if (hide != null && isHiding == false)
         {
-            hide.Interact(this.transform.root.gameObject);
+            currHideBox = hide;
+            hide.Interact();
+            isHiding = true;
         }
 
         current = null;
@@ -93,7 +106,6 @@ public class DetectObjectOutline : MonoBehaviour
 
     private void Update()
     {
-
         // create a ray from the center of the screen
         var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
@@ -105,7 +117,7 @@ public class DetectObjectOutline : MonoBehaviour
             {
                 ShowOnly(pullPanel);
             }
-            else if (best.gameObject.name == "Hide Trigger")
+            else if (best.gameObject.CompareTag("Hide"))
             {
                 ShowOnly(hidePanel);
             }
@@ -121,6 +133,10 @@ public class DetectObjectOutline : MonoBehaviour
                     ShowOnly(pickupPanel);
                 }
             }
+        }
+        else if (isHiding)
+        {
+            ShowOnly(exitHidePanel);
         }
 
         if (best != null)

@@ -6,26 +6,24 @@ public class HideInBox : MonoBehaviour
     [Header("Setup")]
     [SerializeField] private Transform boxAnchor;    
     [SerializeField] private float exitDistance = 1.5f; 
-    [SerializeField] private float transitionDuration = 0.5f; // How long the lerp takes
+    [SerializeField] private float transitionDuration = 1f; // How long the lerp takes
     
-    [Header("Rotation Limits")]
-    [SerializeField] private float horizontalLimit = 45f;
-    [SerializeField] private float verticalLimit = 30f;
-    [SerializeField] private float sensitivity = 2f;
-
     private float originalPlayerY;
 
     private bool isHiding = false;
     private bool isTransitioning = false; // Prevents bugs if player spams interact
     
+    private GameObject player;
     private GameObject playerRef;
     private Camera playerMainCamera;
     private Quaternion originalCamLocalRot; // Saves original neck angle
     
-    private float yaw;
-    private float pitch;
+    void Start()
+    {
+       player = GameObject.FindGameObjectWithTag("Player"); 
+    }
 
-    public void Interact(GameObject player)
+    public void Interact()
     {
         if (isTransitioning) return;
 
@@ -41,8 +39,7 @@ public class HideInBox : MonoBehaviour
 
         player.GetComponent<CharacterController>().enabled = false;
         player.GetComponent<PlayerMovement>().enabled = false;
-        player.GetComponentInChildren<MouseLook>().isHiding = true; 
-        player.GetComponentInChildren<MouseLook>().enabled = false;
+        player.GetComponentInChildren<MouseLook>().hidingTransition = true; 
 
         // Save the FPC camera's local rotation to restore upon exit
         originalCamLocalRot = playerMainCamera.transform.localRotation;
@@ -69,16 +66,20 @@ public class HideInBox : MonoBehaviour
             yield return null; // Wait for next frame
         }
 
-        yaw = 0;
-        pitch = 0;
         isHiding = true;
         isTransitioning = false;
+
+        MouseLook ml = player.GetComponentInChildren<MouseLook>();
+        ml.SyncLookAngles(0f, 0f);
+        ml.isHiding = true; 
+        ml.hidingTransition = false;
     }
 
     private IEnumerator ExitBoxRoutine()
     {
         isTransitioning = true;
         isHiding = false; 
+        player.GetComponentInChildren<MouseLook>().hidingTransition = true; 
 
         Vector3 exitDirection = boxAnchor.forward;
         exitDirection.y = 0; 
@@ -110,41 +111,22 @@ public class HideInBox : MonoBehaviour
 
         playerRef.transform.position = exitPosition;
         playerRef.transform.rotation = exitPlayerRot;
-        playerMainCamera.transform.rotation = targetCamRot;
-        playerMainCamera.transform.localRotation = originalCamLocalRot;
+
+        playerMainCamera.transform.localRotation = originalCamLocalRot; 
         Physics.SyncTransforms();
+
+        float originalPitch = originalCamLocalRot.eulerAngles.x;
+        if (originalPitch > 180f) originalPitch -= 360f;
+        MouseLook ml = playerRef.GetComponentInChildren<MouseLook>();
+        ml.SyncLookAngles(originalPitch, 0f);
 
         // Re-enable player movements
         playerRef.GetComponent<CharacterController>().enabled = true;
         playerRef.GetComponent<PlayerMovement>().enabled = true;
-        playerRef.GetComponentInChildren<MouseLook>().isHiding = false; 
-        playerRef.GetComponentInChildren<MouseLook>().enabled = true;
+        ml.isHiding = false; 
+        ml.hidingTransition = false; 
 
         playerRef = null;
         isTransitioning = false;
-    }
-
-    private void Update()
-    {
-        // Don't allow camera movement while transitioning
-        if (!isHiding || isTransitioning) return;
-
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            StartCoroutine(ExitBoxRoutine());
-            return;
-        }
-
-        float mouseX = Input.GetAxis("Mouse X") * sensitivity;
-        float mouseY = Input.GetAxis("Mouse Y") * sensitivity;
-
-        yaw += mouseX;
-        pitch -= mouseY;
-
-        yaw = Mathf.Clamp(yaw, -horizontalLimit, horizontalLimit);
-        pitch = Mathf.Clamp(pitch, -verticalLimit, verticalLimit);
-
-        Quaternion targetRotation = boxAnchor.rotation * Quaternion.Euler(pitch, yaw, 0);
-        playerMainCamera.transform.rotation = targetRotation;
     }
 }
