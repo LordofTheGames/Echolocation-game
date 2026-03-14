@@ -174,15 +174,6 @@ public class ThrowItem : MonoBehaviour
         {
             currentObj = Instantiate(prefab, cubeSpawnPoint.position, Quaternion.identity);
             currentObj.transform.SetParent(cubeSpawnPoint);
-
-            // Register item's collider in colliderColorMap
-            if (GlobalEchoSystem.Instance != null)
-            {
-                foreach (Collider col in currentObj.GetComponentsInChildren<Collider>())
-                {
-                    GlobalEchoSystem.Instance.RegisterCollider(col);
-                }
-            }
         }
 
         trajectoryLine.enabled = true;
@@ -326,14 +317,6 @@ public class ThrowItem : MonoBehaviour
     {
         if (currentObj != null)
         {
-            // Unregister before destroying
-            if (GlobalEchoSystem.Instance != null)
-            {
-                foreach (Collider col in currentObj.GetComponentsInChildren<Collider>())
-                {
-                    GlobalEchoSystem.Instance.UnregisterCollider(col);
-                }
-            }
             Destroy(currentObj);
             currentObj = null;
         }

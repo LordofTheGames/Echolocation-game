@@ -1,8 +1,5 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,8 +8,6 @@ public class InventoryManager : MonoBehaviour
     public static InventoryManager Instance;
     public event Action OnInventoryChanged, OnSelecting;
     private Dictionary<ItemType, int> counts = new Dictionary<ItemType, int>();
-    private float time = 0;
-    private bool tempInventory = false;
 
     // currently selected item to throw/use
     public ItemType Selected { get; private set; } = ItemType.None;
@@ -40,27 +35,6 @@ public class InventoryManager : MonoBehaviour
         //add items so tutorial got something to switch to
         Add(ItemType.Rock, 3);
 
-    }
-
-    private void Update()
-    {
-        if(time > 0f && tempInventory){ 
-            time -= Time.deltaTime;
-        }
-
-        if(time <= 0 && toggle.UIopen() && tempInventory)
-        {
-            toggle.CloseInventory();
-            time = 0f;
-            tempInventory = false;
-        }
-    }
-
-    private void DelayClosing()
-    {
-        toggle.OpenInventory();
-        tempInventory = true;
-        time = 1f;
     }
 
     public void Add(ItemType type, int amount = 1)
@@ -110,31 +84,21 @@ public class InventoryManager : MonoBehaviour
     {
         if (GetCount(type) <= 0) return;
         Selected = type;
-        Selection(type);
-    }
-
-    public void Selection(ItemType type)
-    {
-        if (GetCount(type) <= 0) return;
-        Selecting = type;
-        OnSelecting?.Invoke();
     }
 
     public void OnNext(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && Instance.toggle.UIopen())
         {
             Instance.HandleNext(Instance.Selecting);
-            Instance.DelayClosing();
         }
     }
 
     public void OnPrevious(InputAction.CallbackContext context)
     {
-        if (context.performed)
+        if (context.performed && Instance.toggle.UIopen())
         {
-            Instance.HandlePrevious(Instance.Selecting);
-            Instance.DelayClosing();
+            Instance.HandlePrevious();
         }
     }
 
@@ -157,12 +121,12 @@ public class InventoryManager : MonoBehaviour
 
         if(counts[Selecting] == 0) Selecting = ItemType.None;
 
-        Select(Selecting);
+        OnSelecting?.Invoke();
     }
 
-    private void HandlePrevious(ItemType start)
+    private void HandlePrevious()
     {
-        ItemType looper = start;
+        ItemType looper = Selecting;
 
         for(int i=0; i<counts.Count-1; i++)
         {
@@ -178,16 +142,13 @@ public class InventoryManager : MonoBehaviour
 
         if(counts[Selecting] == 0) Selecting = ItemType.None;
 
-        Select(Selecting);
+        OnSelecting?.Invoke();
     }
 
     public void OnSelect(InputAction.CallbackContext context)
     {
-        if(context.performed && Instance.toggle.UIopen()){
-            Instance.Select(Instance.Selecting);
-            Instance.toggle.CloseInventory();
-        }
+        Instance.Select(Instance.Selecting);
+        Instance.toggle.CloseInventory();
     }
-
 }
 

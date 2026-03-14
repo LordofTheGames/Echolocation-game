@@ -18,13 +18,11 @@ public partial class FindNavigablePositionAwayFromTargetAction : Action
     private Vector3 awayDir;
     private Vector3 targetPosition;
     private float currAngle;
-    private float currDistance;
 
     protected override Status OnStart()
     {
         checkCount = 0;
         currAngle = 10;
-        currDistance = Distance;
         awayDir = Agent.Value.transform.position - Target.Value.transform.position;
         awayDir.y = 0;
         awayDir = awayDir.normalized;
@@ -51,21 +49,7 @@ public partial class FindNavigablePositionAwayFromTargetAction : Action
             currAngle += 10;
             checkCount = 0;
             FinalPoint.Value = Agent.Value.transform.position;
-            if (currAngle >= 90)
-            {
-               currAngle = 10;
-               currDistance -= 10;
-                if (currDistance <= 0)
-                {
-                    FinalPoint.Value = Agent.Value.transform.position;
-                    return Status.Failure;
-                }
-                else
-                {
-                    targetPosition = awayDir * Distance;
-                    return Status.Running;
-                }
-            }
+            if (currAngle >= 90) return Status.Failure;
             else return Status.Running;
         }
         else 

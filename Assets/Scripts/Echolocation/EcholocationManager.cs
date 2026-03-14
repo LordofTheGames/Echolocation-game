@@ -2,9 +2,6 @@ using UnityEngine;
 using Unity.Collections;            // Native collections (NativeArray) for high-performance memory management
 using Unity.Jobs;                   // The job system - allows us to run code on multiple CPU cores
 using System.Collections.Generic;   // For use of dictionary
-using Unity.Profiling;
-using Unity.Mathematics;
-using Unity.Burst;
 
 public class EcholocationManager : MonoBehaviour
 {
@@ -17,16 +14,9 @@ public class EcholocationManager : MonoBehaviour
     public float maxDistance = 50f;     // Max distance rays can travel
     public LayerMask scanLayers;
 
-    [Header("Sound Propagation")]
-    [Tooltip("Speed of 'sound' for animation (Rays are still instant, dots are revealed at different times)")]
-    public float soundSpeed = 10f;
-    [Tooltip("If disabled, all hits appear instantly as before")]
-    public bool useSoundPropagation = true;
-
     [Header("Reflection Settings")]
     [Tooltip("Maximum number of times sound rays will bounce before stopping")]
     public int maxBounces = 2;
-    public bool visualiseAllBounces = true;
 
     [Header("Visual Settings")]
     // Tooltip adds pop-up info when hovering mouse over the variable in the inspector
@@ -52,8 +42,10 @@ public class EcholocationManager : MonoBehaviour
     public Color[] interactableColors = new Color[3] {Color.green, new Color(0f, 0.8f, 0f), new Color(0f, 0.6f, 0f)};
     public Color[] defaultColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
 
-    // HashMap to store color (category) of every collider in the game
-    private NativeHashMap<int, int> colliderColorMap;
+    [Header("Layers To Detect (for different colour dots/squares)")]
+    public LayerMask monsterLayer;
+    public LayerMask interactableLayer;
+    public LayerMask outlinedObjectLayer;
 
 
     // Hidden GPU variables
@@ -62,15 +54,13 @@ public class EcholocationManager : MonoBehaviour
     private ComputeBuffer argsBuffer;       // Holds arguments for drawing (how many meshes to draw)
     private ComputeBuffer matrixBuffer;     // Holds the position/rotation/scale of every single mesh
     private ComputeBuffer colorBuffer;      // Holds the colour for each dot/square
-    private ComputeBuffer revealTimeBuffer; // Holds time each dot should be revealed for propagation animation
 
 
     // NativeArray is a high-performance list used by the job system
     private NativeArray<RaycastCommand> commands;       // The "to do list" of raycasts
     private NativeArray<RaycastHit> results;            // The results
-    private NativeArray<float4x4> instanceMatrices;     // Holds position data before sending it to the GPU
-    private NativeArray<Vector4> instanceColors;        // Holds color data before sending it to GPU
-    private NativeArray<float> instanceRevealTimes;     // Holds reveal time data before sending it to GPU
+    private Matrix4x4[] instanceMatrices;               // Holds position data before sending it to the GPU
+    private Vector4[] instanceColors;                   // Holds color data before sending it to GPU
     private uint[] args = new uint[5] { 0, 0, 0, 0, 0}; // Array of 5 uints required by "DrawMeshInstancedIndirect" command
     private int activeHitCount = 0; // A counter to keep track of how many rays have actually hit a wall this frame
 
@@ -102,30 +92,6 @@ public class EcholocationManager : MonoBehaviour
     // Layer memory - to restore object+children's layers, after setting to IgnoreRaycast layer on first pulse, and reset before first reflections
     private Dictionary<Transform, int> layerMemory = new Dictionary<Transform, int>();
 
-    // For profiling main loop - bounces and stuff
-    static readonly ProfilerMarker scanMarker = new ProfilerMarker("Burst_HeavyScanLoop");
-
-
-    // Used to store render bounds so bounds aren't rebuilt every frame
-    private Bounds renderBounds;
-
-    // A small data packet the job will send back to main thread
-    public struct VisualHit
-    {
-        public float4x4 matrix;
-        public int colorVariant; //  0, 1, or 2
-        public int colorCategory; // 0 = default, 1 = monster, 2 = interactable
-        public float travelDistance; // Total distance ray travelled to reach this hit point
-    };
-
-    // Struct to hold ray data to prevent scrambling in paralllel section
-    public struct RayData
-    {
-        public Vector3 origin;
-        public Vector3 direction;
-        public float range;
-        public float distanceTravelled; // Cumulative distance travelled across all bounces up to that point 
-    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -165,21 +131,18 @@ public class EcholocationManager : MonoBehaviour
         float totalFalloff = gridOffset + gridDepth;
         instanceMaterial.SetFloat("_Falloff", totalFalloff);
 
-        long totalMaxHits = (long) raysPerScan * (maxBounces + 1);      // Calculate max number of rays/hits, including initial pulse and subsequent reflections
-        int safeBufferSize = (int)Mathf.Min(totalMaxHits, 1000000);     // Prevenet a single pulse event from taking up to much VRAM
+        long totalMaxHits = (long) raysPerScan * (maxBounces + 1);                                          // Calculate max number of rays/hits, including initial pulse and subsequent reflections
+        int safeBufferSize = (int)Mathf.Min(totalMaxHits, 1000000);                                         // Prevenet a single pulse event from taking up to much VRAM
 
-        instanceMatrices = new NativeArray<float4x4>(safeBufferSize, Allocator.Persistent);     // Intialise the array to hold "safeBufferSize" number of matrices (positions)
-        instanceColors = new NativeArray<Vector4>(safeBufferSize, Allocator.Persistent);        // Intialise the array to hold "safeBufferSize" number of colors
-        instanceRevealTimes = new NativeArray<float>(safeBufferSize, Allocator.Persistent);     // Intialise the array to hold "safeBufferSize" number of reveal times
-
+        instanceMatrices = new Matrix4x4[safeBufferSize];                                                       // Intialise theh array to hold "raysPerScan" number of matrices (positions)
+        instanceColors = new Vector4[safeBufferSize];                                                           // Intialise theh array to hold "raysPerScan" number of colors
+        
         matrixBuffer = new ComputeBuffer(safeBufferSize, 64);                                                   // Create the GPU buffer - 64 is the "stride" (size of one 4x4 matrix in bytes = 16 floats * 4 bytes each)
         colorBuffer = new ComputeBuffer(safeBufferSize, 16);                                                    // Create GPU buffer for colours, 16 = 4 floats * 4 bytes
-        revealTimeBuffer = new ComputeBuffer(safeBufferSize, 4);                                                // Create GPU buffer for reveal times, 4 = 1 float (4 bytes)
         argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);     // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
 
         PerformScan();
-        float propagationDelay = useSoundPropagation ? maxDistance / soundSpeed : 0f;
-        Destroy(gameObject, pulseDuration + propagationDelay); // Destory this instance once the pulse duration + any delay to propagation animation has ended
+        Destroy(gameObject, pulseDuration); // Destory this instance once the pulse duration has ended
     }
 
     // Update is called once per frame
@@ -187,7 +150,11 @@ public class EcholocationManager : MonoBehaviour
     {
         if (activeHitCount <= 0 || instanceMaterial == null) return;
 
-        instanceMaterial.SetFloat("_ElapsedTime", Time.time - spawnTime);
+        // Fade out over time
+        float lifePercent = (Time.time - spawnTime) / pulseDuration;
+        float currentAlpha = Mathf.Lerp(1.0f, 0.0f, lifePercent);
+
+        instanceMaterial.SetFloat("_GlobalVisibility", currentAlpha);
         RenderVisuals();
     }
 
@@ -211,7 +178,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float maxDist = 50f, float volume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float maxDist = 50f, float volume = 10f, bool isFootsteps = false)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -219,17 +186,13 @@ public class EcholocationManager : MonoBehaviour
         scanDirection = direction.normalized;
         scanAngle = angle;
         scanUniformity = Mathf.Clamp01(uniformity);     // Make sure is in valid range
-        raysPerScan = Mathf.Clamp(numRays, 0, 100000);  // Make sure is in (currently chosen) valid range
+        raysPerScan = Mathf.Clamp(numRays, 0, 100000);   // Make sure is in (currently chosen) valid range
         maxDistance = maxDist;
         objectToIgnore = ignoreMe;
-        colliderColorMap = colorMap;
         // TODO: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
-        GameObject monster = GameObject.FindGameObjectWithTag("Monster");
-        if (monster != null) {
-            INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
-            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, volume, isFootsteps);
-        }
+        INoiseSensitive sensitiveTarget = GameObject.FindGameObjectWithTag("Monster").GetComponent<INoiseSensitive>();
+        sensitiveTarget.OnHeardScan(transform, volume, isFootsteps);
     }
 
 
@@ -286,148 +249,215 @@ public class EcholocationManager : MonoBehaviour
         }
 
         // Create temporary memory for the job
-        NativeList<RayData> currentRays = new NativeList<RayData>(raysPerScan, Allocator.TempJob);  // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
-        currentRays.Resize(raysPerScan, NativeArrayOptions.UninitializedMemory);                    // Pre-size array without initialising memory
-    
+        NativeList<Vector3> rayOrigins = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);   // Allocator.TempJob keeps the buffer for 4 frames - however must return the key (call .Dispose()) when done to avoid memory leak warnings
+        NativeList<Vector3> rayDirections = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);
+        NativeList<float> rayRanges = new NativeList<float>(raysPerScan, Allocator.TempJob);
+
+        Vector3 startOrigin = transform.position; // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
+ 
         // Prepare first layer of raycasts
-        var genJob  = new GenerateRaysJob
+        for (int i = 0; i < raysPerScan; i++)
         {
-            seed = (uint)(Time.frameCount * 1000 + GetInstanceID()),
-            scanAngle = scanAngle,
-            scanDirection = scanDirection,
-            scanUniformity = scanUniformity,
-            maxDistance = maxDistance,
-            startOrigin = transform.position,   // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
-            rays = currentRays.AsArray()
-        };
-        JobHandle genHandle = genJob.Schedule(raysPerScan, 64);
-        genHandle.Complete();
+            rayOrigins.Add(startOrigin);    // Initial fire before reflections have the same origin
+            rayRanges.Add(maxDistance);     // And start with the same max distance to travel
+            
+            Vector3 worldDir;
+
+            if (scanAngle >= 360f)
+            {
+                worldDir = UnityEngine.Random.onUnitSphere;
+            }
+            else
+            {
+                // Uniform cone distribution math - using Archimedes theorem
+                // Any slice of a sphere with the same height, has the same surface area on the "crust" of the sphere
+                // Therefore if you imagine those heights getting really small ~ 0, it produces a circular ring on the sphere's surface
+                // If you uniformly pick  heights/rings, all of which have the same surface area, and uniformly pick points on the rings
+                // You will uniformly distribute points an the surface of the sphere
+                // And if you limit the height to be picked along a line from the sphere's centre, say 1 at surface of a unit sphere, to 0.866 
+                // Where the "width" of the sphere at that point corresponds to a 60 degree cone
+                // You can uniformly distribute rays within a cone without clumping at the centre/pole
+                // And then you can convert to the space of the "direction" of the cone
+
+                float halfAngleRad = (scanAngle / 2f) * Mathf.Deg2Rad;      // Split angle to half on either side of line and convert to radians
+                float minZ = Mathf.Cos(halfAngleRad);                       // Get the height corresponding to the angle of the cone on the sphere
+
+                float exponent = Mathf.Lerp(8.0f, 1.0f, scanUniformity);    // How clumped the rays should be
+
+                float rng = UnityEngine.Random.value;                       // Random value 0 to 1
+                float biasedT = Mathf.Pow(rng, 1.0f / exponent);            // Warp random value using exponent, root effect for smooth hill like distribution
+
+                float z = Mathf.Lerp(minZ, 1.0f, biasedT);                  // Uniformity = 1 means exponent = 1 means 1 / exponent = 1 means even distribution, higher exponent/lower uniformity means more clumped
+
+                float radiusAtHeight = Mathf.Sqrt(1f - z * z);              // Get the radius of the ring at that point
+                float phi = UnityEngine.Random.Range(0f, 2f * Mathf.PI);    // Randomly pick an angle around the ring (polar coordinates)
+
+                // Convert to cartesian
+                Vector3 localDir = new Vector3(
+                    radiusAtHeight * Mathf.Cos(phi),
+                    radiusAtHeight * Mathf.Sin(phi),
+                    z
+                );
+
+                // Rotate to direction specified (prevent LookRotation(0,0,0) errors)
+                if (scanDirection != Vector3.forward)
+                {
+                    Quaternion lookRot = Quaternion.LookRotation(scanDirection);
+                    worldDir = lookRot * localDir;
+                }
+                else
+                {
+                    worldDir = localDir;
+                }
+            }
+
+            rayDirections.Add(worldDir);    // Add world direction for this ray
+        }
+
 
         // Reflection loop
 
         activeHitCount = 0;
 
-        using (scanMarker.Auto())
+        for (int bounce = 0; bounce <= maxBounces; bounce++)
         {
-            var qp = QueryParameters.Default;
-            qp.layerMask = scanLayers;
-            qp.hitBackfaces = false;
+            int rayCount = rayOrigins.Length;   // Initialise to current number of rays in "generation
+            if (rayCount == 0) break;           // Stop if none remaining
 
-            for (int bounce = 0; bounce <= maxBounces; bounce++)
+            // Prepare job memory
+            commands = new NativeArray<RaycastCommand>(rayCount, Allocator.TempJob); 
+            results = new NativeArray<RaycastHit>(rayCount, Allocator.TempJob);
+
+            // Prepare commands for all current rays
+            for (int i = 0; i < rayCount; i++)
             {
-                int rayCount = currentRays.Length;   // Initialise to current number of rays in "generation"
-                if (rayCount == 0) break;            // Stop if none remaining
+                // Set up the settings package
+                QueryParameters queryParams = QueryParameters.Default;
+                queryParams.layerMask = scanLayers;                                         // Tells raycasts what they're "allowed" to hit, scanLyers is set in Unity
+                queryParams.hitBackfaces = false;                                           // Dont't hit the insides of objects
 
-                // Prepare job memory
-                commands = new NativeArray<RaycastCommand>(rayCount, Allocator.TempJob); 
-                results = new NativeArray<RaycastHit>(rayCount, Allocator.TempJob);
-
-                // Setup physics job
-                var setupJob = new SetupRaycastJob
-                {
-                    rays = currentRays.AsArray(), // Pass the combined list
-                    qp = qp, 
-                    commands = commands
-                };
-                JobHandle setupHandle = setupJob.Schedule(rayCount, 64);
-
-                // Run physics
-                JobHandle rayHandle = RaycastCommand.ScheduleBatch(commands, results, 1, setupHandle);  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
-                rayHandle.Complete();                                                                   // Main thread waits here till complete
-
-
-                // Reset object+children layers after initial projections (so reflections can hit it)
-                if (bounce == 0 && objectToIgnore != null)
-                {
-                    RestoreLayers();
-                }
-
-                // List for next bounce
-                NativeList<RayData> nextRays = new NativeList<RayData>(rayCount, Allocator.TempJob);   
-
-                // Collect list of indices of rays that actually hit something
-                NativeList<int> hitIndices = new NativeList<int>(rayCount, Allocator.TempJob);
-                NativeList<VisualHit> visualHits = new NativeList<VisualHit>(rayCount, Allocator.TempJob);
-
-                var processJob = new ProcessHitsJob
-                {
-                    results = results,
-                    currentRays = currentRays.AsArray(),
-                    bounce = bounce,
-                    maxBounces = maxBounces,
-                    isGridMode = isGridMode,
-                    offset = isGridMode ? gridOffset : dotOffset,
-                    scale = isGridMode ? gridQuadSize : dotScale,
-
-                    visualiseAllBounces = visualiseAllBounces,
-
-                    colliderColorMap = colliderColorMap,
-                    nextRays = nextRays.AsParallelWriter(),
-                    hitIndices = hitIndices.AsParallelWriter(),
-                    visualHits = visualHits.AsParallelWriter(),
-                };
-
-                JobHandle processHandle = processJob.Schedule(rayCount, 64);
-                processHandle.Complete();
-
-                // --- Assign colours (main thread unpacking) ---
-                int currentBounceHits = visualHits.Length;
-
-                // Unpack visual data and assign colours
-                for (int k  = 0; k < currentBounceHits; k++)
-                {
-                    VisualHit vHit = visualHits[k];
-
-                    // Use global index so bounce 1 doesn't overwrite bounce 0
-                    int globalIndex = activeHitCount + k;
-
-                    if (globalIndex >= instanceMatrices.Length) break; // Safety if goes past safeBufferSize
-
-                    instanceMatrices[globalIndex] = vHit.matrix;
-
-                    // Assign colour
-                    instanceColors[globalIndex] = vHit.colorCategory switch
-                    {
-                        1 => monsterColors[vHit.colorVariant],
-                        2 => interactableColors[vHit.colorVariant],
-                        _ => defaultColors[vHit.colorVariant]
-                    };
-
-                    // Calculate reveal time
-                    instanceRevealTimes[globalIndex] = useSoundPropagation ? vHit.travelDistance / soundSpeed : 0f;
-                }
-
-                activeHitCount += currentBounceHits;
-                        
-                // TODO: add this when we have multiple ray bounces working
-                // for (int k = 0; k < hitIndices.Length; k++)
-                // {
-                //     int originalRayIndex = hitIndices[k];
-                //     RaycastHit hit = results[originalRayIndex];
-
-                //     INoiseSensitive sensitiveTarget = hit.collider.GetComponent<INoiseSensitive>();
-
-                //     if (sensitiveTarget != null)
-                //     {
-                //         sensitiveTarget.OnHeardScan(sourceObj.transform);
-                //     }
-                // }
-
-                // Cleanup current "generation"
-                commands.Dispose();
-                results.Dispose();
-                currentRays.Dispose();
-                hitIndices.Dispose();
-                visualHits.Dispose();
-
-                // Swap to next generation
-                currentRays = nextRays;
+                commands[i] = new RaycastCommand(rayOrigins[i], rayDirections[i], queryParams, rayRanges[i]);    // Start at ray origin, go in direciton of ray, use these settings, limit distance to remaining from max distance
             }
+
+            // Fire rays
+            JobHandle handle = RaycastCommand.ScheduleBatch(commands, results, 1, default(JobHandle));  // Schedule the job, "ScheduleBatch" tells Unity to split this work across all CPU cores
+            handle.Complete();                                                                          // Forces the main thread to wait until the job is finished 
+
+            // Reset object+children layers after initial projections (so reflections can hit it)
+            if (bounce == 0 && objectToIgnore != null)
+            {
+                RestoreLayers();
+            }
+
+            // Lists for next bounce
+            NativeList<Vector3> nextOrigins = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);   
+            NativeList<Vector3> nextDirections = new NativeList<Vector3>(raysPerScan, Allocator.TempJob);
+            NativeList<float> nextRanges = new NativeList<float>(raysPerScan, Allocator.TempJob);
+
+
+
+            // Process Hits
+            for (int i = 0; i < rayCount; i++)
+            {
+                // If the collider is not null, the ray hit something
+                if (results[i].collider != null)
+                {
+                    RaycastHit hit = results[i];    // Get hit data
+
+
+                    // NOTE: if you don't want reflected rays to be visualised change the if to if (bounce == 0)
+                    // ALSO: update the total max hit thing to reduce buffer size
+
+                    if (activeHitCount < instanceMatrices.Length)   // Safety check, currently has more than enough space so should have no problems
+                    {
+                        Quaternion rotation = Quaternion.LookRotation(-hit.normal); // Create a rotation that looks "up" away from the surface normal - makes the quad lie flat on the wall
+                    
+                        Vector3 position;
+                        float scale;
+                        if (isGridMode)
+                        {
+                            position = hit.point + (hit.normal * gridOffset);   // Calculate position of the quad - hitpoint + offset
+                            scale = gridQuadSize;                               // Get scale factor for quad
+                        }
+                        else
+                        {
+                            position = hit.point + (hit.normal * dotOffset);    // Calculate position of the quad - hitpoint + offset
+                            scale = dotScale;                                   // Get scale factor for quad
+                        }
+
+                        instanceMatrices[activeHitCount] = Matrix4x4.TRS(position, rotation, Vector3.one * scale);          // Create the matrix (position, rotation, scale) for this instance
+                        
+                        
+                        // Color logic 
+
+                        int hitLayer = hit.collider.gameObject.layer;   // Get hit layer
+                        int hitLayerMask = 1 << hitLayer;               // Convert layer to bitmask
+
+                        int variantIndex = UnityEngine.Random.Range(0,3);   // Get random index for colour within monster/interactable/default colours
+
+                        if ((monsterLayer.value & hitLayerMask) > 0) // Bit wise comparison
+                        {
+                            instanceColors[activeHitCount] = monsterColors[variantIndex];
+                        }
+                        else if ((interactableLayer & hitLayerMask) > 0 || (outlinedObjectLayer & hitLayerMask) > 0) // Check if interactable or currently outlined (only happens to interactables)
+                        {
+                            instanceColors[activeHitCount] = interactableColors[variantIndex];
+                        }
+                        else
+                        {
+                            instanceColors[activeHitCount] = defaultColors[variantIndex];
+                        }
+
+                        
+                        activeHitCount++;                                                                                   // Increment the counter
+                    }
+                    
+                    // TODO: add this when we have multiple ray bounces working
+                    // INoiseSensitive sensitiveTarget = results[i].collider.GetComponent<INoiseSensitive>();
+                    // if (sensitiveTarget != null) // If the thing hit (the monster) has an implementaion of INoiseSensitive (not null) then it wants this info so send
+                    //{
+                    //  sensitiveTarget.OnHeardScan(sourceObj.transform); // Send the original source object even after reflections 
+                    //}
+
+                    // Calculate reflections
+                    if (bounce < maxBounces)
+                    {
+                        float distanceTravelled = hit.distance;
+                        float remainingRange = rayRanges[i] - distanceTravelled; // Calculate remaining distance
+
+                        // Only bounce if range left
+                        if (remainingRange > 0f)
+                        {
+                            Vector3 incomingDir = rayDirections[i];
+                            Vector3 reflectedDir = Vector3.Reflect(incomingDir, hit.normal);
+
+                            // Add to next batch of rays
+                            nextOrigins.Add(hit.point + (hit.normal * 0.01f)); // Add offset to spawn point to prevent self collision
+                            nextDirections.Add(reflectedDir);
+                            nextRanges.Add(remainingRange);
+                        }
+                    }
+                }
+            }
+
+            // Cleanup current "generation"
+            commands.Dispose();
+            results.Dispose();
+            rayOrigins.Dispose();
+            rayDirections.Dispose();
+            rayRanges.Dispose();
+
+            // Swap to next generations
+            rayOrigins = nextOrigins;
+            rayDirections = nextDirections;
+            rayRanges = nextRanges;
         }
 
-        // Final cleanup
-        currentRays.Dispose();
 
+        // Final cleanup
+        rayOrigins.Dispose();
+        rayDirections.Dispose();
+        rayRanges.Dispose();
         
 
         // Always set the arguments so (incorrect) values from previous calls of perform scan aren't kept
@@ -444,192 +474,11 @@ public class EcholocationManager : MonoBehaviour
         if (activeHitCount > 0)
         {
             // Zeroes are, respectively, source index (start reading at beginning of C# array) and destination index (start writing at the beginning of the GPU buffer)
-            matrixBuffer.SetData(instanceMatrices, 0, 0, activeHitCount);           // Send the matrices to the GPU buffer
-            colorBuffer.SetData(instanceColors, 0, 0, activeHitCount);              // Send the colours to the GPU buffer
-            revealTimeBuffer.SetData(instanceRevealTimes, 0, 0, activeHitCount);    // Send the reveal times to the GPU buffer
+            matrixBuffer.SetData(instanceMatrices, 0, 0, activeHitCount);   // Send the matrices to the GPU buffer
+            colorBuffer.SetData(instanceColors, 0, 0, activeHitCount);      // Send the colours to the GPU buffer
         }
 
         //Debug.Log("Scan fired! Hits: " + activeHitCount);
-
-        // SetBuffers moved from RenderVisuals to end of perform scan so only called once
-        // RenderVisuals is ran every frame and buffers don't change after initial setting
-        instanceMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);  // Tell the material where to find the position data (the matrix buffer)
-        instanceMaterial.SetBuffer("_InstanceColors", colorBuffer);     // Tell the material where to find the colours 
-        instanceMaterial.SetBuffer("_RevealTimes", revealTimeBuffer);   // Tell the material the time to reveal the dot
-        instanceMaterial.SetFloat("_PulseDuration", pulseDuration);     // Tell the material how long each dot should be active for
-
-        // Create render bounds
-        renderBounds = new Bounds(transform.position, Vector3.one * 1000);
-    }
-
-    // --- Burst Jobs ---
-
-    [BurstCompile]
-    struct GenerateRaysJob : IJobParallelFor
-    {
-        public uint seed;
-        public float scanAngle;
-        public float scanUniformity;
-        public float3 scanDirection;
-        public float maxDistance;
-        public float3 startOrigin;
-        public NativeArray<RayData> rays;
-
-        public void Execute(int i)
-        {
-            // Each thread gets a unique, deterministic seed
-            var rng = new Unity.Mathematics.Random(math.hash(new uint2(seed, (uint)i)) | 1u);
-            float3 worldDir;
-
-            if (scanAngle >= 360f)
-            {
-                worldDir = rng.NextFloat3Direction();
-            }
-            else
-            {
-                // Uniform cone distribution math - using Archimedes theorem
-                // Any slice of a sphere with the same height, has the same surface area on the "crust" of the sphere
-                // Therefore if you imagine those heights getting really small ~ 0, it produces a circular ring on the sphere's surface
-                // If you uniformly pick  heights/rings, all of which have the same surface area, and uniformly pick points on the rings
-                // You will uniformly distribute points an the surface of the sphere
-                // And if you limit the height to be picked along a line from the sphere's centre, say 1 at surface of a unit sphere, to 0.866 
-                // Where the "width" of the sphere at that point corresponds to a 60 degree cone
-                // You can uniformly distribute rays within a cone without clumping at the centre/pole
-                // And then you can convert to the space of the "direction" of the cone
-
-                float halfAngleRad = math.radians(scanAngle * 0.5f);        // Split angle to half on either side of line and convert to radians
-                float minZ = math.cos(halfAngleRad);                        // Get the height corresponding to the angle of the cone on the sphere
-
-                float exponent = math.lerp(8.0f, 1.0f, scanUniformity);     // How clumped the rays should be
-
-                float biasedT = math.pow(rng.NextFloat(), 1.0f / exponent); // Warp random value using exponent, root effect for smooth hill like distribution
-
-                float z = math.lerp(minZ, 1.0f, biasedT);                   // Uniformity = 1 means exponent = 1 means 1 / exponent = 1 means even distribution, higher exponent/lower uniformity means more clumped
-
-                float radiusAtHeight = math.sqrt(1f - z * z);              // Get the radius of the ring at that point
-                float phi = rng.NextFloat() * math.PI2;                     // Randomly pick an angle around the ring (polar coordinates)
-
-                // Convert to cartesian
-                float3 localDir = new float3(
-                    radiusAtHeight * math.cos(phi),
-                    radiusAtHeight * math.sin(phi),
-                    z
-                );
-
-                // Rotate to direction specified (prevent LookRotation(0,0,0) errors)
-                if (!scanDirection.Equals(math.forward()))
-                {
-                    quaternion lookRot = quaternion.LookRotation(scanDirection, math.up());
-                    worldDir = math.rotate(lookRot, localDir);
-                }
-                else
-                {
-                    worldDir = localDir;
-                }
-            }
-
-            // Add combined package
-            rays[i] = new RayData{ origin = startOrigin, direction = worldDir, range = maxDistance, distanceTravelled = 0f };
-        }
-    }
-
-    [BurstCompile]
-    struct SetupRaycastJob : IJobParallelFor
-    {
-        [ReadOnly] public NativeArray<RayData> rays;
-        public QueryParameters qp;
-        public NativeArray<RaycastCommand> commands;
-
-        public void Execute(int i)
-        {
-            commands[i] = new RaycastCommand(rays[i].origin, rays[i].direction, qp, rays[i].range);
-        }
-
-    };
-
-    [BurstCompile]
-    struct ProcessHitsJob : IJobParallelFor
-    {
-        [ReadOnly] public NativeArray<RaycastHit> results;
-        [ReadOnly] public NativeArray<RayData> currentRays;
-        [ReadOnly] public NativeHashMap<int, int> colliderColorMap;
-
-        public int bounce;
-        public int maxBounces;
-        public bool isGridMode;
-        public float offset;
-        public float scale;
-
-        public bool visualiseAllBounces;
-
-        public NativeList<RayData>.ParallelWriter nextRays;
-        
-        public NativeList<int>.ParallelWriter hitIndices;
-        public NativeList<VisualHit>.ParallelWriter visualHits;
-
-        public void Execute(int i)
-        {
-            if (results[i].colliderInstanceID == 0) return;     // Unity's job system returns a colliderInstanceID of 0 if ray didn't hit anything
-
-            RaycastHit hit = results[i];
-
-            hitIndices.AddNoResize(i);
-
-            float totalDistance = currentRays[i].distanceTravelled + hit.distance;  // Calculate total distance ray has travelled to reach this hit point
-
-            if ((bounce == 0 && !visualiseAllBounces) || visualiseAllBounces)
-            {
-                // High performance SIMD math
-                float3 forward = -hit.normal;
-                float3 up = new float3(0, 1, 0);
-
-                // If ray hits flat floor or ceiling, the normal is parallel to our "up" vector
-                // This casuses NaN error. To fix, temporarily use x-axis as "up"
-                if (math.abs(forward.y) > 0.99f)
-                {
-                    up = new float3(1, 0, 0);
-                }
-                quaternion rot = quaternion.LookRotation(forward, up);
-                float3 pos = (float3)hit.point + (float3)(hit.normal * offset);
-
-                // Hash for random colour variants in range 0-2 
-                uint hash = math.hash(new int2(i, bounce));
-                int colorVariant = (int)(hash % 3); 
-
-                // Get color/category for this collider
-                int colorCategory = 0;
-                if (colliderColorMap.IsCreated) colliderColorMap.TryGetValue(hit.colliderInstanceID, out colorCategory);
-
-                // Save indices so main thread can do layer detection for applying colour correctly
-                visualHits.AddNoResize(new VisualHit
-                {
-                    matrix = float4x4.TRS(pos, rot, new float3(scale, scale, scale)),
-                    colorVariant = colorVariant,
-                    colorCategory = colorCategory,
-                    travelDistance = totalDistance
-                });
-            }
-
-            if (bounce < maxBounces)
-            {
-                float remainingRange = currentRays[i].range - hit.distance;
-                if (remainingRange > 0.0f)
-                {
-                    float3 incoming = currentRays[i].direction;
-                    float3 normal = hit.normal;
-                    float3 reflected = incoming - 2 * math.dot(incoming, normal) * normal;
-
-                    // Group in struct so they aren't scrambled
-                    nextRays.AddNoResize(new RayData
-                    {
-                        origin = hit.point + (hit.normal * 0.01f),
-                        direction = reflected,
-                        range = remainingRange,
-                        distanceTravelled = totalDistance
-                    });
-                }
-            }
-        }
     }
 
     // Function that actually draws the graphics
@@ -637,14 +486,17 @@ public class EcholocationManager : MonoBehaviour
     {
         if (instanceMaterial == null || quadMesh == null) return;
 
+        instanceMaterial.SetBuffer("_InstanceMatrices", matrixBuffer);  // Tell the material where to find the position data (the matrix buffer)
+        instanceMaterial.SetBuffer("_InstanceColors", colorBuffer);     // Tell the material where to find the colours 
+
         // Issue the draw command - "DrawMeshInstancedIndirect" is the most efficient way to draw lots of objects
         // Reads the count from args buffer instead of CPU telling it a number
         // In order parameters mean/are (use this shape, 0 - use the first sub-mesh, paint it with this shader, (explained below), use the argsBuffer to find how many to draw)
-        // "Bounds(transform.position, Vector3.one * 1000)" (now set at the end of PerformScan -  Is a safety net, normally Unity calculates the size of the object to decide if it's on screen, if it's behind you it culls it for performance
+        // "Bounds(transform.position, Vector3.one * 1000)" -  Is a safety net, normally Unity calculates the size of the object to decide if it's on screen, if it's behind you it culls it for performance
         // Due to Indirect, positions are calculated on the GPU, so Unity's CPU has no idea where dots/grid are (behind or in front)
         // Fix - create a giant, fake bounding box that is 1000 metres wide centered on the spawn point of the rays
         // Unity asks if this giant box is on screen, so the rest can easily be left to the GPU 
-        Graphics.DrawMeshInstancedIndirect(quadMesh, 0, instanceMaterial, renderBounds, argsBuffer);
+        Graphics.DrawMeshInstancedIndirect(quadMesh, 0, instanceMaterial, new Bounds(transform.position, Vector3.one * 1000), argsBuffer);
     }
 
     // Runs when the object is deleted or the game stops
@@ -654,10 +506,5 @@ public class EcholocationManager : MonoBehaviour
         if (matrixBuffer != null) matrixBuffer.Release();
         if (argsBuffer != null) argsBuffer.Release();
         if (colorBuffer != null) colorBuffer.Release();
-        if (revealTimeBuffer != null) revealTimeBuffer.Release();
-
-        if (instanceMatrices.IsCreated) instanceMatrices.Dispose();
-        if (instanceColors.IsCreated) instanceColors.Dispose();
-        if (instanceRevealTimes.IsCreated) instanceRevealTimes.Dispose();
     }
 }

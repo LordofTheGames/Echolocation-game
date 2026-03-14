@@ -14,7 +14,7 @@ public class SwiftF0Runner : MonoBehaviour
 
     void Awake()
     {
-        string fullPath = System.IO.Path.Combine(Application.streamingAssetsPath, modelPath);
+        string fullPath = System.IO.Path.Combine(Application.dataPath, modelPath);
 
         if (!System.IO.File.Exists(fullPath))
         {

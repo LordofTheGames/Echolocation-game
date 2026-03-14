@@ -1,5 +1,4 @@
 using UnityEngine;
-using Unity.Collections;
 
 public class GlobalEchoSystem : MonoBehaviour
 {
@@ -26,9 +25,6 @@ public class GlobalEchoSystem : MonoBehaviour
         {
             _instance = this;
         }
-
-        // Starting capacity of 1024, grows if needed
-        colliderColorMap = new NativeHashMap<int, int>(1024, Allocator.Persistent);
     }
 
     // Actual funcitonality
@@ -77,72 +73,7 @@ public class GlobalEchoSystem : MonoBehaviour
 
         if (manager != null)
         {
-            manager.SetupScan(sourceObject, direction, angle, uniformity, numRays, maxDistance, volume, isFootsteps, colliderColorMap);
+            manager.SetupScan(sourceObject, direction, angle, uniformity, numRays, maxDistance, volume, isFootsteps);
         }
     }
-
-
-
-    // --- Layer to HashMap conversion ---
-
-    private NativeHashMap<int, int> colliderColorMap;
-
-    [Header("Layers To Detect")]
-    public LayerMask monsterLayer;
-    public LayerMask interactableLayer;
-    public LayerMask outlinedObjectLayer;
-
-    void Start()
-    {
-        RegisterAllColliders();
-    }
-
-    void RegisterAllColliders()
-    {
-        Collider[] allColliders = FindObjectsByType<Collider>(FindObjectsSortMode.None);
-
-        foreach (Collider col in allColliders)
-        {
-            int category = GetCategoryFromLayer(col.gameObject.layer);
-            colliderColorMap.TryAdd(col.GetInstanceID(), category);
-        }
-    }
-
-    int GetCategoryFromLayer(int layer)
-    {
-        int layerMask = 1 << layer;
-
-        if ((monsterLayer.value & layerMask) > 0) return 1;         // Monster
-        if ((interactableLayer.value & layerMask) > 0) return 2;    // Interactable
-        if ((outlinedObjectLayer.value & layerMask) > 0) return 2;  // Interactable
-        return 0;                                                   // Default
-    }
-
-    // Runtime function to register a newly spawned collider 
-    public void RegisterCollider(Collider col)
-    {
-        int category = GetCategoryFromLayer(col.gameObject.layer);
-        int id = col.GetInstanceID();
-
-        if (colliderColorMap.ContainsKey(id))
-        {
-            colliderColorMap[id] = category;
-        }
-        else
-        {
-            colliderColorMap.TryAdd(id, category);
-        }
-    }
-
-    // Call in objects OnDestroy method to unregister - Unity can re-use instance ids after an object dies and a new one spawns
-    public void UnregisterCollider(Collider col)
-    {
-        colliderColorMap.Remove(col.GetInstanceID());
-    }
-
-    void OnDestroy()
-    {
-        if (colliderColorMap.IsCreated) colliderColorMap.Dispose();
-    }
-
 }

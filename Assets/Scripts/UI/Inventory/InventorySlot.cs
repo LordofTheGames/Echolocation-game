@@ -26,18 +26,18 @@ public class InventorySlot : MonoBehaviour,
 
         if (InventoryManager.Instance != null){
             InventoryManager.Instance.OnInventoryChanged += RefreshCount;
-            InventoryManager.Instance.OnSelecting += RefreshSelecting;
+            InventoryManager.Instance.OnSelecting += Selecting;
         }
 
         RefreshCount();
-        RefreshSelecting();
+        Selecting();
     }
 
     private void OnDisable()
     {
         if (InventoryManager.Instance != null){
             InventoryManager.Instance.OnInventoryChanged -= RefreshCount;
-            InventoryManager.Instance.OnSelecting -= RefreshSelecting;
+            InventoryManager.Instance.OnSelecting -= Selecting;
         }
     }
 
@@ -54,7 +54,7 @@ public class InventorySlot : MonoBehaviour,
             HideHighlight();
     }
 
-    public void RefreshSelecting()
+    public void Selecting()
     {
         if (InventoryManager.Instance == null) return;
 
@@ -69,7 +69,6 @@ public class InventorySlot : MonoBehaviour,
     {
         if (currentCount <= 0) return;
         ShowHighlight();
-        InventoryManager.Instance.Selection(itemType);
     }
 
     public void OnPointerExit(PointerEventData eventData)
