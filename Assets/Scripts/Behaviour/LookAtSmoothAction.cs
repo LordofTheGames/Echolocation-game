@@ -10,7 +10,7 @@ public partial class LookAtSmoothAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
     [SerializeReference] public BlackboardVariable<GameObject> Target;
-    [SerializeReference] public BlackboardVariable<float> Speed = new BlackboardVariable<float>(5.0f);
+    [SerializeReference] public BlackboardVariable<float> Speed;
 
     private Quaternion targetRotation;
     private Transform agentTransform;

@@ -1,9 +1,8 @@
 public enum ItemType
 {
     Rock,
+    Clicker,
     Plank,
-    EchoBeacon,
-    SonicGrenade,
-    Key,
-    None
+    Flashbang, 
+    Key
 }

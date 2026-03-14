@@ -20,8 +20,10 @@ public class WaterfallTrigger : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+        Debug.Log(other.tag);
         if (other.CompareTag("Monster"))
         {
+            Debug.Log("HAHAH");
             bool inWaterfall;
             agent.BlackboardReference.GetVariableValue("inWaterfall", out inWaterfall);
             agent.BlackboardReference.SetVariableValue("inWaterfall", !inWaterfall);

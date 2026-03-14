@@ -9,11 +9,18 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private bool enableKeyboardToggle = true;
     [SerializeField] private GameObject pauseUI;
 
-    public void OnPause(InputAction.CallbackContext context)
+    private void Update()
     {
-        if (!enableKeyboardToggle) return;
+        if (!enableKeyboardToggle)
+            return;
 
-        TogglePause();
+        if (Keyboard.current == null)
+            return;
+
+        if (Keyboard.current.pKey.wasPressedThisFrame)
+        {
+            TogglePause();
+        }
     }
 
     public void TogglePause()

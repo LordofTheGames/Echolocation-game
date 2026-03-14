@@ -42,7 +42,6 @@ public class ThrowItem : MonoBehaviour
     private ItemType holdingType;
 
     private float scrollInput;
-    public LayerMask layerMask;
 
 
     private void Start()
@@ -212,7 +211,7 @@ public class ThrowItem : MonoBehaviour
             Vector3 rayDir = currentPos - lastPoint;
             float rayDist = rayDir.magnitude;
 
-            if (Physics.Raycast(lastPoint, rayDir.normalized, out RaycastHit hit, rayDist, layerMask))
+            if (Physics.Raycast(lastPoint, rayDir.normalized, out RaycastHit hit, rayDist))
             {
                 landingPosition = hit.point;
                 trajectoryPointsList.Add(landingPosition);
@@ -271,21 +270,18 @@ public class ThrowItem : MonoBehaviour
         if (echo == null) echo = currentObj.GetComponentInChildren<CollisionEcho>(true);
         if (echo != null) echo.Arm();
 
-        var timedEmitter = currentObj.GetComponent<TimedEchoEmitter>();
-        if (timedEmitter == null) timedEmitter = currentObj.GetComponentInChildren<TimedEchoEmitter>(true);
-        if (timedEmitter != null) timedEmitter.SetArmOnNextCollision();
+        
 
-        var sonicGrenade = currentObj.GetComponent<SonicGrenade>();
-        if (sonicGrenade == null) sonicGrenade = currentObj.GetComponentInChildren<SonicGrenade>(true);
-        if (sonicGrenade != null) sonicGrenade.Arm();
-
+        // Enable physics, add spin, and apply throw force so the rock rolls and rotates in the air
         Rigidbody rb = currentObj.GetComponent<Rigidbody>();
-        if (rb == null) rb = currentObj.GetComponentInChildren<Rigidbody>(true);
-        if (rb == null)
-        {
-            rb = currentObj.AddComponent<Rigidbody>();
-            Debug.LogWarning("[ThrowItem] No Rigidbody on throwable prefab '" + currentObj.name + "'. Added one at runtime. Add a Rigidbody to the prefab for correct behaviour.");
-        }
+            if (rb == null) rb = currentObj.GetComponentInChildren<Rigidbody>(true);
+
+    if (rb == null)
+    {
+        Debug.LogError("[ThrowItem] Throw failed: Rigidbody not found on object/root children.");
+        CancelHolding();
+        return;
+    }
 
     if (cameraTransform != null)
         rb.position = cameraTransform.position + cameraTransform.forward * 0.8f;

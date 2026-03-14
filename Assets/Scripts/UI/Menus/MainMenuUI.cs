@@ -5,11 +5,11 @@ public class MainMenuUI : MonoBehaviour
 {
 	public void OnStartGameClicked()
 	{
-		Invoke(nameof(LoadGameScene), 0.5f);
+		Invoke(nameof(LoadGameScene), 3f);
 	}
 
 	private void LoadGameScene()
 	{
-		SceneManager.LoadScene("MicCalibration");
+		SceneManager.LoadScene("MVP");
 	}
 }
