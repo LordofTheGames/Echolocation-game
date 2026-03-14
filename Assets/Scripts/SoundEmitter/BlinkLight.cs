@@ -3,8 +3,8 @@ using UnityEngine;
 [RequireComponent(typeof(Light))]
 public class BlinkRealLight : MonoBehaviour
 {
-    public float secondsToStayOn = 0.5f;
-    public float secondsToStayOff = 1.0f;
+    public float TimeOn = 0.5f;
+    public float TimeOff = 1.0f;
 
     private float timePassed = 0f;
     private Light myLight;
@@ -18,12 +18,12 @@ public class BlinkRealLight : MonoBehaviour
     {
         timePassed += Time.deltaTime;
 
-        if (myLight.enabled && timePassed >= secondsToStayOn)
+        if (myLight.enabled && timePassed >= TimeOn)
         {
             myLight.enabled = false;
             timePassed = 0f;
         }
-        else if (!myLight.enabled && timePassed >= secondsToStayOff)
+        else if (!myLight.enabled && timePassed >= TimeOff)
         {
             myLight.enabled = true;
             timePassed = 0f;
