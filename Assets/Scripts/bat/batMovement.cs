@@ -196,8 +196,12 @@ public class BatMovement : MonoBehaviour
         newDir.Normalize();
 
         // Add a tiny speed wobble so bats do not all fly at perfectly constant speed.
+        // When obscuring the player, bats fly faster; back to normal after scare.
         float speedWobble = 0.15f;
-        float desiredSpeed = Mathf.Clamp(baseSpeed + Mathf.Sin(t * 0.6f + seed) * speedWobble, mgr.minSpeed, mgr.maxSpeed);
+        float speedMult = mgr.IsObscuring ? 2.0f : 1f;
+        float effectiveMin = mgr.minSpeed * speedMult;
+        float effectiveMax = mgr.maxSpeed * speedMult;
+        float desiredSpeed = Mathf.Clamp(baseSpeed * speedMult + Mathf.Sin(t * 0.6f + seed) * speedWobble, effectiveMin, effectiveMax);
         float newSpeed = Mathf.MoveTowards(velocity.magnitude, desiredSpeed, mgr.acceleration * Time.deltaTime);
 
         velocity = newDir * newSpeed;
