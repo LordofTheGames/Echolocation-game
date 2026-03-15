@@ -51,6 +51,14 @@ public class EcholocationManager : MonoBehaviour
     public Color[] monsterColors = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
     public Color[] interactableColors = new Color[3] {Color.green, new Color(0f, 0.8f, 0f), new Color(0f, 0.6f, 0f)};
     public Color[] defaultColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
+    public Color[] metalColors = new Color[3] { Color.gray, new Color(0.8f, 0.8f, 0.8f), new Color(0.6f, 0.6f, 0.6f) };
+    public Color[] dirtColors = new Color[3] { new Color(0.4f, 0.2f, 0f), new Color(0.3f, 0.15f, 0f), new Color(0.2f, 0.1f, 0f) };
+    public Color[] woodColors = new Color[3] { new Color(0.6f, 0.4f, 0.2f), new Color(0.5f, 0.3f, 0.1f), new Color(0.4f, 0.2f, 0.05f) };
+    public Color[] labColors = new Color[3] { Color.white, new Color(0.9f, 0.9f, 0.9f), new Color(0.8f, 0.8f, 0.8f) }; 
+    public Color[] railColors = new Color[3] { new Color(0.3f, 0.3f, 0.3f), new Color(0.2f, 0.2f, 0.2f), new Color(0.1f, 0.1f, 0.1f) };
+    public Color[] hideRockColors = new Color[3] { new Color(0.4f, 0.4f, 0.4f), new Color(0.35f, 0.35f, 0.35f), new Color(0.3f, 0.3f, 0.3f) };
+        
+    
 
     // HashMap to store color (category) of every collider in the game
     private NativeHashMap<int, int> colliderColorMap;
@@ -390,6 +398,12 @@ public class EcholocationManager : MonoBehaviour
                     {
                         1 => monsterColors[vHit.colorVariant],
                         2 => interactableColors[vHit.colorVariant],
+                        3 => metalColors[vHit.colorVariant],
+                        4 => dirtColors[vHit.colorVariant],
+                        5 => woodColors[vHit.colorVariant],
+                        6 => labColors[vHit.colorVariant],
+                        7 => railColors[vHit.colorVariant],
+                        8 => hideRockColors[vHit.colorVariant],
                         _ => defaultColors[vHit.colorVariant]
                     };
 
