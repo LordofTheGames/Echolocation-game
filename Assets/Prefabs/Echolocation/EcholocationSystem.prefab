@@ -44,13 +44,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 985b2b24fe37bc640929d831ef07c47e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pulseDuration: 1.5
+  pulseDuration: 2
   raysPerScan: 20000
   maxDistance: 50
   scanLayers:
     serializedVersion: 2
     m_Bits: 1407
-  maxBounces: 0
+  soundSpeed: 100
+  useSoundPropagation: 1
+  maxBounces: 2
+  visualiseAllBounces: 0
   dotScale: 0.1
   gridQuadSize: 5
   dotOffset: 0.01
@@ -70,12 +73,3 @@ MonoBehaviour:
   - {r: 0, g: 1, b: 1, a: 1}
   - {r: 0, g: 0.4431373, b: 1, a: 1}
   - {r: 0, g: 0.15582667, b: 0.764151, a: 1}
-  monsterLayer:
-    serializedVersion: 2
-    m_Bits: 1024
-  interactableLayer:
-    serializedVersion: 2
-    m_Bits: 256
-  outlinedObjectLayer:
-    serializedVersion: 2
-    m_Bits: 8
