@@ -17,8 +17,7 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject gateUnlockPanel;
     [SerializeField] private GameObject doorOpenPanel;
     [SerializeField] private GameObject doorClosePanel;
-    [SerializeField] private GameObject breakablePitchPanel;
-    [SerializeField] private GameObject breakableVolumePanel;
+    [SerializeField] private GameObject breakablePanel;
     [SerializeField] private GameObject hidePanel;
     [SerializeField] private GameObject exitHidePanel;
     public bool ignoreLiftChain;
@@ -37,8 +36,7 @@ public class DetectObjectOutline : MonoBehaviour
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
         if (doorOpenPanel) doorOpenPanel.SetActive(false);
         if (doorClosePanel) doorClosePanel.SetActive(false);
-        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
-        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
+        if (breakablePanel) breakablePanel.SetActive(false);
         if (hidePanel) hidePanel.SetActive(false);
         if (exitHidePanel) exitHidePanel.SetActive(false);
 
@@ -51,8 +49,7 @@ public class DetectObjectOutline : MonoBehaviour
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
-        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
-        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
+        if (breakablePanel) breakablePanel.SetActive(false);
         if (hidePanel) hidePanel.SetActive(false);
         if (exitHidePanel) exitHidePanel.SetActive(false);
         if (doorOpenPanel) doorOpenPanel.SetActive(false);
@@ -61,7 +58,16 @@ public class DetectObjectOutline : MonoBehaviour
         currentPanel = panel;
         if (currentPanel) currentPanel.SetActive(true);
     }
+    private T FindInTarget<T>(OutlineTarget target) where T : Component
+    {
+        if (!target) return null;
 
+        T comp = target.GetComponent<T>();
+        if (!comp) comp = target.GetComponentInParent<T>();
+        if (!comp) comp = target.GetComponentInChildren<T>();
+
+        return comp;
+    }
     public void OnInteract(InputAction.CallbackContext context)
     {
         if (context.performed && current != null)
@@ -95,13 +101,10 @@ public class DetectObjectOutline : MonoBehaviour
         currentPanel.SetActive(false);
         current.SetOutlined(false);
 
-        var door = current.GetComponent<LabDoor>();
-        if (!door) door = current.GetComponentInParent<LabDoor>();
-        if (!door) door = current.GetComponentInChildren<LabDoor>();
-
-        if (door != null)
+        var button = FindInTarget<DoorButton>(current);
+        if (button != null)
         {
-            door.Interact();
+            button.Interact();
             current = null;
             return;
         }
@@ -141,46 +144,46 @@ public class DetectObjectOutline : MonoBehaviour
             {
                 ShowOnly(pullPanel);
             }
-            else if (best.gameObject.CompareTag("BreakablePitch"))
-            {
-                ShowOnly(breakablePitchPanel);
-            }
-            else if (best.gameObject.CompareTag("BreakableVolume"))
-            {
-                ShowOnly(breakableVolumePanel);
-            }
-            else if (best.gameObject.CompareTag("Hide"))
-            {
-                ShowOnly(hidePanel);
-            }
             else
             {
-                var gate = best.GetComponentInParent<Gate>();
-                if (gate != null)
+                var breakable = FindInTarget<Breakable>(best);
+                if (breakable != null && !breakable.HasBroken)
                 {
-                    ShowOnly(gate.HasKey() ? gateUnlockPanel : gateHintPanel);
+                    ShowOnly(breakablePanel);
+                }
+                else if (best.gameObject.CompareTag("Hide"))
+                {
+                    ShowOnly(hidePanel);
                 }
                 else
                 {
-                    var door = best.GetComponentInParent<LabDoor>();
-                    if (door != null)
+                    var gate = best.GetComponentInParent<Gate>();
+                    if (gate != null)
                     {
-                        if (door.IsMoving)
-                        {
-                            ShowOnly(null);
-                        }
-                        else if (door.IsOpen)
-                        {
-                            ShowOnly(doorClosePanel);
-                        }
-                        else
-                        {
-                            ShowOnly(doorOpenPanel);
-                        }
+                        ShowOnly(gate.HasKey() ? gateUnlockPanel : gateHintPanel);
                     }
                     else
                     {
-                        ShowOnly(pickupPanel);
+                        var button = FindInTarget<DoorButton>(best);
+                        if (button != null)
+                        {
+                            if (!button.CanInteract || button.IsDoorMoving)
+                            {
+                                ShowOnly(null);
+                            }
+                            else if (button.IsDoorOpen)
+                            {
+                                ShowOnly(doorClosePanel);
+                            }
+                            else
+                            {
+                                ShowOnly(doorOpenPanel);
+                            }
+                        }
+                        else
+                        {
+                            ShowOnly(pickupPanel);
+                        }
                     }
                 }
             }
@@ -235,7 +238,11 @@ public class DetectObjectOutline : MonoBehaviour
             
             var t = col.GetComponentInParent<OutlineTarget>();
             if (!t) continue;
-
+            var button = FindInTarget<DoorButton>(t);
+            if (button != null && !button.CanInteract)
+            {
+                continue;
+            }
             // vector from camera to the hit point
             Vector3 to = hits[i].point - ray.origin;
             float distance = to.magnitude;
