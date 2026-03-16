@@ -93,7 +93,7 @@ public class ClickerTrigger : MonoBehaviour
                     audioSource.pitch = Random.Range(0.98f, 1.02f); // Vary pitch very slightly each time
                     audioSource.PlayOneShot(clickerSound, soundEffectVolume);
                 }
-                GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, maxDistance, volume);
+                GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, volume);
 
                 // Start next cooldown timer
                 nextAvailableTime = Time.time + cooldownTime;
@@ -106,7 +106,6 @@ public class ClickerTrigger : MonoBehaviour
                     cooldownBar.fillAmount = 1f;
                 }
             }
-            GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, volume);
         }
     }
 }
