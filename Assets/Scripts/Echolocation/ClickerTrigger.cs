@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.UI;
 
 public class ClickerTrigger : MonoBehaviour
 {
@@ -27,6 +28,19 @@ public class ClickerTrigger : MonoBehaviour
     
     [Header("Volume of sound (used for AI reactions)")]
     public float volume = 100f;
+
+    [Header("Cooldown Settings")]
+    [Tooltip("Time in seconds before the clicker can be used again")]
+    public float cooldownTime = 1.5f;
+    [Tooltip("Assign a UI image here to act as the reload bar")]
+    public Image cooldownBar;
+    [Tooltip("Colour of the shrinking reload bar")]
+    public Color cooldownColor = Color.yellow;
+    [Tooltip("Transparncy of cooldown bar: 0 (transparent) - 1 (opaque))")]
+    [Range(0f, 1f)]
+    public float transparency = 0.8f;
+
+    private float nextAvailableTime = 0f; // Tracks when the player is allowed to use clicker again
     
     void Start()
     {
@@ -35,18 +49,59 @@ public class ClickerTrigger : MonoBehaviour
             audioSource = gameObject.AddComponent<AudioSource>();
             audioSource.spatialBlend = 0f; // Heard equally in both ears since it's coming from the player
         }
+
+        if (cooldownBar != null)
+        {
+            cooldownColor.a *= transparency;
+            cooldownBar.color = cooldownColor;
+            cooldownBar.gameObject.SetActive(false);
+        }
+    }
+
+    void Update()
+    {
+        if (cooldownBar != null)
+        {
+            if (Time.time < nextAvailableTime)
+            {
+                // Calculate remaining time and therefore ratio/size of bar
+                float timeRemaining = nextAvailableTime - Time.time;
+                float fillRatio = timeRemaining / cooldownTime;
+
+                cooldownBar.fillAmount = fillRatio;
+            }
+            else if (cooldownBar.gameObject.activeSelf)
+            {
+                // Cooldown is finished - hide the bar
+                cooldownBar.gameObject.SetActive(false);
+            }
+        }
     }
 
     public void OnEcholocate(InputAction.CallbackContext context)
     {
         if (context.performed)
         {
-            if (clickerSound != null)
+            if (Time.time >= nextAvailableTime)
             {
-                audioSource.pitch = Random.Range(0.98f, 1.02f); // Vary pitch very slightly each time
-                audioSource.PlayOneShot(clickerSound, soundEffectVolume);
+                if (clickerSound != null)
+                {
+                    audioSource.pitch = Random.Range(0.98f, 1.02f); // Vary pitch very slightly each time
+                    audioSource.PlayOneShot(clickerSound, soundEffectVolume);
+                }
+                GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, maxDistance, volume);
+
+                // Start next cooldown timer
+                nextAvailableTime = Time.time + cooldownTime;
+
+                // Show and reset the bar
+                if (cooldownBar != null && cooldownTime > 0)
+                {
+                    cooldownBar.color = cooldownColor;
+                    cooldownBar.gameObject.SetActive(true);
+                    cooldownBar.fillAmount = 1f;
+                }
             }
-            GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, maxDistance, volume);
         }
     }
 }
