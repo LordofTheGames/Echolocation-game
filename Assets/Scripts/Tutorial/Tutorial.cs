@@ -63,7 +63,6 @@ public class Tutorial : MonoBehaviour
         {
             animator.SetBool("Tutorial", false);
             tutorial = false;
-            Debug.Log("Skip");
         }
     }
 

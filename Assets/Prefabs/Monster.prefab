@@ -265,7 +265,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5683829060095955525}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
   m_Name: 
@@ -274,8 +274,6 @@ MonoBehaviour:
   m_BlackboardVariableOverridesList:
   - rid: 2320555136217252090
   - rid: 2320555136217252138
-  - rid: 104681315139322730
-  - rid: 104681503906332964
   - rid: 1914980985187598590
   m_OriginalGraph: {fileID: 0}
   m_IsInitialised: 0
@@ -283,41 +281,6 @@ MonoBehaviour:
   references:
     version: 2
     RefIds:
-    - rid: 104681315139322730
-      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 10224547993428335536
-          m_Value1: 11643500370812136251
-        Name: Waypoints
-        m_Value:
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-    - rid: 104681503906332964
-      type: {class: 'BlackboardVariable`1[[System.Collections.Generic.List`1[[UnityEngine.GameObject, UnityEngine.CoreModule]], mscorlib]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 11413828909850511174
-          m_Value1: 6308012497802893335
-        Name: Waypoints Maze
-        m_Value:
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
-        - {fileID: 0}
     - rid: 1914980985187598590
       type: {class: 'BlackboardVariable`1[[UnityEngine.AudioSource, UnityEngine.AudioModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -360,7 +323,7 @@ MonoBehaviour:
   TargetEyeHeight: 1.8
   ObstructionMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 53576
   ShowDebugVisuals: 1
 --- !u!114 &8491061249567926694
 MonoBehaviour:
@@ -378,7 +341,7 @@ MonoBehaviour:
   AgentEyeHeight: 3.9
   ObstructionMask:
     serializedVersion: 2
-    m_Bits: 64
+    m_Bits: 53576
   ShowDebugVisuals: 1
 --- !u!114 &8795594309079875185
 MonoBehaviour:

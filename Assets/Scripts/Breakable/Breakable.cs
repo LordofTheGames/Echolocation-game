@@ -14,7 +14,7 @@ public class Breakable : MonoBehaviour
     [SerializeField] float minRelativePitch = 0.5f;
     [SerializeField] float holdTimeToBreak = 1.2f;
     [SerializeField] float maxDistanceToMic = 5f;
-    [SerializeField] float secondsUntilDestroy = 5f;
+    [SerializeField] float secondsUntilDestroy = 2f;
 
     [SerializeField] AudioSource audioSource;
     bool _hasBroken;
@@ -23,12 +23,25 @@ public class Breakable : MonoBehaviour
     private GameObject player;
     private MicInput micInput;
 
-    private void Awake()
+    private void Start()
     {
         micInput = GameObject.Find("MicInput").GetComponent<MicInput>();
         player = GameObject.FindGameObjectWithTag("Player");
         IntactObject.SetActive(true);
         BrokenObject.SetActive(false);
+        GlobalEchoSystem system = GameObject.Find("GlobalEchoSystem").GetComponent<GlobalEchoSystem>();
+        // the broken object pieces are inactive on start and so aren't registered automatically 
+        // in the echolocation layers to colours system, so we must do it manually
+        foreach (Transform child in BrokenObject.transform)
+        {
+            BoxCollider bcol = child.GetComponent<BoxCollider>();
+            if (bcol != null) system.RegisterCollider(bcol);
+            else
+            {
+                MeshCollider mcol = child.GetComponent<MeshCollider>();
+                if (mcol != null) system.RegisterCollider(mcol);
+            }
+        }
     }
 
     private void Update()

@@ -6,7 +6,8 @@ public enum SurfaceType
     Water,
     Metal,
     Wood,
-    Dirt
+    Dirt,
+    Lab
 }
 
 [System.Serializable]
@@ -43,6 +44,7 @@ public class PlayerFootsteps : MonoBehaviour
     public AudioClip metalFootstep;
     public AudioClip woodFootstep;
     public AudioClip dirtFootstep;
+    public AudioClip labFootstep;
 
     [Header("Echo Settings")]
     public float footSeparation = 1f;   // Distance from center to foot
@@ -59,19 +61,24 @@ public class PlayerFootsteps : MonoBehaviour
     public MoveSettings waterSprint = new MoveSettings { name = "Water Sprint", stepDistance = 5f, volume = 0.35f, echoRays = 7000, maxDistance = 35f, volForMonster = 70f };
 
     [Header("Movement - Metal")]
-    public MoveSettings metalCrouch = new MoveSettings { name = "Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
-    public MoveSettings metalWalk = new MoveSettings { name = "Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
-    public MoveSettings metalSprint = new MoveSettings { name = "Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
+    public MoveSettings metalCrouch = new MoveSettings { name = "Metal Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
+    public MoveSettings metalWalk = new MoveSettings { name = "Metal Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
+    public MoveSettings metalSprint = new MoveSettings { name = "Metal Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
 
     [Header("Movement - Wood")]
-    public MoveSettings woodCrouch = new MoveSettings { name = "Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
-    public MoveSettings woodWalk = new MoveSettings { name = "Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
-    public MoveSettings woodSprint = new MoveSettings { name = "Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
+    public MoveSettings woodCrouch = new MoveSettings { name = "Wood Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
+    public MoveSettings woodWalk = new MoveSettings { name = "Wood Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
+    public MoveSettings woodSprint = new MoveSettings { name = "Wood Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
 
     [Header("Movement - Dirt")]
-    public MoveSettings dirtCrouch = new MoveSettings { name = "Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
-    public MoveSettings dirtWalk = new MoveSettings { name = "Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
-    public MoveSettings dirtSprint = new MoveSettings { name = "Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
+    public MoveSettings dirtCrouch = new MoveSettings { name = "Dirt Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
+    public MoveSettings dirtWalk = new MoveSettings { name = "Dirt Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
+    public MoveSettings dirtSprint = new MoveSettings { name = "Dirt Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
+
+    [Header("Movement - Lab")]
+    public MoveSettings labCrouch = new MoveSettings { name = "Lab Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
+    public MoveSettings labWalk = new MoveSettings { name = "Lab Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
+    public MoveSettings labSprint = new MoveSettings { name = "Lab Sprint", stepDistance = 5f, volume = 1f, echoRays = 5000, maxDistance = 30f, volForMonster = 50f };
 
     private Vector3 lastPos;
     private Vector3 currentPos;
@@ -129,6 +136,9 @@ public class PlayerFootsteps : MonoBehaviour
                 case "Dirt":
                     currentSurface = SurfaceType.Dirt;
                     break;
+                case "Lab":
+                    currentSurface = SurfaceType.Lab;
+                    break;
                 default:
                     currentSurface = SurfaceType.Default;
                     break;
@@ -160,6 +170,11 @@ public class PlayerFootsteps : MonoBehaviour
                 else if (CurrentState == MoveState.WALK) currentSettings = dirtWalk;
                 else if (CurrentState == MoveState.SPRINT) currentSettings = dirtSprint;
                 break;
+            case SurfaceType.Lab:
+                if (CurrentState == MoveState.CROUCH) currentSettings = labCrouch;
+                else if (CurrentState == MoveState.WALK) currentSettings = labWalk;
+                else if (CurrentState == MoveState.SPRINT) currentSettings = labSprint;
+                break;
             default:
                 if (CurrentState == MoveState.CROUCH) currentSettings = crouch;
                 else if (CurrentState == MoveState.WALK) currentSettings = walk;
@@ -184,6 +199,9 @@ public class PlayerFootsteps : MonoBehaviour
                 break;
             case SurfaceType.Metal:
                 clipToPlay = metalFootstep;
+                break;
+            case SurfaceType.Lab:
+                clipToPlay = labFootstep;
                 break;
             default:
                 clipToPlay = defaultFootstep;
