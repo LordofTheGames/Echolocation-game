@@ -110,8 +110,10 @@ public class MonsterFootsteps : MonoBehaviour
         // Ensure the echo spawns at ground level (optional, assumes pivot is at feet)
         footPos.y = transform.position.y; 
 
+        // Calculate visual volume based on old max distance and loss per meter (2)
+        float visualVolume = currentSettings.maxDistance * 2f;
         // Trigger Echo
         // We use footPos as origin, and transform.forward for direction (though if angle is 360, direction doesn't matter)
-        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.volForMonster, true);
+        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, visualVolume, currentSettings.volForMonster, true);
     }
 }

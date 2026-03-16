@@ -217,7 +217,9 @@ public class PlayerFootsteps : MonoBehaviour
         Vector3 footPos = transform.position + (transform.right * footSeparation * dirMultiplier);
         footPos.y = transform.position.y;
 
+        // Calculate visual volume based on old max distance and loss per meter (2)
+        float visualVolume = currentSettings.maxDistance * 2f;
         // Trigger Echo
-        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.volForMonster, true);
+        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, visualVolume, currentSettings.volForMonster, true);
     }
 }

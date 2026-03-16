@@ -391,7 +391,8 @@ MonoBehaviour:
   numRays: 20000
   maxDistance: 50
   angle: 110
-  volume: 200
+  visualVolume: 100
+  monsterVolume: 100
   cooldownTime: 4
   cooldownBar: {fileID: 0}
   cooldownColor: {r: 1, g: 1, b: 1, a: 1}
@@ -947,7 +948,7 @@ MonoBehaviour:
     m_ActionName: 'Player/Previous[/XInputControllerWindows/leftShoulder,/Keyboard/1]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 3677165169037684896}
         m_TargetAssemblyTypeName: MouseLook, Assembly-CSharp
         m_MethodName: OnLook
         m_Mode: 0
@@ -1025,127 +1026,127 @@ MonoBehaviour:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 3000
+    maxDistance: 5
     volForMonster: 0
   walk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 7000
+    maxDistance: 10
     volForMonster: 25
   sprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 20
     volForMonster: 50
   waterCrouch:
     name: Water Crouch
     stepDistance: 2
     volume: 0.07
-    echoRays: 1000
-    maxDistance: 8
+    echoRays: 4000
+    maxDistance: 12
     volForMonster: 10
   waterWalk:
     name: Water Walk
     stepDistance: 4
     volume: 0.15
-    echoRays: 2700
-    maxDistance: 15
+    echoRays: 8000
+    maxDistance: 18
     volForMonster: 35
   waterSprint:
     name: Water Sprint
     stepDistance: 5
     volume: 0.35
-    echoRays: 7000
-    maxDistance: 35
+    echoRays: 15000
+    maxDistance: 30
     volForMonster: 70
   metalCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 3500
+    maxDistance: 10
     volForMonster: 0
   metalWalk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 8000
+    maxDistance: 15
     volForMonster: 25
   metalSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 12000
+    maxDistance: 25
     volForMonster: 50
   woodCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 3000
+    maxDistance: 5
     volForMonster: 0
   woodWalk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 7000
+    maxDistance: 10
     volForMonster: 25
   woodSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 20
     volForMonster: 50
   dirtCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 1500
+    maxDistance: 3
     volForMonster: 0
   dirtWalk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 7000
+    maxDistance: 5
     volForMonster: 25
   dirtSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 10
     volForMonster: 50
   labCrouch:
     name: Lab Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
+    echoRays: 3000
     maxDistance: 6
     volForMonster: 0
   labWalk:
     name: Lab Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
+    echoRays: 7000
     maxDistance: 12
     volForMonster: 25
   labSprint:
     name: Lab Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 23
     volForMonster: 50
 --- !u!1 &5489064552480596990
 GameObject:

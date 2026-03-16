@@ -116,8 +116,9 @@ public class EcholocationManager : MonoBehaviour
     // Stop the rays colliding with the object that spawns them
     private GameObject objectToIgnore;  
 
-    // Intital volume of source
-    private float initialVolume = 100f;
+    // Intital volumes of source
+    private float initialVisualVolume = 100f;
+    private float initialMonsterVolume = 100f;
 
     // Tells monster if it's a footstep sound
     private bool isFootstepsScan = false;
@@ -210,7 +211,7 @@ public class EcholocationManager : MonoBehaviour
         argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);     // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
 
         PerformScan();
-        float maxPossibleDistance = initialVolume / volumeLossPerMeter; // Calculate maximum possible distance for a ray to travel
+        float maxPossibleDistance = initialVisualVolume / volumeLossPerMeter; // Calculate maximum possible distance for a ray to travel
         float propagationDelay = useSoundPropagation ? maxPossibleDistance / soundSpeed : 0f;
         Destroy(gameObject, pulseDuration + propagationDelay); // Destory this instance once the pulse duration + any delay to propagation animation has ended
     }
@@ -244,7 +245,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float volume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float visualVolume = 10f, float monsterVolume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -255,7 +256,8 @@ public class EcholocationManager : MonoBehaviour
         raysPerScan = Mathf.Clamp(numRays, 0, 100000);  // Make sure is in (currently chosen) valid range
         objectToIgnore = ignoreMe;
         colliderColorMap = colorMap;
-        initialVolume = volume;
+        initialVisualVolume = visualVolume;
+        initialMonsterVolume = monsterVolume;
         isFootstepsScan = isFootsteps;
 
         // TODO: remove this when multiple ray bounces have been implemented
@@ -263,7 +265,7 @@ public class EcholocationManager : MonoBehaviour
         GameObject monster = GameObject.FindGameObjectWithTag("Monster");
         if (monster != null) {
             INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
-            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, volume, isFootsteps);
+            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, monsterVolume, isFootsteps);
         }
     }
 
@@ -331,7 +333,7 @@ public class EcholocationManager : MonoBehaviour
             scanAngle = scanAngle,
             scanDirection = scanDirection,
             scanUniformity = scanUniformity,
-            initialVolume = initialVolume,
+            initialVolume = initialVisualVolume,
             volumeLossPerMeter = volumeLossPerMeter,
             startOrigin = transform.position,   // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
             rays = currentRays.AsArray()

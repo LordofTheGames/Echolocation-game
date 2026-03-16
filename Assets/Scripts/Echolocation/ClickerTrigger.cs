@@ -26,8 +26,10 @@ public class ClickerTrigger : MonoBehaviour
     [Header("Angle of projection (0 = line, 60 = cone, 360 = sphere)")]
     public float angle = 60f;
     
+    [Header("Volume of sound (used for fading effect)")]
+    public float visualVolume = 100f;
     [Header("Volume of sound (used for AI reactions)")]
-    public float volume = 100f;
+    public float monsterVolume = 100f;
 
     [Header("Cooldown Settings")]
     [Tooltip("Time in seconds before the clicker can be used again")]
@@ -93,7 +95,7 @@ public class ClickerTrigger : MonoBehaviour
                     audioSource.pitch = Random.Range(0.98f, 1.02f); // Vary pitch very slightly each time
                     audioSource.PlayOneShot(clickerSound, soundEffectVolume);
                 }
-                GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, volume);
+                GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, visualVolume, monsterVolume);
 
                 // Start next cooldown timer
                 nextAvailableTime = Time.time + cooldownTime;
