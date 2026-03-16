@@ -45,7 +45,7 @@ public class MicToEcholocation : MonoBehaviour
         distance = proportion * maxDistance;            // Calculate max distance of rays to travel based on proportion of rays of max rays
         volForMonster = proportion * maxVolForMonster;  // Calculate max volume for monster based on proportion of rays of max rays
 
-        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, rays, distance, volForMonster);
+        GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, rays, volForMonster);
 
     }
 }

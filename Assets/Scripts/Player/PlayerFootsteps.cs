@@ -218,6 +218,6 @@ public class PlayerFootsteps : MonoBehaviour
         footPos.y = transform.position.y;
 
         // Trigger Echo
-        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.maxDistance, currentSettings.volForMonster, true);
+        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.volForMonster, true);
     }
 }
