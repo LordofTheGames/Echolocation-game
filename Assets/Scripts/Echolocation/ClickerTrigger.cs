@@ -41,6 +41,8 @@ public class ClickerTrigger : MonoBehaviour
     public float transparency = 0.8f;
 
     private float nextAvailableTime = 0f; // Tracks when the player is allowed to use clicker again
+    private RectTransform cooldownBarRect;
+    private Vector2 newSizeDelta = new(300, 5);
     
     void Start()
     {
@@ -52,6 +54,7 @@ public class ClickerTrigger : MonoBehaviour
 
         if (cooldownBar != null)
         {
+            cooldownBarRect = cooldownBar.GetComponent<RectTransform>();
             cooldownColor.a *= transparency;
             cooldownBar.color = cooldownColor;
             cooldownBar.gameObject.SetActive(false);
@@ -64,16 +67,17 @@ public class ClickerTrigger : MonoBehaviour
         {
             if (Time.time < nextAvailableTime)
             {
-                // Calculate remaining time and therefore ratio/size of bar
+                // Calculate remaining time and therefore new size of bar
                 float timeRemaining = nextAvailableTime - Time.time;
-                float fillRatio = timeRemaining / cooldownTime;
-
-                cooldownBar.fillAmount = fillRatio;
+                newSizeDelta.x = timeRemaining / cooldownTime * 300;
+                cooldownBarRect.sizeDelta = newSizeDelta;
             }
             else if (cooldownBar.gameObject.activeSelf)
             {
-                // Cooldown is finished - hide the bar
+                // Cooldown is finished - hide the bar and reset size
                 cooldownBar.gameObject.SetActive(false);
+                newSizeDelta.x = 300;
+                cooldownBarRect.sizeDelta = newSizeDelta;
             }
         }
     }
