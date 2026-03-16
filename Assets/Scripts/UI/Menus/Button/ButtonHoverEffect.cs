@@ -15,6 +15,9 @@ ISelectHandler, IDeselectHandler, ISubmitHandler
     
     [SerializeField] [Range(0f, 1f)] private float clickSoundVolume = 1f;
 
+    [Tooltip("Uncheck this to prevent SoundManager from playing default sound.")]
+    [SerializeField] private bool useDefaultClickSound = true;
+
     private Vector3 originalScale;
     private RectTransform rectTransform;
     private Coroutine scaleCoroutine;
@@ -126,7 +129,7 @@ ISelectHandler, IDeselectHandler, ISubmitHandler
                 audioSource.PlayOneShot(clickSound, clickSoundVolume);
             }
         }
-        else if (SoundManager.Instance != null)
+        else if (useDefaultClickSound && SoundManager.Instance != null)
         {
             SoundManager.Instance.PlayButtonClickSound(null, clickSoundVolume);
         }
