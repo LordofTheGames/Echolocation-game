@@ -97,6 +97,7 @@ public class GlobalEchoSystem : MonoBehaviour
     public LayerMask labLayer;
     public LayerMask railLayer;
     public LayerMask hideRockLayer;
+    public LayerMask waterLayer;
 
     void Start()
     {
@@ -127,6 +128,7 @@ public class GlobalEchoSystem : MonoBehaviour
         if ((labLayer.value & layerMask) > 0) return 6;             // Lab
         if ((railLayer.value & layerMask) > 0) return 7;            // Rail
         if ((hideRockLayer.value & layerMask) > 0) return 8;        // HideRock
+        if ((waterLayer.value & layerMask) > 0) return 9;           // Water
         return 0;                                                   // Default
     }
 

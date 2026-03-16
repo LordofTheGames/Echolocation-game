@@ -11,6 +11,7 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private float loseDelay = 0.12f;
 
     [SerializeField] private LayerMask interactMask = ~0; 
+    [SerializeField] private LayerMask obstacleMask = ~0; 
     [SerializeField] private GameObject pickupPanel; 
     [SerializeField] private GameObject pullPanel; 
     [SerializeField] private GameObject gateHintPanel;   
@@ -221,6 +222,7 @@ public class DetectObjectOutline : MonoBehaviour
         // track the best target and its score (lower = better)
         OutlineTarget best = null;
         float bestScore = float.PositiveInfinity;
+        Vector3 bestHitPoint = Vector3.zero;
 
         for (int i = 0; i < hits.Length; i++)
         {
@@ -248,9 +250,15 @@ public class DetectObjectOutline : MonoBehaviour
             {
                 bestScore = score;
                 best = t;
+                bestHitPoint = hits[i].point;
             }
         }
-
+        // If we found a valid target, verify we have Line of Sight to it
+        if (best != null)
+        {
+            if (Physics.Linecast(ray.origin, bestHitPoint, obstacleMask, QueryTriggerInteraction.Ignore))
+                return null;
+        }
         return best;
     }
     public void SetEnabled(bool value)

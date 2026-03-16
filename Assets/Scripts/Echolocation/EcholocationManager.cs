@@ -57,6 +57,7 @@ public class EcholocationManager : MonoBehaviour
     public Color[] labColors = new Color[3] { Color.white, new Color(0.9f, 0.9f, 0.9f), new Color(0.8f, 0.8f, 0.8f) }; 
     public Color[] railColors = new Color[3] { new Color(0.3f, 0.3f, 0.3f), new Color(0.2f, 0.2f, 0.2f), new Color(0.1f, 0.1f, 0.1f) };
     public Color[] hideRockColors = new Color[3] { new Color(0.4f, 0.4f, 0.4f), new Color(0.35f, 0.35f, 0.35f), new Color(0.3f, 0.3f, 0.3f) };
+    public Color[] waterColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
         
     
 
@@ -404,6 +405,7 @@ public class EcholocationManager : MonoBehaviour
                         6 => labColors[vHit.colorVariant],
                         7 => railColors[vHit.colorVariant],
                         8 => hideRockColors[vHit.colorVariant],
+                        9 => waterColors[vHit.colorVariant],
                         _ => defaultColors[vHit.colorVariant]
                     };
 
