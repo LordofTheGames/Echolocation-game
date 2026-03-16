@@ -353,11 +353,11 @@ MonoBehaviour:
   - type: 0
     prefab: {fileID: 6708599122270987611, guid: dc35457561e2b3746bd21668f2e9a16a, type: 3}
   - type: 1
-    prefab: {fileID: 7286101680068963467, guid: 670934e21c06b15458bf248ada43c43d, type: 3}
+    prefab: {fileID: 4666918432005921956, guid: 3a5d92522412def4390279976730b6c3, type: 3}
   - type: 2
     prefab: {fileID: 8213984805270231195, guid: 3245903fabd446741b3ca03b9b3fdb39, type: 3}
   - type: 3
-    prefab: {fileID: 4666918432005921956, guid: 3a5d92522412def4390279976730b6c3, type: 3}
+    prefab: {fileID: 0}
   throwForce: 15
   throwHeight: 0.5
   landingIndicatorSize: 1
@@ -392,6 +392,10 @@ MonoBehaviour:
   maxDistance: 50
   angle: 110
   volume: 200
+  cooldownTime: 4
+  cooldownBar: {fileID: 0}
+  cooldownColor: {r: 1, g: 1, b: 1, a: 1}
+  transparency: 0.6
 --- !u!114 &7900835251262604122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -410,7 +414,10 @@ MonoBehaviour:
   loseDelay: 0.12
   interactMask:
     serializedVersion: 2
-    m_Bits: 265
+    m_Bits: 131337
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 53312
   pickupPanel: {fileID: 0}
   pullPanel: {fileID: 0}
   gateHintPanel: {fileID: 0}
@@ -925,8 +932,8 @@ MonoBehaviour:
   - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
-        m_MethodName: OnNext
+        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
+        m_MethodName: OnPrevious
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -979,6 +986,7 @@ MonoBehaviour:
   metalFootstep: {fileID: 0}
   woodFootstep: {fileID: 0}
   dirtFootstep: {fileID: 0}
+  labFootstep: {fileID: 0}
   footSeparation: 1
   echoAngle: 360
   crouch:
@@ -1081,6 +1089,27 @@ MonoBehaviour:
     volForMonster: 25
   dirtSprint:
     name: Sprint
+    stepDistance: 5
+    volume: 1
+    echoRays: 5000
+    maxDistance: 30
+    volForMonster: 50
+  labCrouch:
+    name: Lab Crouch
+    stepDistance: 2
+    volume: 0.2
+    echoRays: 700
+    maxDistance: 6
+    volForMonster: 0
+  labWalk:
+    name: Lab Walk
+    stepDistance: 4
+    volume: 0.5
+    echoRays: 2000
+    maxDistance: 12
+    volForMonster: 25
+  labSprint:
+    name: Lab Sprint
     stepDistance: 5
     volume: 1
     echoRays: 5000

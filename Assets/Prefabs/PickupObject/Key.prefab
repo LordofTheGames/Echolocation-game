@@ -22,15 +22,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f5fb065357eab6646bf4cb69278b6502, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.26
+      value: -22.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f5fb065357eab6646bf4cb69278b6502, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.32
+      value: -1.16
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f5fb065357eab6646bf4cb69278b6502, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 445.92
+      value: 384.6
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: f5fb065357eab6646bf4cb69278b6502, type: 3}
       propertyPath: m_LocalRotation.w
@@ -106,7 +106,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78ae7c92667aa407e8835dfc115f1016, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemType: 4
+  itemType: 3
   amount: 1
 --- !u!114 &1790806647087791946
 MonoBehaviour:
@@ -140,6 +140,11 @@ MonoBehaviour:
   minDelayAfterArm: 0.05
   currentPings: 0
   maxPings: 3
+  angle: 360
+  uniformity: 1
+  numRays: 10000
+  maxDistance: 25
+  monsterVolume: 100
 --- !u!64 &5662811380013791763
 MeshCollider:
   m_ObjectHideFlags: 0
