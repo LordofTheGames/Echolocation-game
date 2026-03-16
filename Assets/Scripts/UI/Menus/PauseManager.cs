@@ -18,7 +18,7 @@ public class PauseManager : MonoBehaviour
 
     [SerializeField] private PlayerInput playerInput;  
     [SerializeField] private string pauseMap = "Pause Menu";
-    [SerializeField] private string prevMap; // Map before pausing
+    private string prevMap; // Map before pausing
 
     private void Awake()
     {
