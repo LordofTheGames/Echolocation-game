@@ -153,7 +153,6 @@ public class BatFlockManager : MonoBehaviour
         if (scareBatsAction != null)
         {
             scareBatsAction.performed -= OnScareBats;
-            scareBatsAction.Disable();
         }
     }
 }
