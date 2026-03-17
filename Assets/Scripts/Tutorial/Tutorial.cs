@@ -168,7 +168,7 @@ public class Tutorial : MonoBehaviour
 
     public void OnExitTutorial()
     {
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("exit-hide"))
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("exit hide"))
             animator.SetTrigger("Change");
     }
 
