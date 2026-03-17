@@ -129,6 +129,7 @@ public class PlayerFootsteps : MonoBehaviour
             {
                 case "Metal":
                     currentSurface = SurfaceType.Metal;
+                    Debug.Log("Metal");
                     break;
                 case "Wood":
                     currentSurface = SurfaceType.Wood;
@@ -141,6 +142,7 @@ public class PlayerFootsteps : MonoBehaviour
                     break;
                 default:
                     currentSurface = SurfaceType.Default;
+                    Debug.Log("Default");
                     break;
             }
         }
