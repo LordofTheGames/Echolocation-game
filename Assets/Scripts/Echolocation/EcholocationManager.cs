@@ -245,7 +245,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float visualVolume = 10f, float monsterVolume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float visualVolume = 10f, float monsterVolume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default, float priority = 1f)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -265,7 +265,7 @@ public class EcholocationManager : MonoBehaviour
         GameObject monster = GameObject.FindGameObjectWithTag("Monster");
         if (monster != null) {
             INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
-            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, monsterVolume, isFootsteps);
+            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, monsterVolume, isFootsteps, priority);
         }
     }
 
