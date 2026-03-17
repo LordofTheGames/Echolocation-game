@@ -19,10 +19,6 @@ public class ClickerTrigger : MonoBehaviour
     [Header("Number of Rays")]
     public int numRays = 4000;
 
-    [Header("Ray Max Distance")]
-    [Range(0f, 50f)]
-    public float maxDistance = 50f;
-
     [Header("Angle of projection (0 = line, 60 = cone, 360 = sphere)")]
     public float angle = 60f;
     
