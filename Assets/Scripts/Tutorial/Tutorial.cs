@@ -35,6 +35,10 @@ public class Tutorial : MonoBehaviour
         sprint.OnCollision += OnSprint;
         target.OnCollision += OnTargetThrow;
         inventory.OnInventoryChanged += OnPick;
+        Breakable.OnRockBroken += OnBreakTutorial;
+        HideInBox.OnPlayerHide += OnHideTutorial;
+        HideInBox.OnPlayerExit += OnExitTutorial;
+
 
         animator.SetBool("Tutorial", tutorial);
     }
@@ -148,5 +152,24 @@ public class Tutorial : MonoBehaviour
     //     if(animator.GetCurrentAnimatorStateInfo(0).IsName("select")) 
     //         animator.SetTrigger("Change");
     // }
+
+
+    public void OnBreakTutorial()
+    {
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("break"))
+            animator.SetTrigger("Change");
+    }
+
+    public void OnHideTutorial()
+    {
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("hide"))
+            animator.SetTrigger("Change");
+    }
+
+    public void OnExitTutorial()
+    {
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("exit-hide"))
+            animator.SetTrigger("Change");
+    }
 
 }
