@@ -50,6 +50,9 @@ public class PlayerFootsteps : MonoBehaviour
     public float footSeparation = 1f;   // Distance from center to foot
     public float echoAngle = 360f;      // 360 for a full ripple around the foot
 
+    [Header("Raycast Settings (check surface type)")]
+    public LayerMask groundLayer;
+
     [Header("Movement - Default")]
     public MoveSettings crouch = new MoveSettings { name = "Crouch", stepDistance = 2f, volume = 0.2f, echoRays = 700, maxDistance = 6f, volForMonster = 0f };
     public MoveSettings walk = new MoveSettings { name = "Walk", stepDistance = 4f, volume = 0.5f, echoRays = 2000, maxDistance = 12f, volForMonster = 25f };
@@ -98,6 +101,8 @@ public class PlayerFootsteps : MonoBehaviour
 
     void Update()
     {
+        CheckSurface();
+
         lastPos = currentPos;
         currentPos = transform.position;
         currentPos.y = 0;
@@ -116,12 +121,16 @@ public class PlayerFootsteps : MonoBehaviour
         }
     }
 
-    private void OnControllerColliderHit(ControllerColliderHit hit)
+    private void CheckSurface()
     {
         // In Scripts/Water/DetectPlayer.cs, surface type is set to water when player enters water, and set back to previous value when player leaves
         if (currentSurface == SurfaceType.Water) return;
 
-        if (hit.normal.y > 0.5f) // better than using layermask.all for checking if we're on the ground
+        Vector3 rayStart = transform.position + (Vector3.up * 0.5f); // Start slightly above player's pivot
+
+        // Cast a ray from slightly above the bottom of the player, shooting downwards
+        // The 3f distance ensures it reaches the ground even if the player is bouncing/hovering slightly
+        if (Physics.Raycast(rayStart, Vector3.down, out RaycastHit hit, 3f, groundLayer))
         {
             string surfaceTag = hit.collider.tag;
 
@@ -217,7 +226,9 @@ public class PlayerFootsteps : MonoBehaviour
         Vector3 footPos = transform.position + (transform.right * footSeparation * dirMultiplier);
         footPos.y = transform.position.y;
 
+        // Calculate visual volume based on old max distance and loss per meter (2)
+        float visualVolume = currentSettings.maxDistance * 2f;
         // Trigger Echo
-        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, currentSettings.volForMonster, true);
+        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, visualVolume, currentSettings.volForMonster, true);
     }
 }
