@@ -106,7 +106,7 @@ public class GlobalEchoSystem : MonoBehaviour
 
     void RegisterAllColliders()
     {
-        Collider[] allColliders = FindObjectsByType<Collider>(FindObjectsSortMode.None);
+        Collider[] allColliders = FindObjectsByType<Collider>(FindObjectsInactive.Include, FindObjectsSortMode.None);
 
         foreach (Collider col in allColliders)
         {
