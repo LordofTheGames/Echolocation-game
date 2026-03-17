@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using Unity.Behavior;
 
 public class HideInBox : MonoBehaviour
 {
@@ -12,7 +13,9 @@ public class HideInBox : MonoBehaviour
 
     private bool isHiding = false;
     private bool isTransitioning = false; // Prevents bugs if player spams interact
+    private float hidingTime;
     
+    private BehaviorGraphAgent agent;
     private GameObject player;
     private GameObject playerRef;
     private Camera playerMainCamera;
@@ -20,7 +23,8 @@ public class HideInBox : MonoBehaviour
     
     void Start()
     {
-       player = GameObject.FindGameObjectWithTag("Player"); 
+        agent = GameObject.Find("Monster").GetComponent<BehaviorGraphAgent>();
+        player = GameObject.FindGameObjectWithTag("Player"); 
     }
 
     public void Interact()
@@ -66,7 +70,10 @@ public class HideInBox : MonoBehaviour
             yield return null; // Wait for next frame
         }
 
+        hidingTime = 0;
+        agent.BlackboardReference.SetVariableValue("hidingTime", 0f);
         isHiding = true;
+        agent.BlackboardReference.SetVariableValue("playerIsHiding", true);
         isTransitioning = false;
 
         MouseLook ml = player.GetComponentInChildren<MouseLook>();
@@ -78,8 +85,8 @@ public class HideInBox : MonoBehaviour
     private IEnumerator ExitBoxRoutine()
     {
         isTransitioning = true;
-        isHiding = false; 
         player.GetComponentInChildren<MouseLook>().hidingTransition = true; 
+        isHiding = false; 
 
         Vector3 exitDirection = boxAnchor.forward;
         exitDirection.y = 0; 
@@ -125,8 +132,19 @@ public class HideInBox : MonoBehaviour
         playerRef.GetComponent<PlayerMovement>().enabled = true;
         ml.isHiding = false; 
         ml.hidingTransition = false; 
+        agent.BlackboardReference.SetVariableValue("playerIsHiding", false);
 
         playerRef = null;
         isTransitioning = false;
+    }
+
+    // used for registering time player has been hiding for
+    void Update()
+    {
+       if (isHiding)
+        {
+            hidingTime += Time.deltaTime;
+            agent.BlackboardReference.SetVariableValue("hidingTime", hidingTime);
+        } 
     }
 }
