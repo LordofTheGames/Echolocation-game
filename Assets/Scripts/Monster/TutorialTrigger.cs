@@ -1,7 +1,7 @@
 using UnityEngine;
 using Unity.Behavior;
 
-public class MazeTrigger : MonoBehaviour
+public class TutorialTrigger : MonoBehaviour
 {
     [SerializeField] private BehaviorGraphAgent agent;
 
@@ -21,9 +21,7 @@ public class MazeTrigger : MonoBehaviour
     {
         if (other.CompareTag("Player"))
         {
-            bool playerInMaze;
-            agent.BlackboardReference.GetVariableValue("playerInMaze", out playerInMaze);
-            agent.BlackboardReference.SetVariableValue("playerInMaze", !playerInMaze);
+            agent.BlackboardReference.SetVariableValue("playerInTutorial", false);
         }
     }
 }
