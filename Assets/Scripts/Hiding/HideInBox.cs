@@ -144,6 +144,7 @@ public class HideInBox : MonoBehaviour
         ml.isHiding = false; 
         ml.hidingTransition = false; 
         agent.BlackboardReference.SetVariableValue("playerIsHiding", false);
+        agent.BlackboardReference.SetVariableValue("exitHiding", false);
         navmeshEdges.SetActive(true);
 
         playerRef = null;
