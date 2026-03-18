@@ -44,12 +44,16 @@ public class MicInput : MonoBehaviour
     {
         string currSceneName = SceneManager.GetActiveScene().name;
         // if no mic calibration, set default values
-        if (currSceneName != "MicCalibration" && currSceneName != "MainMenu" && highPitch == 0 && normalPitch == 0 && highVolume == 0 && normalVolume == 0)
+        if (currSceneName != "MicCalibration" && currSceneName != "MainMenu")
         {
-            normalPitch = 50;
-            highPitch = 140 - normalPitch;
-            normalVolume = 0.2f;
-            highVolume = 0.97f - normalVolume;
+            if (normalPitch == 0)
+                normalPitch = 50;
+            if (highPitch == 0)
+                highPitch = 140 - normalPitch;
+            if (normalVolume == 0)
+                normalVolume = 0.2f;
+            if (highVolume == 0)
+                highVolume = 0.97f - normalVolume;
         }
         sampleRate = AudioSettings.outputSampleRate;
         audioSource = gameObject.AddComponent<AudioSource>();
