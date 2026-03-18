@@ -3,16 +3,13 @@ using UnityEngine;
 
 public class LabDoor : MonoBehaviour
 {
-    [Header("Door Hinges")]
     [SerializeField] private Transform leftDoorHinge;
     [SerializeField] private Transform rightDoorHinge;
 
-    [Header("Angles")]
     [SerializeField] private float leftOpenY = 85f;
     [SerializeField] private float rightOpenY = -85f;
     [SerializeField] private float closedY = 0f;
 
-    [Header("Animation")]
     [SerializeField] private float rotateSpeed = 180f;
 
     private Quaternion leftClosedRot;

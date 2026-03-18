@@ -47,15 +47,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0c276c0b555217a47affe361c8402e29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IntactObject: {fileID: 8347514980325146389}
-  BrokenObject: {fileID: 7359577691698152635}
+  intactObject: {fileID: 8347514980325146389}
+  brokenObject: {fileID: 7359577691698152635}
   breakSound: {fileID: 8300000, guid: 20677b1a4501c7e429e42e1521bbb5bc, type: 3}
   breakSoundVolume: 2
   minRelativeVolume: 0.824
   minRelativePitch: 0.108
   holdTimeToBreak: 0.5
   maxDistanceToMic: 5
-  secondsUntilDestroy: 2
+  secondsUntilHideBrokenVisual: 5
   audioSource: {fileID: 7978084407277814467}
 --- !u!82 &7978084407277814467
 AudioSource:
@@ -5239,6 +5239,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 39d018dba823fee419cb594616072207, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: b625ab8d890b7624db3132fdb72299ed, type: 2}
     - target: {fileID: 919132149155446097, guid: 39d018dba823fee419cb594616072207, type: 3}
       propertyPath: m_Name
       value: rock

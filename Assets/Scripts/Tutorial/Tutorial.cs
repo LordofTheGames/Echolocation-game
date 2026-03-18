@@ -50,8 +50,6 @@ public class Tutorial : MonoBehaviour
         if(micVolume > 0.1 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) {
             animator.SetTrigger("Change");
         }
-
-        if(animator.GetBool("Next")) animator.SetBool("Next", false);
     }
 
     private void MicVolume()
@@ -73,7 +71,7 @@ public class Tutorial : MonoBehaviour
     public void OnNext(InputAction.CallbackContext context)
     {
         
-        if(context.started) animator.SetBool("Next", true);
+        if(context.started) animator.SetTrigger("Next");
     }
 
     public void OnEcho(InputAction.CallbackContext context)
