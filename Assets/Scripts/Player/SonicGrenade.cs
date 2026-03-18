@@ -18,7 +18,7 @@ public class SonicGrenade : MonoBehaviour
     [Header("360 echo burst")]
     public float echoPingOffset = 0.3f;
     [Range(5000, 100000)] public int echoNumRays = 100000;
-    [Range(15f, 100000f)] public float echoMaxDistance = 100000f;
+    [Range(15f, 100000f)] public float echoVisualVolume = 100000f;
     public float echoMonsterVolume = 1000f;
 
     public float minDelayAfterArm = 0.08f;
@@ -73,6 +73,7 @@ public class SonicGrenade : MonoBehaviour
                 360f,
                 1f,
                 echoNumRays,
+                echoVisualVolume,
                 echoMonsterVolume
             );
         }

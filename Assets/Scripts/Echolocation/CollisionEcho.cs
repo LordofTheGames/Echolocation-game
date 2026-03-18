@@ -24,7 +24,7 @@ public class CollisionEcho : MonoBehaviour
     public float angle = 360f;
     public float uniformity = 1f;
     public int numRays = 10000;
-    public float maxDistance = 25f;
+    public float visualVolume = 50f;
     public float monsterVolume = 100f;
 
     public void Arm() // Called by the throwing system when the object is released
@@ -55,7 +55,7 @@ public class CollisionEcho : MonoBehaviour
             Debug.Log("No sound attached for this type of collision");  // Warning in case a sound is meant to be attached
         }
 
-        GlobalEchoSystem.Ping(gameObject, spawnPoint, Vector3.forward, angle, uniformity, numRays, monsterVolume);
+        GlobalEchoSystem.Ping(gameObject, spawnPoint, Vector3.forward, angle, uniformity, numRays, visualVolume, monsterVolume);
         currentPings++;
 
         if (currentPings >= maxPings)

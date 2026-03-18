@@ -370,7 +370,7 @@ MonoBehaviour:
   landingIndicatorPrefab: {fileID: 2435089806916180378, guid: cdaff24b6b4b98b459ef9c02909fe49d, type: 3}
   layerMask:
     serializedVersion: 2
-    m_Bits: 2047
+    m_Bits: 259583
 --- !u!114 &2083444333531579490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,15 +384,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clickerSound: {fileID: 8300000, guid: 03f111c93295398499034ddfe43c1e3d, type: 3}
-  soundEffectVolume: 2
+  soundEffectVolume: 1
   audioSource: {fileID: 0}
   cameraTransform: {fileID: 2099696623943395477}
   uniformity: 0
   numRays: 20000
-  maxDistance: 50
-  angle: 110
-  volume: 200
-  cooldownTime: 4
+  angle: 100
+  visualVolume: 100
+  monsterVolume: 50
+  cooldownTime: 3.5
   cooldownBar: {fileID: 0}
   cooldownColor: {r: 1, g: 1, b: 1, a: 1}
   transparency: 0.6
@@ -947,7 +947,7 @@ MonoBehaviour:
     m_ActionName: 'Player/Previous[/XInputControllerWindows/leftShoulder,/Keyboard/1]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 3677165169037684896}
         m_TargetAssemblyTypeName: MouseLook, Assembly-CSharp
         m_MethodName: OnLook
         m_Mode: 0
@@ -1015,137 +1015,140 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   defaultFootstep: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
   waterFootstep: {fileID: 8300000, guid: 28c38b101d76bb841941851d69b82999, type: 3}
-  metalFootstep: {fileID: 0}
-  woodFootstep: {fileID: 0}
-  dirtFootstep: {fileID: 0}
-  labFootstep: {fileID: 0}
+  metalFootstep: {fileID: 8300000, guid: 8c7107217f6e8de4fb03eba295163e14, type: 3}
+  woodFootstep: {fileID: 8300000, guid: 7419e92697d5d644f994226347c60659, type: 3}
+  dirtFootstep: {fileID: 8300000, guid: 47679c31239b08e4fb327b08745c54c1, type: 3}
+  labFootstep: {fileID: 8300000, guid: 6b65e0bae1a0eb94686fe51ed0c63bce, type: 3}
   footSeparation: 1
   echoAngle: 360
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 61505
   crouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
-    volForMonster: 0
+    echoRays: 3000
+    maxDistance: 5
+    volForMonster: 5
   walk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
-    volForMonster: 25
+    echoRays: 7000
+    maxDistance: 10
+    volForMonster: 30
   sprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
-    volForMonster: 50
+    echoRays: 10000
+    maxDistance: 20
+    volForMonster: 120
   waterCrouch:
     name: Water Crouch
     stepDistance: 2
     volume: 0.07
-    echoRays: 1000
-    maxDistance: 8
+    echoRays: 4000
+    maxDistance: 12
     volForMonster: 10
   waterWalk:
     name: Water Walk
     stepDistance: 4
     volume: 0.15
-    echoRays: 2700
-    maxDistance: 15
+    echoRays: 8000
+    maxDistance: 18
     volForMonster: 35
   waterSprint:
     name: Water Sprint
     stepDistance: 5
     volume: 0.35
-    echoRays: 7000
-    maxDistance: 35
+    echoRays: 15000
+    maxDistance: 30
     volForMonster: 70
   metalCrouch:
     name: Crouch
     stepDistance: 2
-    volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    volume: 0.8
+    echoRays: 3500
+    maxDistance: 10
     volForMonster: 0
   metalWalk:
     name: Walk
     stepDistance: 4
-    volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    volume: 1
+    echoRays: 8000
+    maxDistance: 15
     volForMonster: 25
   metalSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 12000
+    maxDistance: 25
     volForMonster: 50
   woodCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 3000
+    maxDistance: 5
     volForMonster: 0
   woodWalk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 7000
+    maxDistance: 10
     volForMonster: 25
   woodSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 20
     volForMonster: 50
   dirtCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 1500
+    maxDistance: 3
     volForMonster: 0
   dirtWalk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 7000
+    maxDistance: 5
     volForMonster: 25
   dirtSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 10
     volForMonster: 50
   labCrouch:
     name: Lab Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
+    echoRays: 3000
     maxDistance: 6
     volForMonster: 0
   labWalk:
     name: Lab Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
+    echoRays: 7000
     maxDistance: 12
     volForMonster: 25
   labSprint:
     name: Lab Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 23
     volForMonster: 50
 --- !u!1 &5489064552480596990
 GameObject:
