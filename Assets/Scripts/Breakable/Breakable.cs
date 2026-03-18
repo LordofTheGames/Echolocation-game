@@ -1,66 +1,96 @@
+using System.Collections;
 using UnityEngine;
 
 [SelectionBase]
 public class Breakable : MonoBehaviour
 {
+    [SerializeField] private GameObject intactObject;
+    [SerializeField] private GameObject brokenObject;
+    [SerializeField] private AudioClip breakSound;
+    [SerializeField] private float breakSoundVolume = 1f;
 
-    [SerializeField] GameObject IntactObject;
-    [SerializeField] GameObject BrokenObject;
-    [SerializeField] AudioClip breakSound;
-    [SerializeField] float breakSoundVolume = 1f;
-    [Range(0,1)]
-    [SerializeField] float minRelativeVolume = 0.5f;
-    [Range(0,1)]
-    [SerializeField] float minRelativePitch = 0.5f;
-    [SerializeField] float holdTimeToBreak = 1.2f;
-    [SerializeField] float maxDistanceToMic = 5f;
-    [SerializeField] float secondsUntilDestroy = 2f;
+    [Range(0, 1)]
+    [SerializeField] private float minRelativeVolume = 0.5f;
 
-    [SerializeField] AudioSource audioSource;
-    bool _hasBroken;
-    float _holdTimer;
+    [Range(0, 1)]
+    [SerializeField] private float minRelativePitch = 0.5f;
+
+    [SerializeField] private float holdTimeToBreak = 1.2f;
+    [SerializeField] private float maxDistanceToMic = 5f;
+    [SerializeField] private float secondsUntilHideBrokenVisual = 5f;
+
+    [SerializeField] private AudioSource audioSource;
+
+    private bool hasBroken;
+    private float holdTimer;
 
     private GameObject player;
     private MicInput micInput;
 
-    private void Start()
+    public bool HasBroken => hasBroken;
+
+    public bool HasBroken => hasBroken;
+
+    private void Awake()
     {
         micInput = GameObject.Find("MicInput").GetComponent<MicInput>();
         player = GameObject.FindGameObjectWithTag("Player");
-        IntactObject.SetActive(true);
-        BrokenObject.SetActive(false);
-        GlobalEchoSystem system = GameObject.Find("GlobalEchoSystem").GetComponent<GlobalEchoSystem>();
+
+        if (intactObject != null) intactObject.SetActive(true);
+        if (brokenObject != null) brokenObject.SetActive(false);
     }
 
     private void Update()
     {
-        if (_hasBroken || micInput == null) return;
+        if (hasBroken || micInput == null || player == null) return;
 
         if (Vector3.Distance(transform.position, player.transform.position) > maxDistanceToMic)
         {
-            _holdTimer = 0f;
+            holdTimer = 0f;
             return;
         }
 
         if (micInput.relativePitch >= minRelativePitch && micInput.relativeVolume >= minRelativeVolume)
         {
-            _holdTimer += Time.deltaTime;
-            if (_holdTimer >= holdTimeToBreak)
+            holdTimer += Time.deltaTime;
+
+            if (holdTimer >= holdTimeToBreak)
+            {
                 Break();
+            }
         }
         else
         {
-            _holdTimer = 0f;
+            holdTimer = 0f;
         }
     }
 
     private void Break()
     {
-        _hasBroken = true;
-        IntactObject.SetActive(false);
-        BrokenObject.SetActive(true);
-        audioSource.PlayOneShot(breakSound, breakSoundVolume);
+        if (hasBroken) return;
 
-        Destroy(gameObject, secondsUntilDestroy);
+        hasBroken = true;
+
+        if (intactObject != null) intactObject.SetActive(false);
+        if (brokenObject != null) brokenObject.SetActive(true);
+
+        if (audioSource != null && breakSound != null)
+        {
+            audioSource.PlayOneShot(breakSound, breakSoundVolume);
+        }
+
+        StartCoroutine(HideBrokenVisualLater());
+    }
+
+    private IEnumerator HideBrokenVisualLater()
+    {
+        if (secondsUntilHideBrokenVisual <= 0f) yield break;
+
+        yield return new WaitForSeconds(secondsUntilHideBrokenVisual);
+
+        if (brokenObject != null)
+        {
+            brokenObject.SetActive(false);
+        }
     }
 }
