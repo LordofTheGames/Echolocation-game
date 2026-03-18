@@ -180,4 +180,9 @@ public class Tutorial : MonoBehaviour
             animator.SetTrigger("Change");
     }
 
+    public void PlayMonsterSound()
+    {
+        audioSource.PlayOneShot(monsterSound, volume);
+    }
+
 }
