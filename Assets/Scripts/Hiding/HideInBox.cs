@@ -17,6 +17,7 @@ public class HideInBox : MonoBehaviour
     private float hidingTime;
     
     private BehaviorGraphAgent agent;
+    private GameObject navmeshEdges;
     private GameObject player;
     private GameObject playerRef;
     private Camera playerMainCamera;
@@ -30,6 +31,7 @@ public class HideInBox : MonoBehaviour
     {
         agent = GameObject.Find("Monster").GetComponent<BehaviorGraphAgent>();
         player = GameObject.FindGameObjectWithTag("Player"); 
+        navmeshEdges = GameObject.Find("NavMesh Edges");
     }
 
     public void Interact()
@@ -80,6 +82,7 @@ public class HideInBox : MonoBehaviour
         isHiding = true;
         OnPlayerHide?.Invoke(); // Tell the game the player hid
         agent.BlackboardReference.SetVariableValue("playerIsHiding", true);
+        navmeshEdges.SetActive(false);
         isTransitioning = false;
 
         MouseLook ml = player.GetComponentInChildren<MouseLook>();
@@ -141,6 +144,7 @@ public class HideInBox : MonoBehaviour
         ml.isHiding = false; 
         ml.hidingTransition = false; 
         agent.BlackboardReference.SetVariableValue("playerIsHiding", false);
+        navmeshEdges.SetActive(true);
 
         playerRef = null;
         isTransitioning = false;
