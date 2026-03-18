@@ -38,7 +38,8 @@ public class InventoryManager : MonoBehaviour
         Select(ItemType.None);
 
         //add items so tutorial got something to switch to
-        Add(ItemType.Rock, 3);
+        Add(ItemType.Rock, 4);
+        Add(ItemType.SonicGrenade, 4);
 
     }
 
