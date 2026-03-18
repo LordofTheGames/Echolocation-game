@@ -17,7 +17,7 @@ public class TimedEchoEmitter : MonoBehaviour
     public float angle = 360f;
     public float uniformity = 1f;
     public int numRays = 8000;
-    public float maxDistance = 25f;
+    public float visualVolume = 50f;
     public float monsterVolume = 100f;
 
     public float minDelayAfterThrow = 0.05f;
@@ -90,7 +90,7 @@ public class TimedEchoEmitter : MonoBehaviour
 
             if (GlobalEchoSystem.Instance != null)
             {
-                GlobalEchoSystem.Ping(gameObject, position, Vector3.forward, angle, uniformity, numRays, monsterVolume);
+                GlobalEchoSystem.Ping(gameObject, position, Vector3.forward, angle, uniformity, numRays, visualVolume, monsterVolume);
             }
 
             emitted++;
