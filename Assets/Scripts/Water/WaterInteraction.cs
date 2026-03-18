@@ -18,10 +18,6 @@ public class WaterInteraction : MonoBehaviour
     public float rippleSize = 1.5f;
     public float rippleLifetime = 0.5f;
 
-    [Header("Audio Settings")]
-    public AudioClip footstepWaterSound; 
-    public float volume = 0.8f;
-
     private ParticleSystem StepsRipple;
     private ParticleSystem WadeRipple;
     private CharacterController cc;
@@ -32,18 +28,21 @@ public class WaterInteraction : MonoBehaviour
     private RaycastHit waterHit;
     private LayerMask waterLayer;
 
-    // ------ Variables for Wade ripple type only
     private Vector3 playerPos;
     private float velocityXZ;
+
+    private PlayerFootsteps footstepsScript;
 
     void Start()
     {
         cc = GetComponent<CharacterController>();
-        waterLayer = LayerMask.GetMask("Water");
+
         lastPos = transform.position;
         playerPos = transform.position;
         WadeRipple = Instantiate(WadeRipplePrefab);
         StepsRipple = Instantiate(StepsRipplePrefab);
+        waterLayer = LayerMask.GetMask("Water");
+        footstepsScript = gameObject.GetComponent<PlayerFootsteps>();
     }
 
     void Update()
@@ -73,7 +72,7 @@ public class WaterInteraction : MonoBehaviour
             }
             else
             {
-                distanceTraveled = 0; 
+                distanceTraveled = 0;
             }
 
             lastPos = currentPos;
@@ -81,12 +80,10 @@ public class WaterInteraction : MonoBehaviour
         }
         else if (waterRippleType == WaterRippleType.Wade)
         {
-            // Calculate Velocity (Exactly like your original script)
             velocityXZ = Vector3.Distance(new Vector3(transform.position.x, 0, transform.position.z), new Vector3(playerPos.x, 0, playerPos.z));
             playerPos = transform.position;
             WadeRipple.transform.position = transform.position;
 
-            // Global Shader Variable
             Shader.SetGlobalVector("_Player", transform.position);
 
             CheckWater();
@@ -96,10 +93,12 @@ public class WaterInteraction : MonoBehaviour
 
     void CheckWater()
     {
-        inWater = playerIsInWater();
-        if (waterRippleType == WaterRippleType.Footsteps){
+        inWater = footstepsScript.currentSurface == SurfaceType.Water;
+
+        if (waterRippleType == WaterRippleType.Footsteps)
+        {
             if (StepsRipple.gameObject.activeSelf != inWater) 
-                StepsRipple.gameObject.SetActive(inWater);
+            StepsRipple.gameObject.SetActive(inWater);
         }
         else if (waterRippleType == WaterRippleType.Wade)
         {
@@ -107,11 +106,6 @@ public class WaterInteraction : MonoBehaviour
             if (inWater) WadeRipple.gameObject.SetActive(true);
             else WadeRipple.gameObject.SetActive(false);
         }
-    }
-
-    bool playerIsInWater(){
-        float height = cc.height + cc.radius;
-        return Physics.Raycast(transform.position + Vector3.up * height, Vector3.down, height * 2, waterLayer);
     }
 
     void CreateFootstep(Vector3 triggerPos)
@@ -147,14 +141,9 @@ public class WaterInteraction : MonoBehaviour
 
         StepsRipple.Emit(emitParams, 1);
 
-        if (footstepWaterSound != null)
-        {
-            AudioSource.PlayClipAtPoint(footstepWaterSound, spawnPos, volume);
-        }
-
         isRightFoot = !isRightFoot;
     }
-    
+
     void HandleWadeRipples()
     {
         if (waterRippleType == WaterRippleType.Wade){
@@ -193,11 +182,11 @@ public class WaterInteraction : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        if (waterRippleType == WaterRippleType.Wade){
+       if (waterRippleType == WaterRippleType.Wade){
             if (((1 << other.gameObject.layer) & waterLayer) != 0)
             {
                 WadeRipple.Emit(transform.position, Vector3.zero, 5, 0.1f, Color.white);
             }
-        }
+       }
     }
 }

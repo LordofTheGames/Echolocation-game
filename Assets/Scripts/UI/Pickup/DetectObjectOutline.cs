@@ -11,17 +11,24 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private float loseDelay = 0.12f;
 
     [SerializeField] private LayerMask interactMask = ~0; 
+    [SerializeField] private LayerMask obstacleMask = ~0; 
     [SerializeField] private GameObject pickupPanel; 
     [SerializeField] private GameObject pullPanel; 
     [SerializeField] private GameObject gateHintPanel;   
     [SerializeField] private GameObject gateUnlockPanel;
     [SerializeField] private GameObject doorOpenPanel;
     [SerializeField] private GameObject doorClosePanel;
+    [SerializeField] private GameObject breakablePitchPanel;
+    [SerializeField] private GameObject breakableVolumePanel;
+    [SerializeField] private GameObject hidePanel;
+    [SerializeField] private GameObject exitHidePanel;
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
     private float lastValidHitTime;
     private GameObject currentPanel;
+    private bool isHiding;
+    private HideInBox currHideBox;
 
     private void Awake()
     {
@@ -31,28 +38,43 @@ public class DetectObjectOutline : MonoBehaviour
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
         if (doorOpenPanel) doorOpenPanel.SetActive(false);
         if (doorClosePanel) doorClosePanel.SetActive(false);
+        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
+        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
+        if (hidePanel) hidePanel.SetActive(false);
+        if (exitHidePanel) exitHidePanel.SetActive(false);
 
-    currentPanel = pickupPanel;
+        currentPanel = pickupPanel;
     }
+
     private void ShowOnly(GameObject panel)
     {
-    if (pickupPanel) pickupPanel.SetActive(false);
-    if (pullPanel) pullPanel.SetActive(false);
-    if (gateHintPanel) gateHintPanel.SetActive(false);
-    if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
-    if (doorOpenPanel) doorOpenPanel.SetActive(false);
-    if (doorClosePanel) doorClosePanel.SetActive(false);
+        if (pickupPanel) pickupPanel.SetActive(false);
+        if (pullPanel) pullPanel.SetActive(false);
+        if (gateHintPanel) gateHintPanel.SetActive(false);
+        if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
+        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
+        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
+        if (hidePanel) hidePanel.SetActive(false);
+        if (exitHidePanel) exitHidePanel.SetActive(false);
+        if (doorOpenPanel) doorOpenPanel.SetActive(false);
+        if (doorClosePanel) doorClosePanel.SetActive(false);
 
-    currentPanel = panel;
-    if (currentPanel) currentPanel.SetActive(true);
-    
+        currentPanel = panel;
+        if (currentPanel) currentPanel.SetActive(true);
     }
 
     public void OnInteract(InputAction.CallbackContext context)
     {
         if (context.performed && current != null)
         {
-            PerformInteract();
+            var gate = current.GetComponentInParent<Gate>();
+            if(gate == null) PerformInteract();
+        }
+        else if (context.started && isHiding == true && current == null)
+        {
+            currHideBox.Interact();
+            isHiding = false; 
+            ShowOnly(null);
         }
     }
     public void OnUnlock(InputAction.CallbackContext context)
@@ -89,9 +111,19 @@ public class DetectObjectOutline : MonoBehaviour
         if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
         if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
 
+        var hide = current.GetComponent<HideInBox>();
+        if (!hide) hide = current.GetComponentInParent<HideInBox>();
+        if (!hide) hide = current.GetComponentInChildren<HideInBox>();
+
         if (pickup != null)
         {
             pickup.Interact();
+        }
+        else if (hide != null && isHiding == false)
+        {
+            currHideBox = hide;
+            hide.Interact();
+            isHiding = true;
         }
 
         current = null;
@@ -99,7 +131,6 @@ public class DetectObjectOutline : MonoBehaviour
 
     private void Update()
     {
-
         // create a ray from the center of the screen
         var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
 
@@ -110,6 +141,18 @@ public class DetectObjectOutline : MonoBehaviour
             if (best.gameObject.name == "Lift chain")
             {
                 ShowOnly(pullPanel);
+            }
+            else if (best.gameObject.CompareTag("BreakablePitch"))
+            {
+                ShowOnly(breakablePitchPanel);
+            }
+            else if (best.gameObject.CompareTag("BreakableVolume"))
+            {
+                ShowOnly(breakableVolumePanel);
+            }
+            else if (best.gameObject.CompareTag("Hide"))
+            {
+                ShowOnly(hidePanel);
             }
             else
             {
@@ -143,6 +186,10 @@ public class DetectObjectOutline : MonoBehaviour
                 }
             }
         }
+        else if (isHiding)
+        {
+            ShowOnly(exitHidePanel);
+        }
 
         if (best != null)
             lastValidHitTime = Time.time;
@@ -175,6 +222,7 @@ public class DetectObjectOutline : MonoBehaviour
         // track the best target and its score (lower = better)
         OutlineTarget best = null;
         float bestScore = float.PositiveInfinity;
+        Vector3 bestHitPoint = Vector3.zero;
 
         for (int i = 0; i < hits.Length; i++)
         {
@@ -202,9 +250,15 @@ public class DetectObjectOutline : MonoBehaviour
             {
                 bestScore = score;
                 best = t;
+                bestHitPoint = hits[i].point;
             }
         }
-
+        // If we found a valid target, verify we have Line of Sight to it
+        if (best != null)
+        {
+            if (Physics.Linecast(ray.origin, bestHitPoint, obstacleMask, QueryTriggerInteraction.Ignore))
+                return null;
+        }
         return best;
     }
     public void SetEnabled(bool value)

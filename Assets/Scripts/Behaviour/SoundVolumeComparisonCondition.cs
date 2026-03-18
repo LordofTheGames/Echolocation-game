@@ -3,7 +3,7 @@ using Unity.Behavior;
 using UnityEngine;
 
 [Serializable, Unity.Properties.GeneratePropertyBag]
-[Condition(name: "sound volume comparison", story: "[newVolume] is [operator] [currentVolume] proportional to distance between [Agent] and [newLocation] / [currentLocation]  [newIsFootsteps] [currIsFootsteps]", category: "Conditions", id: "13c71d98c06eaff42c3d9a4f992e0920")]
+[Condition(name: "sound volume comparison", story: "[newVolume] is [Operator] [currentVolume] proportional to distance between [Agent] and [newLocation] / [currentLocation]  [newIsFootsteps] [currIsFootsteps]", category: "Conditions", id: "13c71d98c06eaff42c3d9a4f992e0920")]
 public partial class SoundVolumeComparisonCondition : Condition
 {
     [SerializeReference] public BlackboardVariable<float> NewVolume;

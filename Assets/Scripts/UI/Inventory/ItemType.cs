@@ -1,8 +1,7 @@
 public enum ItemType
 {
-    Rock, 
-    Plank,
-    SoundEmitter,
+    Rock,
+    EchoBeacon,
     SonicGrenade,
     Key,
     None
