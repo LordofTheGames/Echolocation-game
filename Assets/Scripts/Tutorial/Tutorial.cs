@@ -127,11 +127,19 @@ public class Tutorial : MonoBehaviour
         }
     }
 
-    public void OnTargetThrow()
+    public void OnTargetThrow(string hitTag)
     {
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("throw2")) {
+        if(animator.GetCurrentAnimatorStateInfo(0).IsName("throw2") && hitTag == "Throwable Rock") 
+        {
             animator.SetTrigger("Change");
-            audioSource.PlayOneShot(monsterSound, volume);
+        }
+        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("emitter throw") && hitTag == "Throwable Emitter")
+        {
+            animator.SetTrigger("Change");
+        }
+        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("sonic grenade throw") && hitTag == "Throwable Grenade")
+        {
+            animator.SetTrigger("Change");
         }
     }
 
@@ -170,6 +178,11 @@ public class Tutorial : MonoBehaviour
     {
         if (animator.GetCurrentAnimatorStateInfo(0).IsName("exit hide"))
             animator.SetTrigger("Change");
+    }
+
+    public void PlayMonsterSound()
+    {
+        audioSource.PlayOneShot(monsterSound, volume);
     }
 
 }

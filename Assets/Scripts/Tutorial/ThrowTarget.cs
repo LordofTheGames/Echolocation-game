@@ -4,13 +4,15 @@ using System;
 
 public class ThrowTarget : MonoBehaviour
 {
-    public event Action OnCollision;
+    public event Action<string> OnCollision;
 
     private void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.tag == "Throwable")
+        string hitTag = other.gameObject.tag;
+
+        if(hitTag == "Throwable Rock" || hitTag == "Throwable Emitter" || hitTag == "Throwable Grenade")
         {
-            OnCollision?.Invoke();
+            OnCollision?.Invoke(hitTag);
         }
     }
 }

@@ -39,6 +39,16 @@ public class MeasurePitch : MonoBehaviour
 
     public float GetPitch()
     {
+
+        if (Input.GetKeyDown("space"))
+        {
+            changePrompt(Good);
+            Number.text = "";
+            Button.SetActive(true);
+            StartCoroutine(SelectButtonLater(Button));
+            return 0f;
+        }
+
         elapsedTimeSecs += Time.deltaTime;
 
         currPitch[idx] = MicInput.pitchHz;
