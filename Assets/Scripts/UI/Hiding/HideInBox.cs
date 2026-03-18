@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using System;
 using Unity.Behavior;
 
 public class HideInBox : MonoBehaviour
@@ -20,6 +21,10 @@ public class HideInBox : MonoBehaviour
     private GameObject playerRef;
     private Camera playerMainCamera;
     private Quaternion originalCamLocalRot; // Saves original neck angle
+
+    public static event Action OnPlayerHide;
+    public static event Action OnPlayerExit;
+
     
     void Start()
     {
@@ -73,6 +78,7 @@ public class HideInBox : MonoBehaviour
         hidingTime = 0;
         agent.BlackboardReference.SetVariableValue("hidingTime", 0f);
         isHiding = true;
+        OnPlayerHide?.Invoke(); // Tell the game the player hid
         agent.BlackboardReference.SetVariableValue("playerIsHiding", true);
         isTransitioning = false;
 
@@ -85,6 +91,8 @@ public class HideInBox : MonoBehaviour
     private IEnumerator ExitBoxRoutine()
     {
         isTransitioning = true;
+        isHiding = false; 
+        OnPlayerExit?.Invoke();
         player.GetComponentInChildren<MouseLook>().hidingTransition = true; 
         isHiding = false; 
 

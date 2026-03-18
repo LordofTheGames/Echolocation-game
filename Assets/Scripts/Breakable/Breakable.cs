@@ -1,4 +1,5 @@
 using UnityEngine;
+using System;
 
 [SelectionBase]
 public class Breakable : MonoBehaviour
@@ -22,6 +23,8 @@ public class Breakable : MonoBehaviour
 
     private GameObject player;
     private MicInput micInput;
+
+    public static event Action OnRockBroken;
 
     private void Start()
     {
@@ -60,6 +63,8 @@ public class Breakable : MonoBehaviour
         IntactObject.SetActive(false);
         BrokenObject.SetActive(true);
         audioSource.PlayOneShot(breakSound, breakSoundVolume);
+
+        OnRockBroken?.Invoke(); // Tell the game the player broke a rock
 
         Destroy(gameObject, secondsUntilDestroy);
     }
