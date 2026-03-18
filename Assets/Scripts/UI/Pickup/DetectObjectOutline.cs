@@ -63,6 +63,17 @@ public class DetectObjectOutline : MonoBehaviour
         if (currentPanel) currentPanel.SetActive(true);
     }
 
+    private T FindInTarget<T>(OutlineTarget target) where T : Component
+    {
+        if (!target) return null;
+
+        T comp = target.GetComponent<T>();
+        if (!comp) comp = target.GetComponentInParent<T>();
+        if (!comp) comp = target.GetComponentInChildren<T>();
+
+        return comp;
+    }
+
     public void OnInteract(InputAction.CallbackContext context)
     {
         if (context.performed && current != null)
@@ -96,13 +107,10 @@ public class DetectObjectOutline : MonoBehaviour
         currentPanel.SetActive(false);
         current.SetOutlined(false);
 
-        var door = current.GetComponent<LabDoor>();
-        if (!door) door = current.GetComponentInParent<LabDoor>();
-        if (!door) door = current.GetComponentInChildren<LabDoor>();
-
-        if (door != null)
+        var button = FindInTarget<DoorButton>(current);
+        if (button != null)
         {
-            door.Interact();
+            button.Interact();
             current = null;
             return;
         }
@@ -154,6 +162,22 @@ public class DetectObjectOutline : MonoBehaviour
             {
                 ShowOnly(hidePanel);
             }
+            else if (best.gameObject.CompareTag("Button"))
+            {
+                var button = FindInTarget<DoorButton>(best);
+                if (!button.CanInteract || button.IsDoorMoving)
+                {
+                    ShowOnly(null);
+                }
+                if (button.IsDoorOpen)
+                {
+                    ShowOnly(doorClosePanel);
+                }
+                else
+                {
+                    ShowOnly(doorOpenPanel);
+                }
+            }
             else
             {
                 var gate = best.GetComponentInParent<Gate>();
@@ -163,26 +187,7 @@ public class DetectObjectOutline : MonoBehaviour
                 }
                 else
                 {
-                    var door = best.GetComponentInParent<LabDoor>();
-                    if (door != null)
-                    {
-                        if (door.IsMoving)
-                        {
-                            ShowOnly(null);
-                        }
-                        else if (door.IsOpen)
-                        {
-                            ShowOnly(doorClosePanel);
-                        }
-                        else
-                        {
-                            ShowOnly(doorOpenPanel);
-                        }
-                    }
-                    else
-                    {
-                        ShowOnly(pickupPanel);
-                    }
+                    ShowOnly(pickupPanel);
                 }
             }
         }
@@ -237,6 +242,12 @@ public class DetectObjectOutline : MonoBehaviour
             
             var t = col.GetComponentInParent<OutlineTarget>();
             if (!t) continue;
+
+            var button = FindInTarget<DoorButton>(t);
+            if (button != null && !button.CanInteract)
+            {
+                continue;
+            }
 
             // vector from camera to the hit point
             Vector3 to = hits[i].point - ray.origin;
