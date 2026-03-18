@@ -29,6 +29,8 @@ public class Breakable : MonoBehaviour
 
     public bool HasBroken => hasBroken;
 
+    public bool HasBroken => hasBroken;
+
     private void Awake()
     {
         micInput = GameObject.Find("MicInput").GetComponent<MicInput>();

@@ -59,7 +59,7 @@ public class MonsterAI : MonoBehaviour, INoiseSensitive
     }
 
     // This function is called automatically by the Scanner when rays hit the monster
-    public void OnHeardScan(Transform source, float volume, bool isFootsteps)
+    public void OnHeardScan(Transform source, float volume, bool isFootsteps, float priority)
     {
         if (source == null) return;
 

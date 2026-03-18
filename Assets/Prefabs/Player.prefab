@@ -353,11 +353,11 @@ MonoBehaviour:
   - type: 0
     prefab: {fileID: 6708599122270987611, guid: dc35457561e2b3746bd21668f2e9a16a, type: 3}
   - type: 1
-    prefab: {fileID: 7286101680068963467, guid: 670934e21c06b15458bf248ada43c43d, type: 3}
-  - type: 2
-    prefab: {fileID: 8213984805270231195, guid: 3245903fabd446741b3ca03b9b3fdb39, type: 3}
-  - type: 3
     prefab: {fileID: 4666918432005921956, guid: 3a5d92522412def4390279976730b6c3, type: 3}
+  - type: 2
+    prefab: {fileID: 1573398778328573671, guid: 2ea901a4d41c6734fb79af6dd00c6900, type: 3}
+  - type: 3
+    prefab: {fileID: 0}
   throwForce: 15
   throwHeight: 0.5
   landingIndicatorSize: 1
@@ -389,9 +389,13 @@ MonoBehaviour:
   cameraTransform: {fileID: 2099696623943395477}
   uniformity: 0
   numRays: 20000
-  maxDistance: 50
-  angle: 110
-  volume: 200
+  angle: 100
+  visualVolume: 100
+  monsterVolume: 100
+  cooldownTime: 3.5
+  cooldownBar: {fileID: 0}
+  cooldownColor: {r: 1, g: 1, b: 1, a: 1}
+  transparency: 0.6
 --- !u!114 &7900835251262604122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -410,7 +414,10 @@ MonoBehaviour:
   loseDelay: 0.12
   interactMask:
     serializedVersion: 2
-    m_Bits: 265
+    m_Bits: 131337
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 53312
   pickupPanel: {fileID: 0}
   pullPanel: {fileID: 0}
   gateHintPanel: {fileID: 0}
@@ -925,8 +932,8 @@ MonoBehaviour:
   - m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
-        m_MethodName: OnNext
+        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
+        m_MethodName: OnPrevious
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -940,7 +947,7 @@ MonoBehaviour:
     m_ActionName: 'Player/Previous[/XInputControllerWindows/leftShoulder,/Keyboard/1]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
+      - m_Target: {fileID: 3677165169037684896}
         m_TargetAssemblyTypeName: MouseLook, Assembly-CSharp
         m_MethodName: OnLook
         m_Mode: 0
@@ -954,6 +961,38 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: be23a6ab-dd35-4a11-b587-246c34ccb038
     m_ActionName: 'Inventory/Look[/XInputControllerWindows/rightStick,/Mouse/delta]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PauseManager, Assembly-CSharp
+        m_MethodName: OnPause
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 467174cd-17d8-41af-9dc5-96349994becf
+    m_ActionName: 'Inventory/Pause[/Keyboard/p,/XInputControllerWindows/start]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PauseManager, Assembly-CSharp
+        m_MethodName: OnPause
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 9402973e-3fef-45d8-910c-4995f0c51e2e
+    m_ActionName: 'Pause Menu/Pause[/Keyboard/p,/XInputControllerWindows/start]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -976,115 +1015,140 @@ MonoBehaviour:
   audioSource: {fileID: 0}
   defaultFootstep: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
   waterFootstep: {fileID: 8300000, guid: 28c38b101d76bb841941851d69b82999, type: 3}
-  metalFootstep: {fileID: 0}
-  woodFootstep: {fileID: 0}
-  dirtFootstep: {fileID: 0}
+  metalFootstep: {fileID: 8300000, guid: 8c7107217f6e8de4fb03eba295163e14, type: 3}
+  woodFootstep: {fileID: 8300000, guid: 7419e92697d5d644f994226347c60659, type: 3}
+  dirtFootstep: {fileID: 8300000, guid: 47679c31239b08e4fb327b08745c54c1, type: 3}
+  labFootstep: {fileID: 8300000, guid: 6b65e0bae1a0eb94686fe51ed0c63bce, type: 3}
   footSeparation: 1
   echoAngle: 360
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 61505
   crouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 3000
+    maxDistance: 5
     volForMonster: 0
   walk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 7000
+    maxDistance: 10
     volForMonster: 25
   sprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 20
     volForMonster: 50
   waterCrouch:
     name: Water Crouch
     stepDistance: 2
     volume: 0.07
-    echoRays: 1000
-    maxDistance: 8
+    echoRays: 4000
+    maxDistance: 12
     volForMonster: 10
   waterWalk:
     name: Water Walk
     stepDistance: 4
     volume: 0.15
-    echoRays: 2700
-    maxDistance: 15
+    echoRays: 8000
+    maxDistance: 18
     volForMonster: 35
   waterSprint:
     name: Water Sprint
     stepDistance: 5
     volume: 0.35
-    echoRays: 7000
-    maxDistance: 35
+    echoRays: 15000
+    maxDistance: 30
     volForMonster: 70
   metalCrouch:
     name: Crouch
     stepDistance: 2
-    volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    volume: 0.8
+    echoRays: 3500
+    maxDistance: 10
     volForMonster: 0
   metalWalk:
     name: Walk
     stepDistance: 4
-    volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    volume: 1
+    echoRays: 8000
+    maxDistance: 15
     volForMonster: 25
   metalSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 12000
+    maxDistance: 25
     volForMonster: 50
   woodCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 3000
+    maxDistance: 5
     volForMonster: 0
   woodWalk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 7000
+    maxDistance: 10
     volForMonster: 25
   woodSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 20
     volForMonster: 50
   dirtCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 1500
+    maxDistance: 3
     volForMonster: 0
   dirtWalk:
     name: Walk
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 7000
+    maxDistance: 5
     volForMonster: 25
   dirtSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
-    echoRays: 5000
-    maxDistance: 30
+    echoRays: 10000
+    maxDistance: 10
+    volForMonster: 50
+  labCrouch:
+    name: Lab Crouch
+    stepDistance: 2
+    volume: 0.2
+    echoRays: 3000
+    maxDistance: 6
+    volForMonster: 0
+  labWalk:
+    name: Lab Walk
+    stepDistance: 4
+    volume: 0.5
+    echoRays: 7000
+    maxDistance: 12
+    volForMonster: 25
+  labSprint:
+    name: Lab Sprint
+    stepDistance: 5
+    volume: 1
+    echoRays: 10000
+    maxDistance: 23
     volForMonster: 50
 --- !u!1 &5489064552480596990
 GameObject:

@@ -14,7 +14,6 @@ public class EcholocationManager : MonoBehaviour
     [Header("Pulse Settings")]
     public float pulseDuration = 2.0f;  // Duration of pulse that the visualisation fades over
     public int raysPerScan = 20000;     // Number of rays fired for a single scan
-    public float maxDistance = 50f;     // Max distance rays can travel
     public LayerMask scanLayers;
 
     [Header("Sound Propagation")]
@@ -22,11 +21,21 @@ public class EcholocationManager : MonoBehaviour
     public float soundSpeed = 10f;
     [Tooltip("If disabled, all hits appear instantly as before")]
     public bool useSoundPropagation = true;
+    [Tooltip("How much volume is lost per 1 unit of distance, e.g. (100.0 volume / 2.0 loss = 50.0 max distance)")]
+    public float volumeLossPerMeter = 2.0f;
+    [Tooltip("Universal max volume benchmark for starting dot/quad brightness (e.g. 300 for shouting as loud as you possibly can) - Everything higher is just started at max brightness")]
+    public float maxPossibleVolume = 300f;
+    [Tooltip("The minimum starting brightness for each dot/square so that all are clearly visible at least at start.")]
+    [Range(0f, 1f)]
+    public float minStartingBrightness = 0.2f;
 
     [Header("Reflection Settings")]
     [Tooltip("Maximum number of times sound rays will bounce before stopping")]
     public int maxBounces = 2;
     public bool visualiseAllBounces = true;
+    [Tooltip("Percentage of volume retained after each bounce (0.0 to 1.0)")]
+    [Range(0f, 1f)]
+    public float bounceVolumeMultiplier = 0.5f;
 
     [Header("Visual Settings")]
     // Tooltip adds pop-up info when hovering mouse over the variable in the inspector
@@ -51,6 +60,15 @@ public class EcholocationManager : MonoBehaviour
     public Color[] monsterColors = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
     public Color[] interactableColors = new Color[3] {Color.green, new Color(0f, 0.8f, 0f), new Color(0f, 0.6f, 0f)};
     public Color[] defaultColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
+    public Color[] metalColors = new Color[3] { Color.gray, new Color(0.8f, 0.8f, 0.8f), new Color(0.6f, 0.6f, 0.6f) };
+    public Color[] dirtColors = new Color[3] { new Color(0.4f, 0.2f, 0f), new Color(0.3f, 0.15f, 0f), new Color(0.2f, 0.1f, 0f) };
+    public Color[] woodColors = new Color[3] { new Color(0.6f, 0.4f, 0.2f), new Color(0.5f, 0.3f, 0.1f), new Color(0.4f, 0.2f, 0.05f) };
+    public Color[] labColors = new Color[3] { Color.white, new Color(0.9f, 0.9f, 0.9f), new Color(0.8f, 0.8f, 0.8f) }; 
+    public Color[] railColors = new Color[3] { new Color(0.3f, 0.3f, 0.3f), new Color(0.2f, 0.2f, 0.2f), new Color(0.1f, 0.1f, 0.1f) };
+    public Color[] hideRockColors = new Color[3] { new Color(0.4f, 0.4f, 0.4f), new Color(0.35f, 0.35f, 0.35f), new Color(0.3f, 0.3f, 0.3f) };
+    public Color[] waterColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
+        
+    
 
     // HashMap to store color (category) of every collider in the game
     private NativeHashMap<int, int> colliderColorMap;
@@ -98,6 +116,12 @@ public class EcholocationManager : MonoBehaviour
     // Stop the rays colliding with the object that spawns them
     private GameObject objectToIgnore;  
 
+    // Intital volumes of source
+    private float initialVisualVolume = 100f;
+    private float initialMonsterVolume = 100f;
+
+    // Tells monster if it's a footstep sound
+    private bool isFootstepsScan = false;
 
     // Layer memory - to restore object+children's layers, after setting to IgnoreRaycast layer on first pulse, and reset before first reflections
     private Dictionary<Transform, int> layerMemory = new Dictionary<Transform, int>();
@@ -113,18 +137,27 @@ public class EcholocationManager : MonoBehaviour
     public struct VisualHit
     {
         public float4x4 matrix;
-        public int colorVariant; //  0, 1, or 2
-        public int colorCategory; // 0 = default, 1 = monster, 2 = interactable
-        public float travelDistance; // Total distance ray travelled to reach this hit point
+        public int colorVariant;        //  0, 1, or 2
+        public int colorCategory;       // 0 = default, 1 = monster, 2 = interactable
+        public float travelDistance;    // Total distance ray travelled to reach this hit point
+        public float hitVolume;         // Volume of ray at hitpoint
     };
 
-    // Struct to hold ray data to prevent scrambling in paralllel section
+    // Struct to hold ray data to prevent scrambling in parallel section
     public struct RayData
     {
         public Vector3 origin;
         public Vector3 direction;
         public float range;
         public float distanceTravelled; // Cumulative distance travelled across all bounces up to that point 
+        public float currentVolume;     // Tracks volume through bounces and distance travelled
+    }
+
+    // Struct used to pass data to main thread to give monster information
+    public struct MonsterHitData
+    {
+        public int originalRayIndex;
+        public float hitVolume;
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
@@ -178,7 +211,8 @@ public class EcholocationManager : MonoBehaviour
         argsBuffer = new ComputeBuffer(1, args.Length * sizeof(uint), ComputeBufferType.IndirectArguments);     // Create arguments buffer, needs to hold 5 uints, the type tells the GPU this buffer doesn't contain 3D model data, only instructions for how to draw
 
         PerformScan();
-        float propagationDelay = useSoundPropagation ? maxDistance / soundSpeed : 0f;
+        float maxPossibleDistance = initialVisualVolume / volumeLossPerMeter; // Calculate maximum possible distance for a ray to travel
+        float propagationDelay = useSoundPropagation ? maxPossibleDistance / soundSpeed : 0f;
         Destroy(gameObject, pulseDuration + propagationDelay); // Destory this instance once the pulse duration + any delay to propagation animation has ended
     }
 
@@ -211,7 +245,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float maxDist = 50f, float volume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float visualVolume = 10f, float monsterVolume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default, float priority = 1f)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -220,15 +254,18 @@ public class EcholocationManager : MonoBehaviour
         scanAngle = angle;
         scanUniformity = Mathf.Clamp01(uniformity);     // Make sure is in valid range
         raysPerScan = Mathf.Clamp(numRays, 0, 100000);  // Make sure is in (currently chosen) valid range
-        maxDistance = maxDist;
         objectToIgnore = ignoreMe;
         colliderColorMap = colorMap;
+        initialVisualVolume = visualVolume;
+        initialMonsterVolume = monsterVolume;
+        isFootstepsScan = isFootsteps;
+
         // TODO: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
         GameObject monster = GameObject.FindGameObjectWithTag("Monster");
         if (monster != null) {
             INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
-            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, volume, isFootsteps);
+            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, monsterVolume, isFootsteps, priority);
         }
     }
 
@@ -296,7 +333,8 @@ public class EcholocationManager : MonoBehaviour
             scanAngle = scanAngle,
             scanDirection = scanDirection,
             scanUniformity = scanUniformity,
-            maxDistance = maxDistance,
+            initialVolume = initialVisualVolume,
+            volumeLossPerMeter = volumeLossPerMeter,
             startOrigin = transform.position,   // Gets the position at which this instance of the EhcolocationSystem.prefab was instantiated in GlobalEchoSystem.cs
             rays = currentRays.AsArray()
         };
@@ -346,7 +384,7 @@ public class EcholocationManager : MonoBehaviour
                 NativeList<RayData> nextRays = new NativeList<RayData>(rayCount, Allocator.TempJob);   
 
                 // Collect list of indices of rays that actually hit something
-                NativeList<int> hitIndices = new NativeList<int>(rayCount, Allocator.TempJob);
+                NativeList<MonsterHitData> monsterHits = new NativeList<MonsterHitData>(rayCount, Allocator.TempJob);
                 NativeList<VisualHit> visualHits = new NativeList<VisualHit>(rayCount, Allocator.TempJob);
 
                 var processJob = new ProcessHitsJob
@@ -358,12 +396,14 @@ public class EcholocationManager : MonoBehaviour
                     isGridMode = isGridMode,
                     offset = isGridMode ? gridOffset : dotOffset,
                     scale = isGridMode ? gridQuadSize : dotScale,
-
                     visualiseAllBounces = visualiseAllBounces,
+
+                    volumeLossPerMeter = volumeLossPerMeter,
+                    bounceVolumeMultiplier = bounceVolumeMultiplier,
 
                     colliderColorMap = colliderColorMap,
                     nextRays = nextRays.AsParallelWriter(),
-                    hitIndices = hitIndices.AsParallelWriter(),
+                    monsterHits = monsterHits.AsParallelWriter(),
                     visualHits = visualHits.AsParallelWriter(),
                 };
 
@@ -386,12 +426,26 @@ public class EcholocationManager : MonoBehaviour
                     instanceMatrices[globalIndex] = vHit.matrix;
 
                     // Assign colour
-                    instanceColors[globalIndex] = vHit.colorCategory switch
+                    Color baseColor = vHit.colorCategory switch
                     {
                         1 => monsterColors[vHit.colorVariant],
                         2 => interactableColors[vHit.colorVariant],
+                        3 => metalColors[vHit.colorVariant],
+                        4 => dirtColors[vHit.colorVariant],
+                        5 => woodColors[vHit.colorVariant],
+                        6 => labColors[vHit.colorVariant],
+                        7 => railColors[vHit.colorVariant],
+                        8 => hideRockColors[vHit.colorVariant],
+                        9 => waterColors[vHit.colorVariant],
                         _ => defaultColors[vHit.colorVariant]
                     };
+
+                    float normalisedVolume = Mathf.Clamp01(vHit.hitVolume / maxPossibleVolume); // Clamped to 1 if hit volume > maxPossibleVolume - starts at max brightness
+
+                    // Introduce a minimum starting brightness, but use lerp to keep relativeness
+                    float finalAlpha = Mathf.Lerp(minStartingBrightness, 1.0f, normalisedVolume);
+
+                    instanceColors[globalIndex] = new Vector4(baseColor.r, baseColor.g, baseColor.b, finalAlpha);
 
                     // Calculate reveal time
                     instanceRevealTimes[globalIndex] = useSoundPropagation ? vHit.travelDistance / soundSpeed : 0f;
@@ -399,17 +453,19 @@ public class EcholocationManager : MonoBehaviour
 
                 activeHitCount += currentBounceHits;
                         
-                // TODO: add this when we have multiple ray bounces working
-                // for (int k = 0; k < hitIndices.Length; k++)
+                // //TODO: add this when we have multiple ray bounces working
+                // for (int k = 0; k < monsterHits.Length; k++)
                 // {
-                //     int originalRayIndex = hitIndices[k];
+                //     int originalRayIndex = monsterHits[k].originalRayIndex;
+                //     float hitVolume = monsterHits[k].hitVolume;        
                 //     RaycastHit hit = results[originalRayIndex];
 
                 //     INoiseSensitive sensitiveTarget = hit.collider.GetComponent<INoiseSensitive>();
 
                 //     if (sensitiveTarget != null)
                 //     {
-                //         sensitiveTarget.OnHeardScan(sourceObj.transform);
+                //         sensitiveTarget.OnHeardScan(sourceObj.transform, hitVolume, isFootstepsScan);
+                //         Debug.Log("Volume: " + hitVolume);
                 //     }
                 // }
 
@@ -417,7 +473,7 @@ public class EcholocationManager : MonoBehaviour
                 commands.Dispose();
                 results.Dispose();
                 currentRays.Dispose();
-                hitIndices.Dispose();
+                monsterHits.Dispose();
                 visualHits.Dispose();
 
                 // Swap to next generation
@@ -471,7 +527,8 @@ public class EcholocationManager : MonoBehaviour
         public float scanAngle;
         public float scanUniformity;
         public float3 scanDirection;
-        public float maxDistance;
+        public float initialVolume;
+        public float volumeLossPerMeter;
         public float3 startOrigin;
         public NativeArray<RayData> rays;
 
@@ -528,8 +585,10 @@ public class EcholocationManager : MonoBehaviour
                 }
             }
 
+            float initialRange = initialVolume / volumeLossPerMeter;
+
             // Add combined package
-            rays[i] = new RayData{ origin = startOrigin, direction = worldDir, range = maxDistance, distanceTravelled = 0f };
+            rays[i] = new RayData{ origin = startOrigin, direction = worldDir, range = initialRange, distanceTravelled = 0f, currentVolume = initialVolume };
         }
     }
 
@@ -562,9 +621,11 @@ public class EcholocationManager : MonoBehaviour
 
         public bool visualiseAllBounces;
 
+        public float volumeLossPerMeter;
+        public float bounceVolumeMultiplier;
+
         public NativeList<RayData>.ParallelWriter nextRays;
-        
-        public NativeList<int>.ParallelWriter hitIndices;
+        public NativeList<MonsterHitData>.ParallelWriter monsterHits;
         public NativeList<VisualHit>.ParallelWriter visualHits;
 
         public void Execute(int i)
@@ -573,9 +634,25 @@ public class EcholocationManager : MonoBehaviour
 
             RaycastHit hit = results[i];
 
-            hitIndices.AddNoResize(i);
-
             float totalDistance = currentRays[i].distanceTravelled + hit.distance;  // Calculate total distance ray has travelled to reach this hit point
+
+            // Calculate volume of ray at hitpoint
+            float volumeLost = hit.distance * volumeLossPerMeter;
+            float hitVolume = currentRays[i].currentVolume - volumeLost;
+
+            // If hit volume is 0 or below immediately terminate - doesn't show and doesn't bounce
+            if (hitVolume <= 0f) return;
+
+            // Get color/category for this collider
+            int colorCategory = 0;
+            if (colliderColorMap.IsCreated) colliderColorMap.TryGetValue(hit.colliderInstanceID, out colorCategory);
+
+            // Only add to monsterHits if the collider is actually the monster's collider (color category = 1 for monster)
+            if (colorCategory == 1)
+            {
+                // Data required to then pass info about volume to monster
+                monsterHits.AddNoResize(new MonsterHitData{ originalRayIndex = i, hitVolume = hitVolume });
+            }
 
             if ((bounce == 0 && !visualiseAllBounces) || visualiseAllBounces)
             {
@@ -596,24 +673,22 @@ public class EcholocationManager : MonoBehaviour
                 uint hash = math.hash(new int2(i, bounce));
                 int colorVariant = (int)(hash % 3); 
 
-                // Get color/category for this collider
-                int colorCategory = 0;
-                if (colliderColorMap.IsCreated) colliderColorMap.TryGetValue(hit.colliderInstanceID, out colorCategory);
-
                 // Save indices so main thread can do layer detection for applying colour correctly
                 visualHits.AddNoResize(new VisualHit
                 {
                     matrix = float4x4.TRS(pos, rot, new float3(scale, scale, scale)),
                     colorVariant = colorVariant,
                     colorCategory = colorCategory,
-                    travelDistance = totalDistance
+                    travelDistance = totalDistance,
+                    hitVolume = hitVolume
                 });
             }
 
             if (bounce < maxBounces)
             {
-                float remainingRange = currentRays[i].range - hit.distance;
-                if (remainingRange > 0.0f)
+                float nextVolume = hitVolume * bounceVolumeMultiplier; // Calculate volume of ray upon reflection with loss
+
+                if (nextVolume > 0.0f) // Only spawn a new ray if the ray still has any volume/'sound energy' left
                 {
                     float3 incoming = currentRays[i].direction;
                     float3 normal = hit.normal;
@@ -624,8 +699,9 @@ public class EcholocationManager : MonoBehaviour
                     {
                         origin = hit.point + (hit.normal * 0.01f),
                         direction = reflected,
-                        range = remainingRange,
-                        distanceTravelled = totalDistance
+                        range = nextVolume / volumeLossPerMeter, // Range left is calculated based on volume and loss per meter
+                        distanceTravelled = totalDistance,
+                        currentVolume = nextVolume
                     });
                 }
             }
