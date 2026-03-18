@@ -300,7 +300,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 263168
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -353,9 +353,9 @@ MonoBehaviour:
   - type: 0
     prefab: {fileID: 6708599122270987611, guid: dc35457561e2b3746bd21668f2e9a16a, type: 3}
   - type: 1
-    prefab: {fileID: 4666918432005921956, guid: 3a5d92522412def4390279976730b6c3, type: 3}
+    prefab: {fileID: 1573398778328573671, guid: 9077d5744c75c9342bbbf8e8153354eb, type: 3}
   - type: 2
-    prefab: {fileID: 1573398778328573671, guid: 2ea901a4d41c6734fb79af6dd00c6900, type: 3}
+    prefab: {fileID: 4666918432005921956, guid: 3a5d92522412def4390279976730b6c3, type: 3}
   - type: 3
     prefab: {fileID: 0}
   throwForce: 15
@@ -370,7 +370,7 @@ MonoBehaviour:
   landingIndicatorPrefab: {fileID: 2435089806916180378, guid: cdaff24b6b4b98b459ef9c02909fe49d, type: 3}
   layerMask:
     serializedVersion: 2
-    m_Bits: 2047
+    m_Bits: 259583
 --- !u!114 &2083444333531579490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,14 +384,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   clickerSound: {fileID: 8300000, guid: 03f111c93295398499034ddfe43c1e3d, type: 3}
-  soundEffectVolume: 2
+  soundEffectVolume: 1.3
   audioSource: {fileID: 0}
   cameraTransform: {fileID: 2099696623943395477}
   uniformity: 0
   numRays: 20000
   angle: 100
   visualVolume: 100
-  monsterVolume: 100
+  monsterVolume: 75
   cooldownTime: 3.5
   cooldownBar: {fileID: 0}
   cooldownColor: {r: 1, g: 1, b: 1, a: 1}
@@ -993,6 +993,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 9402973e-3fef-45d8-910c-4995f0c51e2e
     m_ActionName: 'Pause Menu/Pause[/Keyboard/p,/XInputControllerWindows/start]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: a1b2c3d4-5678-90ab-cdef-1234567890ab
+    m_ActionName: 'Player/ScareBats[/Keyboard/v]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
@@ -1030,126 +1034,126 @@ MonoBehaviour:
     volume: 0.2
     echoRays: 3000
     maxDistance: 5
-    volForMonster: 0
+    volForMonster: 5
   walk:
     name: Walk
     stepDistance: 4
     volume: 0.5
     echoRays: 7000
     maxDistance: 10
-    volForMonster: 25
+    volForMonster: 50
   sprint:
     name: Sprint
     stepDistance: 5
     volume: 1
     echoRays: 10000
     maxDistance: 20
-    volForMonster: 50
+    volForMonster: 140
   waterCrouch:
     name: Water Crouch
     stepDistance: 2
     volume: 0.07
     echoRays: 4000
     maxDistance: 12
-    volForMonster: 10
+    volForMonster: 15
   waterWalk:
     name: Water Walk
     stepDistance: 4
     volume: 0.15
     echoRays: 8000
     maxDistance: 18
-    volForMonster: 35
+    volForMonster: 65
   waterSprint:
     name: Water Sprint
     stepDistance: 5
     volume: 0.35
     echoRays: 15000
     maxDistance: 30
-    volForMonster: 70
+    volForMonster: 170
   metalCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.8
     echoRays: 3500
     maxDistance: 10
-    volForMonster: 0
+    volForMonster: 15
   metalWalk:
     name: Walk
     stepDistance: 4
     volume: 1
     echoRays: 8000
     maxDistance: 15
-    volForMonster: 25
+    volForMonster: 65
   metalSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
     echoRays: 12000
     maxDistance: 25
-    volForMonster: 50
+    volForMonster: 170
   woodCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
     echoRays: 3000
     maxDistance: 5
-    volForMonster: 0
+    volForMonster: 4
   woodWalk:
     name: Walk
     stepDistance: 4
     volume: 0.5
     echoRays: 7000
     maxDistance: 10
-    volForMonster: 25
+    volForMonster: 40
   woodSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
     echoRays: 10000
     maxDistance: 20
-    volForMonster: 50
+    volForMonster: 120
   dirtCrouch:
     name: Crouch
     stepDistance: 2
     volume: 0.2
     echoRays: 1500
     maxDistance: 3
-    volForMonster: 0
+    volForMonster: 1
   dirtWalk:
     name: Walk
     stepDistance: 4
     volume: 0.5
     echoRays: 7000
     maxDistance: 5
-    volForMonster: 25
+    volForMonster: 30
   dirtSprint:
     name: Sprint
     stepDistance: 5
     volume: 1
     echoRays: 10000
     maxDistance: 10
-    volForMonster: 50
+    volForMonster: 76
   labCrouch:
     name: Lab Crouch
     stepDistance: 2
     volume: 0.2
     echoRays: 3000
     maxDistance: 6
-    volForMonster: 0
+    volForMonster: 5
   labWalk:
     name: Lab Walk
     stepDistance: 4
     volume: 0.5
     echoRays: 7000
     maxDistance: 12
-    volForMonster: 25
+    volForMonster: 50
   labSprint:
     name: Lab Sprint
     stepDistance: 5
     volume: 1
     echoRays: 10000
     maxDistance: 23
-    volForMonster: 50
+    volForMonster: 140
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0

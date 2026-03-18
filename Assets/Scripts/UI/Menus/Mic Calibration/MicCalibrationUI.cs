@@ -122,7 +122,7 @@ public class MicCalibrationUI : MonoBehaviour
 
 	private void LoadGameScene()
 	{
-		SceneManager.LoadScene("MVP");
+		SceneManager.LoadScene("BETA");
 	}
 
     void Update()

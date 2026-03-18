@@ -18,7 +18,8 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject gateUnlockPanel;
     [SerializeField] private GameObject doorOpenPanel;
     [SerializeField] private GameObject doorClosePanel;
-    [SerializeField] private GameObject breakablePanel;
+    [SerializeField] private GameObject breakablePitchPanel;
+    [SerializeField] private GameObject breakableVolumePanel;
     [SerializeField] private GameObject hidePanel;
     [SerializeField] private GameObject exitHidePanel;
     public bool ignoreLiftChain;
@@ -37,7 +38,8 @@ public class DetectObjectOutline : MonoBehaviour
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
         if (doorOpenPanel) doorOpenPanel.SetActive(false);
         if (doorClosePanel) doorClosePanel.SetActive(false);
-        if (breakablePanel) breakablePanel.SetActive(false);
+        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
+        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
         if (hidePanel) hidePanel.SetActive(false);
         if (exitHidePanel) exitHidePanel.SetActive(false);
 
@@ -50,7 +52,8 @@ public class DetectObjectOutline : MonoBehaviour
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
         if (gateUnlockPanel) gateUnlockPanel.SetActive(false);
-        if (breakablePanel) breakablePanel.SetActive(false);
+        if (breakablePitchPanel) breakablePitchPanel.SetActive(false);
+        if (breakableVolumePanel) breakableVolumePanel.SetActive(false);
         if (hidePanel) hidePanel.SetActive(false);
         if (exitHidePanel) exitHidePanel.SetActive(false);
         if (doorOpenPanel) doorOpenPanel.SetActive(false);
@@ -59,6 +62,7 @@ public class DetectObjectOutline : MonoBehaviour
         currentPanel = panel;
         if (currentPanel) currentPanel.SetActive(true);
     }
+
     private T FindInTarget<T>(OutlineTarget target) where T : Component
     {
         if (!target) return null;
@@ -69,6 +73,7 @@ public class DetectObjectOutline : MonoBehaviour
 
         return comp;
     }
+
     public void OnInteract(InputAction.CallbackContext context)
     {
         if (context.performed && current != null)
@@ -145,47 +150,44 @@ public class DetectObjectOutline : MonoBehaviour
             {
                 ShowOnly(pullPanel);
             }
-            else
+            else if (best.gameObject.CompareTag("BreakablePitch"))
             {
-                var breakable = FindInTarget<Breakable>(best);
-                if (breakable != null && !breakable.HasBroken)
+                ShowOnly(breakablePitchPanel);
+            }
+            else if (best.gameObject.CompareTag("BreakableVolume"))
+            {
+                ShowOnly(breakableVolumePanel);
+            }
+            else if (best.gameObject.CompareTag("Hide"))
+            {
+                ShowOnly(hidePanel);
+            }
+            else if (best.gameObject.CompareTag("Button"))
+            {
+                var button = FindInTarget<DoorButton>(best);
+                if (!button.CanInteract || button.IsDoorMoving)
                 {
-                    ShowOnly(breakablePanel);
+                    ShowOnly(null);
                 }
-                else if (best.gameObject.CompareTag("Hide"))
+                if (button.IsDoorOpen)
                 {
-                    ShowOnly(hidePanel);
+                    ShowOnly(doorClosePanel);
                 }
                 else
                 {
-                    var gate = best.GetComponentInParent<Gate>();
-                    if (gate != null)
-                    {
-                        ShowOnly(gate.HasKey() ? gateUnlockPanel : gateHintPanel);
-                    }
-                    else
-                    {
-                        var button = FindInTarget<DoorButton>(best);
-                        if (button != null)
-                        {
-                            if (!button.CanInteract || button.IsDoorMoving)
-                            {
-                                ShowOnly(null);
-                            }
-                            else if (button.IsDoorOpen)
-                            {
-                                ShowOnly(doorClosePanel);
-                            }
-                            else
-                            {
-                                ShowOnly(doorOpenPanel);
-                            }
-                        }
-                        else
-                        {
-                            ShowOnly(pickupPanel);
-                        }
-                    }
+                    ShowOnly(doorOpenPanel);
+                }
+            }
+            else
+            {
+                var gate = best.GetComponentInParent<Gate>();
+                if (gate != null)
+                {
+                    ShowOnly(gate.HasKey() ? gateUnlockPanel : gateHintPanel);
+                }
+                else
+                {
+                    ShowOnly(pickupPanel);
                 }
             }
         }
@@ -240,11 +242,13 @@ public class DetectObjectOutline : MonoBehaviour
             
             var t = col.GetComponentInParent<OutlineTarget>();
             if (!t) continue;
+
             var button = FindInTarget<DoorButton>(t);
             if (button != null && !button.CanInteract)
             {
                 continue;
             }
+
             // vector from camera to the hit point
             Vector3 to = hits[i].point - ray.origin;
             float distance = to.magnitude;

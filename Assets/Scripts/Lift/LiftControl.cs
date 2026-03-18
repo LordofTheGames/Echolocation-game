@@ -51,98 +51,98 @@ public class LiftControl : MonoBehaviour
         outlineScript = GameObject.FindGameObjectWithTag("Player").GetComponent<DetectObjectOutline>();
         outlineScript.ignoreLiftChain = true;
         currentSpeed = speed;
-        CreateQteUI();
+        // CreateQteUI();
     }
 
-    private void CreateQteUI()
-    {
-        qteCanvas = new GameObject("LiftQTE_Canvas");
-        var canvas = qteCanvas.AddComponent<Canvas>();
-        canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-        qteCanvas.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
-        qteCanvas.AddComponent<GraphicRaycaster>();
+    // private void CreateQteUI()
+    // {
+    //     qteCanvas = new GameObject("LiftQTE_Canvas");
+    //     var canvas = qteCanvas.AddComponent<Canvas>();
+    //     canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+    //     qteCanvas.AddComponent<CanvasScaler>().uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
+    //     qteCanvas.AddComponent<GraphicRaycaster>();
 
-        var panel = new GameObject("QTE_Panel");
-        panel.transform.SetParent(qteCanvas.transform, false);
-        var panelRect = panel.AddComponent<RectTransform>();
-        panelRect.anchorMin = new Vector2(0.5f, 0.5f);
-        panelRect.anchorMax = new Vector2(0.5f, 0.5f);
-        panelRect.sizeDelta = new Vector2(400f, 400f);
-        panelRect.anchoredPosition = Vector2.zero;
+    //     var panel = new GameObject("QTE_Panel");
+    //     panel.transform.SetParent(qteCanvas.transform, false);
+    //     var panelRect = panel.AddComponent<RectTransform>();
+    //     panelRect.anchorMin = new Vector2(0.5f, 0.5f);
+    //     panelRect.anchorMax = new Vector2(0.5f, 0.5f);
+    //     panelRect.sizeDelta = new Vector2(400f, 400f);
+    //     panelRect.anchoredPosition = Vector2.zero;
 
-        var ringGo = new GameObject("QTE_CountdownRing");
-        ringGo.transform.SetParent(panel.transform, false);
-        var ringRect = ringGo.AddComponent<RectTransform>();
-        ringRect.anchorMin = Vector2.zero;
-        ringRect.anchorMax = Vector2.one;
-        ringRect.offsetMin = Vector2.zero;
-        ringRect.offsetMax = Vector2.zero;
-        qteCountdownRect = ringRect;
+    //     var ringGo = new GameObject("QTE_CountdownRing");
+    //     ringGo.transform.SetParent(panel.transform, false);
+    //     var ringRect = ringGo.AddComponent<RectTransform>();
+    //     ringRect.anchorMin = Vector2.zero;
+    //     ringRect.anchorMax = Vector2.one;
+    //     ringRect.offsetMin = Vector2.zero;
+    //     ringRect.offsetMax = Vector2.zero;
+    //     qteCountdownRect = ringRect;
 
-        qteCountdownRing = ringGo.AddComponent<Image>();
-        qteCountdownRing.sprite = circleSprite;
-        qteCountdownRing.color = circleColor;
+    //     qteCountdownRing = ringGo.AddComponent<Image>();
+    //     qteCountdownRing.sprite = circleSprite;
+    //     qteCountdownRing.color = circleColor;
 
-        var textGo = new GameObject("QTE_Prompt");
-        textGo.transform.SetParent(panel.transform, false);
-        var textRect = textGo.AddComponent<RectTransform>();
-        textRect.anchorMin = new Vector2(0.5f, 0.5f);
-        textRect.anchorMax = new Vector2(0.5f, 0.5f);
-        textRect.sizeDelta = new Vector2(320f, 120f);
-        textRect.anchoredPosition = Vector2.zero;
+    //     var textGo = new GameObject("QTE_Prompt");
+    //     textGo.transform.SetParent(panel.transform, false);
+    //     var textRect = textGo.AddComponent<RectTransform>();
+    //     textRect.anchorMin = new Vector2(0.5f, 0.5f);
+    //     textRect.anchorMax = new Vector2(0.5f, 0.5f);
+    //     textRect.sizeDelta = new Vector2(320f, 120f);
+    //     textRect.anchoredPosition = Vector2.zero;
 
-        qtePromptText = textGo.AddComponent<TextMeshProUGUI>();
-        qtePromptText.font = qteFont;
-        qtePromptText.alignment = TextAlignmentOptions.Center;
-        qtePromptText.fontSize = 72;
-        qtePromptText.color = Color.white;
+    //     qtePromptText = textGo.AddComponent<TextMeshProUGUI>();
+    //     qtePromptText.font = qteFont;
+    //     qtePromptText.alignment = TextAlignmentOptions.Center;
+    //     qtePromptText.fontSize = 72;
+    //     qtePromptText.color = Color.white;
 
-        qteCanvas.SetActive(false);
-    }
+    //     qteCanvas.SetActive(false);
+    // }
 
-    private void ShowQte(KeyCode key)
-    {
-        activeQteKey = key;
-        qteStartTime = Time.time;
-        if (qtePromptText != null)
-            qtePromptText.text = key.ToString();
-        if (qteCountdownRect != null)
-            qteCountdownRect.localScale = Vector3.one;
-        if (qteCanvas != null)
-            qteCanvas.SetActive(true);
-    }
+    // private void ShowQte(KeyCode key)
+    // {
+    //     activeQteKey = key;
+    //     qteStartTime = Time.time;
+    //     if (qtePromptText != null)
+    //         qtePromptText.text = key.ToString();
+    //     if (qteCountdownRect != null)
+    //         qteCountdownRect.localScale = Vector3.one;
+    //     if (qteCanvas != null)
+    //         qteCanvas.SetActive(true);
+    // }
 
-    private void UpdateQteCountdownVisual()
-    {
-        if (qteCountdownRect == null) return;
-        float elapsed = Time.time - qteStartTime;
-        float remaining = 1f - Mathf.Clamp01(elapsed / qteTimeLimit);
-        qteCountdownRect.localScale = Vector3.one * remaining;
-    }
+    // private void UpdateQteCountdownVisual()
+    // {
+    //     if (qteCountdownRect == null) return;
+    //     float elapsed = Time.time - qteStartTime;
+    //     float remaining = 1f - Mathf.Clamp01(elapsed / qteTimeLimit);
+    //     qteCountdownRect.localScale = Vector3.one * remaining;
+    // }
 
-    private void HideQte()
-    {
-        activeQteKey = null;
-        if (qteCanvas != null) qteCanvas.SetActive(false);
-    }
+    // private void HideQte()
+    // {
+    //     activeQteKey = null;
+    //     if (qteCanvas != null) qteCanvas.SetActive(false);
+    // }
 
-    private void OnQteSuccess()
-    {
-        consecutiveFails = 0;
-        currentSpeed = speed;
-        HideQte();
-        nextQteTime = Time.time + qteInterval;
-    }
+    // private void OnQteSuccess()
+    // {
+    //     consecutiveFails = 0;
+    //     currentSpeed = speed;
+    //     HideQte();
+    //     nextQteTime = Time.time + qteInterval;
+    // }
 
-    private void OnQteFail()
-    {
-        currentSpeed = 0f;
-        consecutiveFails++;
-        HideQte();
-        nextQteTime = Time.time + qteInterval;
-        if (consecutiveFails >= maxConsecutiveFails)
-            SceneManager.LoadScene("GameOver");
-    }
+    // private void OnQteFail()
+    // {
+    //     currentSpeed = 0f;
+    //     consecutiveFails++;
+    //     HideQte();
+    //     nextQteTime = Time.time + qteInterval;
+    //     if (consecutiveFails >= maxConsecutiveFails)
+    //         SceneManager.LoadScene("GameOver");
+    // }
 
     private void OnTriggerEnter(Collider other)
     {
@@ -173,31 +173,31 @@ public class LiftControl : MonoBehaviour
         }
         if (moving)
         {
-            if (startAtBottom && activeQteKey.HasValue)
-            {
-                UpdateQteCountdownVisual();
-                KeyCode expected = activeQteKey.Value;
-                bool hit = (expected == KeyCode.J && Keyboard.current != null && Keyboard.current.jKey.wasPressedThisFrame) ||
-                           (expected == KeyCode.K && Keyboard.current != null && Keyboard.current.kKey.wasPressedThisFrame) ||
-                           (expected == KeyCode.L && Keyboard.current != null && Keyboard.current.lKey.wasPressedThisFrame);
-                if (hit)
-                {
-                    OnQteSuccess();
-                }
-                else
-                {
-                    bool wrongKey = Keyboard.current != null &&
-                        ((Keyboard.current.jKey.wasPressedThisFrame && expected != KeyCode.J) ||
-                         (Keyboard.current.kKey.wasPressedThisFrame && expected != KeyCode.K) ||
-                         (Keyboard.current.lKey.wasPressedThisFrame && expected != KeyCode.L));
-                    if (wrongKey || (Time.time - qteStartTime) >= qteTimeLimit)
-                        OnQteFail();
-                }
-            }
-            else if (startAtBottom && !activeQteKey.HasValue && Time.time >= nextQteTime)
-            {
-                ShowQte(QteKeys[Random.Range(0, QteKeys.Length)]);
-            }
+            // if (startAtBottom && activeQteKey.HasValue)
+            // {
+                // UpdateQteCountdownVisual();
+                // KeyCode expected = activeQteKey.Value;
+                // bool hit = (expected == KeyCode.J && Keyboard.current != null && Keyboard.current.jKey.wasPressedThisFrame) ||
+                //            (expected == KeyCode.K && Keyboard.current != null && Keyboard.current.kKey.wasPressedThisFrame) ||
+                //            (expected == KeyCode.L && Keyboard.current != null && Keyboard.current.lKey.wasPressedThisFrame);
+                // if (hit)
+                // {
+                //     OnQteSuccess();
+                // }
+                // else
+                // {
+                //     bool wrongKey = Keyboard.current != null &&
+                //         ((Keyboard.current.jKey.wasPressedThisFrame && expected != KeyCode.J) ||
+                //          (Keyboard.current.kKey.wasPressedThisFrame && expected != KeyCode.K) ||
+                //          (Keyboard.current.lKey.wasPressedThisFrame && expected != KeyCode.L));
+                //     if (wrongKey || (Time.time - qteStartTime) >= qteTimeLimit)
+                //         OnQteFail();
+                // }
+            // }
+            // else if (startAtBottom && !activeQteKey.HasValue && Time.time >= nextQteTime)
+            // {
+            //     ShowQte(QteKeys[Random.Range(0, QteKeys.Length)]);
+            // }
 
             float moveAmount = (startAtBottom ? currentSpeed : speed) * Time.deltaTime;
             Vector3 newPos = LiftBody.position;
@@ -210,7 +210,7 @@ public class LiftControl : MonoBehaviour
                     newPos = endPos;
                     LiftBody.position = newPos;
                     this.transform.position = newPos;
-                    HideQte();
+                    // HideQte();
                     Invoke("loadVictoryScreen", 1f); // wait 1 second before loading victory screen
                     return;
                 }
@@ -233,7 +233,7 @@ public class LiftControl : MonoBehaviour
             Vector3 platformMovement = newPos - LiftBody.position;
             LiftBody.position = newPos;
             this.transform.position = newPos;
-            if (playerController != null) playerController.Move(platformMovement);
+            playerController.Move(platformMovement);
         }
     }
 

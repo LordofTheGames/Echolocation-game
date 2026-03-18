@@ -35,6 +35,10 @@ public class Tutorial : MonoBehaviour
         sprint.OnCollision += OnSprint;
         target.OnCollision += OnTargetThrow;
         inventory.OnInventoryChanged += OnPick;
+        Breakable.OnRockBroken += OnBreakTutorial;
+        HideInBox.OnPlayerHide += OnHideTutorial;
+        HideInBox.OnPlayerExit += OnExitTutorial;
+
 
         animator.SetBool("Tutorial", tutorial);
     }
@@ -46,8 +50,6 @@ public class Tutorial : MonoBehaviour
         if(micVolume > 0.1 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) {
             animator.SetTrigger("Change");
         }
-
-        if(animator.GetBool("Next")) animator.SetBool("Next", false);
     }
 
     private void MicVolume()
@@ -69,7 +71,7 @@ public class Tutorial : MonoBehaviour
     public void OnNext(InputAction.CallbackContext context)
     {
         
-        if(context.started) animator.SetBool("Next", true);
+        if(context.started) animator.SetTrigger("Next");
     }
 
     public void OnEcho(InputAction.CallbackContext context)
@@ -123,11 +125,19 @@ public class Tutorial : MonoBehaviour
         }
     }
 
-    public void OnTargetThrow()
+    public void OnTargetThrow(string hitTag)
     {
-        if(animator.GetCurrentAnimatorStateInfo(0).IsName("throw2")) {
+        if(animator.GetCurrentAnimatorStateInfo(0).IsName("throw2") && hitTag == "Throwable Rock") 
+        {
             animator.SetTrigger("Change");
-            audioSource.PlayOneShot(monsterSound, volume);
+        }
+        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("emitter throw") && hitTag == "Throwable Emitter")
+        {
+            animator.SetTrigger("Change");
+        }
+        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("sonic grenade throw") && hitTag == "Throwable Grenade")
+        {
+            animator.SetTrigger("Change");
         }
     }
 
@@ -148,5 +158,29 @@ public class Tutorial : MonoBehaviour
     //     if(animator.GetCurrentAnimatorStateInfo(0).IsName("select")) 
     //         animator.SetTrigger("Change");
     // }
+
+
+    public void OnBreakTutorial()
+    {
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("break"))
+            animator.SetTrigger("Change");
+    }
+
+    public void OnHideTutorial()
+    {
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("hide"))
+            animator.SetTrigger("Change");
+    }
+
+    public void OnExitTutorial()
+    {
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("exit hide"))
+            animator.SetTrigger("Change");
+    }
+
+    public void PlayMonsterSound()
+    {
+        audioSource.PlayOneShot(monsterSound, volume);
+    }
 
 }

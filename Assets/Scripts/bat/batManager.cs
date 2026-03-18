@@ -93,9 +93,9 @@ public class BatFlockManager : MonoBehaviour
     void Update()
     {
         if (!centerBat || !playerCam) return;
-        float distance = Vector3.Distance(playerCam.position, centerBat.transform.position);
-        if (!isObscuring && Time.time > scaredUntil && distance < obscureTriggerDistance)
-            isObscuring = true;
+        // float distance = Vector3.Distance(playerCam.position, centerBat.transform.position);
+        // if (!isObscuring && Time.time > scaredUntil && distance < obscureTriggerDistance)
+        //     isObscuring = true;
     }
 
     void Start()
@@ -130,6 +130,8 @@ public class BatFlockManager : MonoBehaviour
             pos.y = spawnHeight + Random.Range(-0.2f, 0.2f);
 
             var go = Instantiate(batPrefab, pos, Quaternion.identity);
+            GlobalEchoSystem system = GameObject.Find("GlobalEchoSystem").GetComponent<GlobalEchoSystem>();
+            system.RegisterCollider(go.GetComponent<MeshCollider>());
 
             var agent = go.GetComponent<BatMovement>();
             if (!agent) agent = go.AddComponent<BatMovement>();
@@ -143,8 +145,8 @@ public class BatFlockManager : MonoBehaviour
     {
         if (context.performed)
         {
-            isObscuring = false;
-            scaredUntil = Time.time + 4f;
+            // isObscuring = false;
+            // scaredUntil = Time.time + 4f;
         }
     }
 

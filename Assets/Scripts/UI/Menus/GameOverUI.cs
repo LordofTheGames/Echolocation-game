@@ -21,7 +21,7 @@ public class GameOverUI : MonoBehaviour
 
     private void LoadGameScene()
     {
-        SceneManager.LoadScene("MVP");
+        SceneManager.LoadScene("BETA");
     }
 
     private void LoadMainMenu()

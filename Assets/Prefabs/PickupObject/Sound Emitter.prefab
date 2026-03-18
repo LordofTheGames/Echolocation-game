@@ -12,9 +12,9 @@ GameObject:
   - component: {fileID: 1888641422914362597}
   - component: {fileID: 3544188760147456983}
   - component: {fileID: 8461728808452436728}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Point Light (1)
-  m_TagString: Untagged
+  m_TagString: Throwable Emitter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -151,7 +151,7 @@ GameObject:
   - component: {fileID: 8624872326471097137}
   m_Layer: 8
   m_Name: Sound Emitter
-  m_TagString: Untagged
+  m_TagString: Throwable Emitter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -191,11 +191,11 @@ MonoBehaviour:
   soundVolume: 1
   initialDelay: 0.2
   pingInterval: 3
-  maxPings: 10
+  maxPings: 3
   angle: 360
   uniformity: 1
   numRays: 8000
-  maxDistance: 25
+  visualVolume: 50
   monsterVolume: 100
   minDelayAfterThrow: 0.05
 --- !u!54 &7287876640650636612
@@ -246,8 +246,8 @@ MonoBehaviour:
   angle: 360
   uniformity: 1
   numRays: 10000
-  maxDistance: 25
-  monsterVolume: 100
+  visualVolume: 50
+  monsterVolume: 65
 --- !u!114 &6263023253677180433
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -274,7 +274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78ae7c92667aa407e8835dfc115f1016, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  itemType: 2
+  itemType: 1
   amount: 1
 --- !u!1 &2555910090516866443
 GameObject:
@@ -288,9 +288,9 @@ GameObject:
   - component: {fileID: 3710362111264134455}
   - component: {fileID: 7610059249212935568}
   - component: {fileID: 6950822466576525088}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Point Light
-  m_TagString: Untagged
+  m_TagString: Throwable Emitter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -423,9 +423,9 @@ GameObject:
   - component: {fileID: 8962264792621538039}
   - component: {fileID: 3972451433639366926}
   - component: {fileID: 5047896856176056338}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Mine
-  m_TagString: Untagged
+  m_TagString: Throwable Emitter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -532,9 +532,9 @@ GameObject:
   - component: {fileID: 6967131795238051935}
   - component: {fileID: 1151248538182408386}
   - component: {fileID: 776979821698932494}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Base
-  m_TagString: Untagged
+  m_TagString: Throwable Emitter
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

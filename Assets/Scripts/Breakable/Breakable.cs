@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using System;
 
 [SelectionBase]
 public class Breakable : MonoBehaviour
@@ -27,7 +28,7 @@ public class Breakable : MonoBehaviour
     private GameObject player;
     private MicInput micInput;
 
-    public bool HasBroken => hasBroken;
+    public static event Action OnRockBroken;
 
     public bool HasBroken => hasBroken;
 
@@ -68,6 +69,8 @@ public class Breakable : MonoBehaviour
     private void Break()
     {
         if (hasBroken) return;
+
+        OnRockBroken?.Invoke(); // Tell the game the player broke a rock
 
         hasBroken = true;
 

@@ -185,6 +185,8 @@ GameObject:
   - component: {fileID: 1997102751303061440}
   - component: {fileID: 8737043143605252243}
   - component: {fileID: 8738375180280089010}
+  - component: {fileID: 8193312070692757988}
+  - component: {fileID: 8284764034434471042}
   - component: {fileID: 8491061249567926694}
   - component: {fileID: 8795594309079875185}
   - component: {fileID: 3235923388471130729}
@@ -244,7 +246,7 @@ NavMeshAgent:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5683829060095955525}
   m_Enabled: 1
-  m_AgentTypeID: 1479372276
+  m_AgentTypeID: 0
   m_Radius: 70
   m_Speed: 8
   m_Acceleration: 15
@@ -265,7 +267,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5683829060095955525}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f0038c16c34866b4f9e25c9c0dc0f7e6, type: 3}
   m_Name: 
@@ -275,6 +277,8 @@ MonoBehaviour:
   - rid: 2320555136217252090
   - rid: 2320555136217252138
   - rid: 1914980985187598590
+  - rid: 1914981334647308923
+  - rid: 1914981334647308924
   m_OriginalGraph: {fileID: 0}
   m_IsInitialised: 0
   m_IsStarted: 0
@@ -289,6 +293,22 @@ MonoBehaviour:
           m_Value1: 959115960180765656
         Name: MonsterSound
         m_Value: {fileID: 8255928641836917361}
+    - rid: 1914981334647308923
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 11345413872489952020
+          m_Value1: 4405279783435690339
+        Name: RespawnPoint1
+        m_Value: {fileID: 0}
+    - rid: 1914981334647308924
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 11280212106975940866
+          m_Value1: 17139345017175559048
+        Name: RespawnPoint2
+        m_Value: {fileID: 0}
     - rid: 2320555136217252090
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
       data:
@@ -318,7 +338,47 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Radius: 15
-  Angle: 100
+  Angle: 90
+  AgentEyeHeight: 3.9
+  TargetEyeHeight: 1.8
+  ObstructionMask:
+    serializedVersion: 2
+    m_Bits: 53576
+  ShowDebugVisuals: 1
+--- !u!114 &8193312070692757988
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683829060095955525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbf0b31af0e16104c83a220d744db206, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Radius: 7
+  Angle: 190
+  AgentEyeHeight: 3.9
+  TargetEyeHeight: 1.8
+  ObstructionMask:
+    serializedVersion: 2
+    m_Bits: 53576
+  ShowDebugVisuals: 1
+--- !u!114 &8284764034434471042
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683829060095955525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cbf0b31af0e16104c83a220d744db206, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Radius: 4.1
+  Angle: 355
   AgentEyeHeight: 3.9
   TargetEyeHeight: 1.8
   ObstructionMask:
@@ -337,7 +397,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f41b16a884a77ea4ea05efabe713814e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSoundDistance: 30
+  maxSoundDistance: 22
   AgentEyeHeight: 3.9
   ObstructionMask:
     serializedVersion: 2
@@ -414,24 +474,24 @@ MonoBehaviour:
     maxSpeed: 0
     stepDistance: 4
     volume: 5
-    echoRays: 2000
-    maxDistance: 10
+    echoRays: 1000
+    maxDistance: 8
     volForMonster: 0
   chase:
     name: Chase
     maxSpeed: 0
     stepDistance: 5
     volume: 10
-    echoRays: 5000
-    maxDistance: 20
+    echoRays: 3000
+    maxDistance: 10
     volForMonster: 0
   runAway:
     name: Run Away
     maxSpeed: 0
     stepDistance: 5
     volume: 10
-    echoRays: 5000
-    maxDistance: 20
+    echoRays: 3000
+    maxDistance: 10
     volForMonster: 0
 --- !u!82 &8255928641836917361
 AudioSource:
@@ -455,7 +515,7 @@ AudioSource:
   Priority: 128
   DopplerLevel: 1
   MinDistance: 1
-  MaxDistance: 40
+  MaxDistance: 30
   Pan2D: 0
   rolloffMode: 1
   BypassEffects: 0
