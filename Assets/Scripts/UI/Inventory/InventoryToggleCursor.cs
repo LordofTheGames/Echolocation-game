@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -11,7 +12,7 @@ public class InventoryToggleCursor : MonoBehaviour
     [SerializeField] private MouseLook playerLook;
     [SerializeField] private DetectObjectOutline outlineDetector;
 
-    private bool isOpen;
+    private bool isOpen = false;
 
     private void Start()
     {
@@ -33,19 +34,28 @@ public class InventoryToggleCursor : MonoBehaviour
             SetOpen(false);
         }
     }
+    
+    public void CloseInventory() 
+    {
+        if (isOpen) SetOpen(false);
+    }
 
-    public void CloseInventory() => SetOpen(false);
-    public void OpenInventory()  => SetOpen(true);
+    public void OpenInventory() 
+    {
+        if (!isOpen) SetOpen(true);
+    }
 
     private void SetOpen(bool open)
     {
+
         isOpen = open;
 
         if (inventoryUI) inventoryUI.SetActive(open);
 
-        if (playerLook) playerLook.enabled = !open;
+        //if (playerLook) playerLook.enabled = !open;
         if (outlineDetector) outlineDetector.SetEnabled(!open);
 
+        // TODO: comment this for BETA
         Cursor.visible = open;
         Cursor.lockState = open ? CursorLockMode.None : CursorLockMode.Locked;
 
@@ -55,7 +65,7 @@ public class InventoryToggleCursor : MonoBehaviour
             else        playerInput.SwitchCurrentActionMap(gameplayMap);
         }
 
-        if (open) ResetAllSlotsByChildName();
+        //if (open) ResetAllSlotsByChildName();
     }
 
     private void ResetAllSlotsByChildName()
@@ -68,5 +78,10 @@ public class InventoryToggleCursor : MonoBehaviour
             if (t.name == "Original") t.gameObject.SetActive(true);
             if (t.name == "LightBG") t.gameObject.SetActive(false);
         }
+    }
+
+    public bool UIopen()
+    {
+        return isOpen;
     }
 }

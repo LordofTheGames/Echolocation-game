@@ -24,6 +24,7 @@ public class PlayerMovement : MonoBehaviour
 
     public Transform cameraTransform;
     private float defaultCamY;
+    private PlayerFootsteps footstepsScript;
 
     
 
@@ -31,16 +32,26 @@ public class PlayerMovement : MonoBehaviour
     public void OnSprint(InputAction.CallbackContext context)
     {
         if (context.performed)
-            isSprinting = true;
-
-        if (context.canceled)
-            isSprinting = false;
+        {
+            isSprinting = !isSprinting;
+            if (isSprinting && !isCrouching) footstepsScript.CurrentState = MoveState.SPRINT;
+            else footstepsScript.CurrentState = MoveState.WALK;
+        }
     }
 
     public void OnCrouch(InputAction.CallbackContext context)
     {
         if (context.performed)
+        {
             isCrouching = !isCrouching; 
+            if (isCrouching) 
+            {
+                footstepsScript.CurrentState = MoveState.CROUCH;
+            isSprinting = false;
+
+            }
+            else footstepsScript.CurrentState = MoveState.WALK;
+        }
     }
 
     public void OnMove(InputAction.CallbackContext context)
@@ -66,6 +77,7 @@ public class PlayerMovement : MonoBehaviour
 
     void Start()
     {
+        footstepsScript = gameObject.GetComponent<PlayerFootsteps>();
         defaultCamY = cameraTransform.localPosition.y;
     }
     // Update is called once per frame
@@ -94,7 +106,16 @@ public class PlayerMovement : MonoBehaviour
         if (isCrouching)
             currentSpeed = crouchSpeed;
         else if (sprintAllowed && isSprinting)
+        {
             currentSpeed = sprintSpeed;
+
+            if(moveInput.Equals(Vector2.zero)){ 
+                currentSpeed = walkSpeed;
+                isSprinting = false;
+                footstepsScript.CurrentState = MoveState.WALK;
+            }
+        }
+        
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         controller.Move(currentSpeed * Time.deltaTime * move);
@@ -102,5 +123,15 @@ public class PlayerMovement : MonoBehaviour
 
         velocity.y += gravity * Time.deltaTime;
         controller.Move(velocity * Time.deltaTime);
+    }
+
+    public bool GetSprint()
+    {
+        return isSprinting;
+    }
+
+    public bool GetCrouch()
+    {
+        return isCrouching;
     }
 }

@@ -1,5 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+
+
 
 public class PauseManager : MonoBehaviour
 {
@@ -9,15 +13,27 @@ public class PauseManager : MonoBehaviour
     [SerializeField] private bool enableKeyboardToggle = true;
     [SerializeField] private GameObject pauseUI;
 
-    private void Update()
+    [SerializeField] private GameObject firstSelectedButton; // Drag Quit game object here in inspector
+
+
+    [SerializeField] private PlayerInput playerInput;  
+    [SerializeField] private string pauseMap = "Pause Menu";
+    private string prevMap; // Map before pausing
+
+    private void Awake()
     {
-        if (!enableKeyboardToggle)
-            return;
+        if (playerInput == null)
+        {
+            playerInput = FindAnyObjectByType<PlayerInput>();
+        }
+    } 
 
-        if (Keyboard.current == null)
-            return;
 
-        if (Keyboard.current.pKey.wasPressedThisFrame)
+    public void OnPause(InputAction.CallbackContext context)
+    {
+        if (!enableKeyboardToggle) return;
+
+        if (context.performed) 
         {
             TogglePause();
         }
@@ -41,6 +57,24 @@ public class PauseManager : MonoBehaviour
 
         if (pauseUI != null)
             pauseUI.SetActive(IsPaused);
+
+        if (IsPaused) 
+        {
+            prevMap = playerInput.currentActionMap?.name;
+            playerInput.SwitchCurrentActionMap(pauseMap);
+            EnableCursor();
+
+            EventSystem.current.SetSelectedGameObject(null);
+            EventSystem.current.SetSelectedGameObject(firstSelectedButton);
+        } 
+        else 
+        {
+            if (!string.IsNullOrEmpty(prevMap)) 
+            {
+                playerInput.SwitchCurrentActionMap(prevMap);
+            }
+            DisableCursor();
+        }   
     }
 
     private void OnDisable()
@@ -51,5 +85,35 @@ public class PauseManager : MonoBehaviour
             AudioListener.pause = false;
             IsPaused = false;
         }
+    }
+
+
+    private void EnableCursor()
+    {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+    }
+
+    private void DisableCursor()
+    {
+        Cursor.visible = false;
+    }
+
+    // Changed delay method since pause "freezes" time so needs another way for delay
+    public void OnQuitClicked()
+    {
+        StartCoroutine(LoadMainMenuWithDelay());
+    }
+
+    private System.Collections.IEnumerator LoadMainMenuWithDelay()
+    {
+        yield return new WaitForSecondsRealtime(0.5f);
+
+        // Reset variables before loading next scene
+        Time.timeScale = 1f;
+        AudioListener.pause = false;
+        IsPaused = false;
+
+        SceneManager.LoadScene("MainMenu");
     }
 }

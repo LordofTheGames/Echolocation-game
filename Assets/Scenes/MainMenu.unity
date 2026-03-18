@@ -167,6 +167,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 2333965749947483535, guid: 892892ebd863f4a41a100914478b2d1c, type: 3}
+      propertyPath: m_FirstSelected
+      value: 
+      objectReference: {fileID: 199579411}
     - target: {fileID: 8476694455032665164, guid: 892892ebd863f4a41a100914478b2d1c, type: 3}
       propertyPath: m_Name
       value: EventSystem
@@ -298,7 +302,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hoverScale: 1.2
   animationDuration: 0.2
-  clickSound: {fileID: 8300000, guid: 798a86a74a61a904ea96756e05d0ac2d, type: 3}
+  clickSound: {fileID: 0}
   clickSoundVolume: 1
 --- !u!1 &306024468
 GameObject:
@@ -517,7 +521,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -81}
-  m_SizeDelta: {x: 0, y: 0}
+  m_SizeDelta: {x: 40, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &630037917
 MonoBehaviour:
@@ -539,7 +543,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Start
+  m_text: Press A to start
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: a08d3d9a9af3f4b3682df6970d037c19, type: 2}
   m_sharedMaterial: {fileID: 3077652670808814237, guid: a08d3d9a9af3f4b3682df6970d037c19, type: 2}

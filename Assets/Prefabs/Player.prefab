@@ -236,9 +236,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6fa11b056f64ba14bb8268d4fcafe82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mouseSensitivity: 50
+  mouseSensitivity: 20
+  gamepadSensitivity: 13
   playerBody: {fileID: 3853411543216132462}
   lightTransform: {fileID: 7770523898133361850}
+  isHiding: 0
+  hidingTransition: 0
 --- !u!1 &5235627052445221193
 GameObject:
   m_ObjectHideFlags: 0
@@ -256,7 +259,7 @@ GameObject:
   - component: {fileID: 6448768869653819886}
   - component: {fileID: 3073600552268709393}
   - component: {fileID: 896755040844005566}
-  - component: {fileID: 1318630112358169782}
+  - component: {fileID: 7401529261617155565}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -297,7 +300,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 16
+    m_Bits: 0
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -349,8 +352,12 @@ MonoBehaviour:
   itemPrefabs:
   - type: 0
     prefab: {fileID: 6708599122270987611, guid: dc35457561e2b3746bd21668f2e9a16a, type: 3}
+  - type: 1
+    prefab: {fileID: 4666918432005921956, guid: 3a5d92522412def4390279976730b6c3, type: 3}
   - type: 2
-    prefab: {fileID: 7286101680068963467, guid: 670934e21c06b15458bf248ada43c43d, type: 3}
+    prefab: {fileID: 1573398778328573671, guid: 2ea901a4d41c6734fb79af6dd00c6900, type: 3}
+  - type: 3
+    prefab: {fileID: 0}
   throwForce: 15
   throwHeight: 0.5
   landingIndicatorSize: 1
@@ -361,6 +368,9 @@ MonoBehaviour:
   trajectoryTimeStep: 0.02
   maxTrajectorySteps: 500
   landingIndicatorPrefab: {fileID: 2435089806916180378, guid: cdaff24b6b4b98b459ef9c02909fe49d, type: 3}
+  layerMask:
+    serializedVersion: 2
+    m_Bits: 2047
 --- !u!114 &2083444333531579490
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -379,9 +389,13 @@ MonoBehaviour:
   cameraTransform: {fileID: 2099696623943395477}
   uniformity: 0
   numRays: 20000
-  maxDistance: 50
-  angle: 110
-  volume: 200
+  angle: 100
+  visualVolume: 100
+  monsterVolume: 100
+  cooldownTime: 3.5
+  cooldownBar: {fileID: 0}
+  cooldownColor: {r: 1, g: 1, b: 1, a: 1}
+  transparency: 0.6
 --- !u!114 &7900835251262604122
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -400,11 +414,20 @@ MonoBehaviour:
   loseDelay: 0.12
   interactMask:
     serializedVersion: 2
-    m_Bits: 265
+    m_Bits: 131337
+  obstacleMask:
+    serializedVersion: 2
+    m_Bits: 53312
   pickupPanel: {fileID: 0}
   pullPanel: {fileID: 0}
   gateHintPanel: {fileID: 0}
   gateUnlockPanel: {fileID: 0}
+  doorOpenPanel: {fileID: 0}
+  doorClosePanel: {fileID: 0}
+  breakablePitchPanel: {fileID: 0}
+  breakableVolumePanel: {fileID: 0}
+  hidePanel: {fileID: 0}
+  exitHidePanel: {fileID: 0}
   ignoreLiftChain: 0
 --- !u!114 &6448768869653819886
 MonoBehaviour:
@@ -426,8 +449,6 @@ MonoBehaviour:
   forwardOffset: 2.3
   rippleSize: 1.5
   rippleLifetime: 0.5
-  footstepWaterSound: {fileID: 8300000, guid: 28c38b101d76bb841941851d69b82999, type: 3}
-  volume: 0.1
   inWater: 0
 --- !u!114 &3073600552268709393
 MonoBehaviour:
@@ -502,6 +523,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
+        m_MethodName: OnLook
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 6b444451-8a00-4d00-a97e-f47457f736a8
     m_ActionName: 'Player/Look[/Mouse/delta,/Touchscreen/delta]'
   - m_PersistentCalls:
@@ -512,6 +545,18 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 3275837314705130536}
         m_TargetAssemblyTypeName: ThrowItem, Assembly-CSharp
+        m_MethodName: OnThrow
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
         m_MethodName: OnThrow
         m_Mode: 0
         m_Arguments:
@@ -545,6 +590,18 @@ MonoBehaviour:
       - m_Target: {fileID: 7900835251262604122}
         m_TargetAssemblyTypeName: DetectObjectOutline, Assembly-CSharp
         m_MethodName: OnInteract
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 7900835251262604122}
+        m_TargetAssemblyTypeName: DetectObjectOutline, Assembly-CSharp
+        m_MethodName: OnUnlock
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -618,6 +675,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
+        m_MethodName: OnEcho
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
     m_ActionId: 1afa277a-aae2-40a5-8107-b8966dab2740
     m_ActionName: 'Player/Echolocate[/Mouse/leftButton]'
   - m_PersistentCalls:
@@ -658,80 +727,20 @@ MonoBehaviour:
     m_ActionName: 'Inventory/Sprint[/Keyboard/leftShift]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: InventoryToggleCursor, Assembly-CSharp
-        m_MethodName: OnCloseInventory
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: 89a030ab-e706-43fa-8d69-3455d2648ac0
-    m_ActionName: 'Inventory/Close Inventory[/Keyboard/escape,/Keyboard/b,/Keyboard/tab]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: c95b2375-e6d9-4b88-9c4c-c5e76515df4b
-    m_ActionName: 'UI/Navigate[/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 7607c7b6-cd76-4816-beef-bd0341cfe950
-    m_ActionName: 'UI/Submit[/Keyboard/enter]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 15cef263-9014-4fd5-94d9-4e4a6234a6ef
-    m_ActionName: 'UI/Cancel[/Keyboard/escape]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 32b35790-4ed0-4e9a-aa41-69ac6d629449
-    m_ActionName: 'UI/Point[/Mouse/position,/Touchscreen/touch0/position,/Touchscreen/touch1/position,/Touchscreen/touch2/position,/Touchscreen/touch3/position,/Touchscreen/touch4/position,/Touchscreen/touch5/position,/Touchscreen/touch6/position,/Touchscreen/touch7/position,/Touchscreen/touch8/position,/Touchscreen/touch9/position]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 3c7022bf-7922-4f7c-a998-c437916075ad
-    m_ActionName: 'UI/Click[/Mouse/leftButton,/Touchscreen/touch0/press,/Touchscreen/touch1/press,/Touchscreen/touch2/press,/Touchscreen/touch3/press,/Touchscreen/touch4/press,/Touchscreen/touch5/press,/Touchscreen/touch6/press,/Touchscreen/touch7/press,/Touchscreen/touch8/press,/Touchscreen/touch9/press]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 44b200b1-1557-4083-816c-b22cbdf77ddf
-    m_ActionName: 'UI/RightClick[/Mouse/rightButton]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: dad70c86-b58c-4b17-88ad-f5e53adf419e
-    m_ActionName: 'UI/MiddleClick[/Mouse/middleButton]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 0489e84a-4833-4c40-bfae-cea84b696689
-    m_ActionName: 'UI/ScrollWheel[/Mouse/scroll]'
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 24908448-c609-4bc3-a128-ea258674378a
-    m_ActionName: UI/TrackedDevicePosition
-  - m_PersistentCalls:
-      m_Calls: []
-    m_ActionId: 9caa3d8a-6b2f-4e8e-8bad-6ede561bd9be
-    m_ActionName: UI/TrackedDeviceOrientation
-  - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 7900835251262604122}
-        m_TargetAssemblyTypeName: DetectObjectOutline, Assembly-CSharp
-        m_MethodName: OnUnlock
-        m_Mode: 0
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-    m_ActionId: b3f03cb7-db1f-4a80-ab11-9f623845078e
-    m_ActionName: 'UI/Unlock[/Keyboard/c]'
-  - m_PersistentCalls:
-      m_Calls:
       - m_Target: {fileID: 6415922210037909487}
         m_TargetAssemblyTypeName: PlayerMovement, Assembly-CSharp
+        m_MethodName: OnCrouch
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
         m_MethodName: OnCrouch
         m_Mode: 0
         m_Arguments:
@@ -746,9 +755,9 @@ MonoBehaviour:
     m_ActionName: 'Player/Crouch[/Keyboard/leftCtrl]'
   - m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 7900835251262604122}
-        m_TargetAssemblyTypeName: DetectObjectOutline, Assembly-CSharp
-        m_MethodName: OnUnlock
+      - m_Target: {fileID: 8693551460166898632, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
+        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
+        m_MethodName: OnNext
         m_Mode: 0
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -758,14 +767,238 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
-    m_ActionId: 3134112a-381a-4520-a7b8-145426c6be88
-    m_ActionName: 'Player/Unlock[/Keyboard/c]'
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
+        m_MethodName: OnChoose
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 100bead9-47e4-4006-b45d-3f454c973284
+    m_ActionName: 'Inventory/Next[/XInputControllerWindows/buttonNorth]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 8693551460166898632, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
+        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
+        m_MethodName: OnPrevious
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
+        m_MethodName: OnChoose
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 896d8340-4a79-45c0-8f05-2777fe573c73
+    m_ActionName: Inventory/Previous
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 995755870794296105, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
+        m_TargetAssemblyTypeName: InventoryToggleCursor, Assembly-CSharp
+        m_MethodName: CloseInventory
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: e40a1bc3-da6a-4e16-9488-049f2509acf4
+    m_ActionName: 'Inventory/Select[/XInputControllerWindows/buttonWest]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
+        m_MethodName: OnNext
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: f9511250-f592-4c47-878e-5eead9216f42
+    m_ActionName: 'Player/Tutorial next[/Keyboard/x]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: Tutorial, Assembly-CSharp
+        m_MethodName: OnSkip
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: bc6959ba-8e65-4b1f-97cd-90f8afdebf26
+    m_ActionName: 'Player/Tutorial skip[/Keyboard/z]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PauseManager, Assembly-CSharp
+        m_MethodName: OnPause
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 27ad6c36-640b-418a-906e-9701bd8c6f37
+    m_ActionName: 'Player/Pause[/Keyboard/p]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b65696d9-f141-4e68-b63c-dc799e368e7a
+    m_ActionName: 'UI/Navigate[/XInputControllerWindows/leftStick/up,/XInputControllerWindows/rightStick/up,/XInputControllerWindows/leftStick/down,/XInputControllerWindows/rightStick/down,/XInputControllerWindows/leftStick/left,/XInputControllerWindows/rightStick/left,/XInputControllerWindows/leftStick/right,/XInputControllerWindows/rightStick/right,/XInputControllerWindows/dpad,/Keyboard/w,/Keyboard/upArrow,/Keyboard/s,/Keyboard/downArrow,/Keyboard/a,/Keyboard/leftArrow,/Keyboard/d,/Keyboard/rightArrow]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: b3729705-7737-4117-893d-1e090cc6b3f1
+    m_ActionName: 'UI/Submit[/Keyboard/enter,/XInputControllerWindows/buttonSouth]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0a6bea12-aff0-4561-b9d6-35054d7175c0
+    m_ActionName: 'UI/Cancel[/Keyboard/escape,/XInputControllerWindows/buttonEast]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 0323c8aa-c7b3-41d0-b29b-774d2ce65e19
+    m_ActionName: 'UI/Point[/Mouse/position]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 901917b7-9fa3-4162-adc0-ec18b73c604c
+    m_ActionName: 'UI/Click[/Mouse/leftButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d422a03e-e4da-46a3-a77a-0f46990947ae
+    m_ActionName: 'UI/RightClick[/Mouse/rightButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: d40f1eba-08b1-480e-9526-30aea5e076d8
+    m_ActionName: 'UI/MiddleClick[/Mouse/middleButton]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 99e6d981-1e20-44ac-b597-50c642ba2656
+    m_ActionName: 'UI/ScrollWheel[/Mouse/scroll]'
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 584575d8-b71f-4566-bc3f-c56cfee11e27
+    m_ActionName: UI/TrackedDevicePosition
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: aac36796-2435-4970-b574-bfa311407352
+    m_ActionName: UI/TrackedDeviceOrientation
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
+        m_MethodName: OnNext
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 988dcee3-b2e5-4073-9cc5-6108a8870463
+    m_ActionName: 'Player/Next[/XInputControllerWindows/rightShoulder,/Keyboard/2]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: InventoryManager, Assembly-CSharp
+        m_MethodName: OnPrevious
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 0731e808-d7be-4032-b59e-18b6f935ba9b
+    m_ActionName: 'Player/Previous[/XInputControllerWindows/leftShoulder,/Keyboard/1]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3677165169037684896}
+        m_TargetAssemblyTypeName: MouseLook, Assembly-CSharp
+        m_MethodName: OnLook
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: be23a6ab-dd35-4a11-b587-246c34ccb038
+    m_ActionName: 'Inventory/Look[/XInputControllerWindows/rightStick,/Mouse/delta]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PauseManager, Assembly-CSharp
+        m_MethodName: OnPause
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 467174cd-17d8-41af-9dc5-96349994becf
+    m_ActionName: 'Inventory/Pause[/Keyboard/p,/XInputControllerWindows/start]'
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PauseManager, Assembly-CSharp
+        m_MethodName: OnPause
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 9402973e-3fef-45d8-910c-4995f0c51e2e
+    m_ActionName: 'Pause Menu/Pause[/Keyboard/p,/XInputControllerWindows/start]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
---- !u!114 &1318630112358169782
+--- !u!114 &7401529261617155565
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -777,33 +1010,145 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 933aeb9c695107b4d923399996bbec46, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  footstepSound: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
+  currentSurface: 0
+  CurrentState: 1
   audioSource: {fileID: 0}
+  defaultFootstep: {fileID: 8300000, guid: 9e2a6f5fcc1f7a447a19a66d3f1ff3e6, type: 3}
+  waterFootstep: {fileID: 8300000, guid: 28c38b101d76bb841941851d69b82999, type: 3}
+  metalFootstep: {fileID: 8300000, guid: 8c7107217f6e8de4fb03eba295163e14, type: 3}
+  woodFootstep: {fileID: 8300000, guid: 7419e92697d5d644f994226347c60659, type: 3}
+  dirtFootstep: {fileID: 8300000, guid: 47679c31239b08e4fb327b08745c54c1, type: 3}
+  labFootstep: {fileID: 8300000, guid: 6b65e0bae1a0eb94686fe51ed0c63bce, type: 3}
   footSeparation: 1
   echoAngle: 360
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 61505
   crouch:
     name: Crouch
-    maxSpeed: 3
     stepDistance: 2
     volume: 0.2
-    echoRays: 700
-    maxDistance: 6
+    echoRays: 3000
+    maxDistance: 5
     volForMonster: 0
   walk:
     name: Walk
-    maxSpeed: 6
     stepDistance: 4
     volume: 0.5
-    echoRays: 2000
-    maxDistance: 12
+    echoRays: 7000
+    maxDistance: 10
     volForMonster: 25
   sprint:
     name: Sprint
-    maxSpeed: 12
     stepDistance: 5
     volume: 1
-    echoRays: 5000
+    echoRays: 10000
+    maxDistance: 20
+    volForMonster: 50
+  waterCrouch:
+    name: Water Crouch
+    stepDistance: 2
+    volume: 0.07
+    echoRays: 4000
+    maxDistance: 12
+    volForMonster: 10
+  waterWalk:
+    name: Water Walk
+    stepDistance: 4
+    volume: 0.15
+    echoRays: 8000
+    maxDistance: 18
+    volForMonster: 35
+  waterSprint:
+    name: Water Sprint
+    stepDistance: 5
+    volume: 0.35
+    echoRays: 15000
     maxDistance: 30
+    volForMonster: 70
+  metalCrouch:
+    name: Crouch
+    stepDistance: 2
+    volume: 0.8
+    echoRays: 3500
+    maxDistance: 10
+    volForMonster: 0
+  metalWalk:
+    name: Walk
+    stepDistance: 4
+    volume: 1
+    echoRays: 8000
+    maxDistance: 15
+    volForMonster: 25
+  metalSprint:
+    name: Sprint
+    stepDistance: 5
+    volume: 1
+    echoRays: 12000
+    maxDistance: 25
+    volForMonster: 50
+  woodCrouch:
+    name: Crouch
+    stepDistance: 2
+    volume: 0.2
+    echoRays: 3000
+    maxDistance: 5
+    volForMonster: 0
+  woodWalk:
+    name: Walk
+    stepDistance: 4
+    volume: 0.5
+    echoRays: 7000
+    maxDistance: 10
+    volForMonster: 25
+  woodSprint:
+    name: Sprint
+    stepDistance: 5
+    volume: 1
+    echoRays: 10000
+    maxDistance: 20
+    volForMonster: 50
+  dirtCrouch:
+    name: Crouch
+    stepDistance: 2
+    volume: 0.2
+    echoRays: 1500
+    maxDistance: 3
+    volForMonster: 0
+  dirtWalk:
+    name: Walk
+    stepDistance: 4
+    volume: 0.5
+    echoRays: 7000
+    maxDistance: 5
+    volForMonster: 25
+  dirtSprint:
+    name: Sprint
+    stepDistance: 5
+    volume: 1
+    echoRays: 10000
+    maxDistance: 10
+    volForMonster: 50
+  labCrouch:
+    name: Lab Crouch
+    stepDistance: 2
+    volume: 0.2
+    echoRays: 3000
+    maxDistance: 6
+    volForMonster: 0
+  labWalk:
+    name: Lab Walk
+    stepDistance: 4
+    volume: 0.5
+    echoRays: 7000
+    maxDistance: 12
+    volForMonster: 25
+  labSprint:
+    name: Lab Sprint
+    stepDistance: 5
+    volume: 1
+    echoRays: 10000
+    maxDistance: 23
     volForMonster: 50
 --- !u!1 &5489064552480596990
 GameObject:
