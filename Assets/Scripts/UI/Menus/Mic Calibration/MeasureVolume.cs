@@ -38,6 +38,16 @@ public class MeasureVolume : MonoBehaviour
 
     public float GetVolume()
     {
+
+        if (Input.GetKeyDown("space"))
+        {
+            changePrompt(Good);
+            Number.text = "";
+            Button.SetActive(true);
+            StartCoroutine(SelectButtonLater());
+            return 0f;
+        }
+
         elapsedTimeSecs += Time.deltaTime;
 
         currVolume[idx] = MicInput.volume;
