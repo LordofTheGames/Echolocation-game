@@ -19,8 +19,8 @@ public class HideInBox : MonoBehaviour
     private Camera playerMainCamera;
     private Quaternion originalCamLocalRot; // Saves original neck angle
 
-    public static event Action OnPlayerHide;
-    public static event Action OnPlayerExit;
+    public static event System.Action OnPlayerHide;
+    public static event System.Action OnPlayerExit;
 
     
     void Start()
