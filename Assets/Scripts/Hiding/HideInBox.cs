@@ -12,8 +12,8 @@ public class HideInBox : MonoBehaviour
     
     private float originalPlayerY;
 
-    private bool isHiding = false;
-    private bool isTransitioning = false; // Prevents bugs if player spams interact
+    public bool isHiding = false;
+    public bool isTransitioning = false; // Prevents bugs if player spams interact
     private float hidingTime;
     
     private BehaviorGraphAgent agent;
@@ -51,6 +51,7 @@ public class HideInBox : MonoBehaviour
         player.GetComponent<CharacterController>().enabled = false;
         player.GetComponent<PlayerMovement>().enabled = false;
         player.GetComponentInChildren<MouseLook>().hidingTransition = true; 
+        player.GetComponent<PlayerRespawn>().CurrentBox = this;
 
         // Save the FPC camera's local rotation to restore upon exit
         originalCamLocalRot = playerMainCamera.transform.localRotation;
@@ -97,7 +98,6 @@ public class HideInBox : MonoBehaviour
         isHiding = false; 
         OnPlayerExit?.Invoke();
         player.GetComponentInChildren<MouseLook>().hidingTransition = true; 
-        isHiding = false; 
 
         Vector3 exitDirection = boxAnchor.forward;
         exitDirection.y = 0; 
