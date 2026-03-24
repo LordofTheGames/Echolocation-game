@@ -15,10 +15,13 @@ public partial class FindNavigablePositionAroundVectorAction : Action
     [SerializeReference] public BlackboardVariable<float> Radius = new BlackboardVariable<float>(10.0f);
 
     private float checkCount;
+    private NavMeshAgent agent;
+
 
     protected override Status OnStart()
     {
         checkCount = 0;
+        agent = Agent.Value.GetComponent<NavMeshAgent>();
         return Status.Running;
     }
 
@@ -35,10 +38,17 @@ public partial class FindNavigablePositionAroundVectorAction : Action
         checkCount++;
         if(NavMesh.SamplePosition(randomPosition, out hit, maxSearchDist, NavMesh.AllAreas))
         {
-            FinalPoint.Value = hit.position;
-            return Status.Success;
+            NavMeshPath path = new NavMeshPath();
+            if (agent.CalculatePath(hit.position, path))
+            {
+                if (path.status == NavMeshPathStatus.PathComplete)
+                {
+                    FinalPoint.Value = hit.position;
+                    return Status.Success;
+                }
+            }
         }
-        else if (checkCount == 5)
+        if (checkCount == 5)
         {
             if (Agent.Value != null) FinalPoint.Value = Agent.Value.transform.position;
             return Status.Failure;

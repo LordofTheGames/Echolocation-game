@@ -19,9 +19,12 @@ public partial class FindNavigablePositionAwayFromTargetAction : Action
     private Vector3 targetPosition;
     private float currAngle;
     private float currDistance;
+    private NavMeshAgent agent;
+
 
     protected override Status OnStart()
     {
+        agent = Agent.Value.GetComponent<NavMeshAgent>();
         checkCount = 0;
         currAngle = 10;
         currDistance = Distance;
@@ -43,10 +46,17 @@ public partial class FindNavigablePositionAwayFromTargetAction : Action
         checkCount++;
         if(NavMesh.SamplePosition(newPos, out hit, maxSearchDist, NavMesh.AllAreas))
         {
-            FinalPoint.Value = hit.position;
-            return Status.Success;
+            NavMeshPath path = new NavMeshPath();
+            if (agent.CalculatePath(hit.position, path))
+            {
+                if (path.status == NavMeshPathStatus.PathComplete)
+                {
+                    FinalPoint.Value = hit.position;
+                    return Status.Success;
+                }
+            }
         }
-        else if (checkCount == 5)
+        if (checkCount == 5)
         {
             currAngle += 10;
             checkCount = 0;

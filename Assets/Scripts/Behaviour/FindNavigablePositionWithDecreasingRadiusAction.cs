@@ -15,9 +15,12 @@ public partial class FindNavigablePositionWithDecreasingRadiusAction : Action
 
     private float checkCount;
     private float currRadius;
+    private NavMeshAgent agent;
+
 
     protected override Status OnStart()
     {
+        agent = Agent.Value.GetComponent<NavMeshAgent>();
         checkCount = 0;
         currRadius = MaxRadius;
         return Status.Running;
@@ -35,10 +38,17 @@ public partial class FindNavigablePositionWithDecreasingRadiusAction : Action
         checkCount++;
         if(NavMesh.SamplePosition(randomPosition, out hit, maxSearchDist, NavMesh.AllAreas))
         {
-            FinalPoint.Value = hit.position;
-            return Status.Success;
+            NavMeshPath path = new NavMeshPath();
+            if (agent.CalculatePath(hit.position, path))
+            {
+                if (path.status == NavMeshPathStatus.PathComplete)
+                {
+                    FinalPoint.Value = hit.position;
+                    return Status.Success;
+                }
+            }
         }
-        else if (checkCount == 5)
+        if (checkCount == 5)
         {
             currRadius -= 2;
             checkCount = 0;
