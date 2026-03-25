@@ -5,25 +5,28 @@ using Unity.Behavior;
 
 public class PlayerRespawn : MonoBehaviour
 {
+    public Image blackScreenImage; 
+    public float fadeInTime = 1.0f; 
+    public float fadeOutTime = 1.0f; 
+    public float waitTime = 1.0f;
+
     public Vector3 RespawnPosition;
     public HideInBox CurrentBox;
+
     public static event System.Action OnPlayerExit;
-    private GameObject navmeshEdges;
-    public Image blackScreenImage; 
-    public float fadeWaitTime = 1.0f; 
 
     private bool isRespawning = false;
+    private GameObject navmeshEdges;
+    private BehaviorGraphAgent agent;
 
     void Start()
     {
+        agent = GameObject.Find("Monster").GetComponent<BehaviorGraphAgent>();
+        agent.BlackboardReference.SetVariableValue("respawnTime", fadeInTime);
         navmeshEdges = GameObject.Find("NavMesh Edges");
-        
-        if (blackScreenImage != null)
-        {
-            Color c = blackScreenImage.color;
-            c.a = 0f;
-            blackScreenImage.color = c;
-        }
+        Color c = blackScreenImage.color;
+        c.a = 0;
+        blackScreenImage.color = c;
     }
 
     public void Respawn()
@@ -36,53 +39,55 @@ public class PlayerRespawn : MonoBehaviour
         isRespawning = true;
 
         PlayerMovement pm = gameObject.GetComponent<PlayerMovement>();
-        if (pm != null) pm.enabled = false;
+        CharacterController cc = gameObject.GetComponent<CharacterController>();
+        pm.enabled = false;
+        cc.enabled = false;
 
         //fade to black
-        if (blackScreenImage != null)
+        float timer = 0f;
+        Color c = blackScreenImage.color;
+        while (timer < fadeInTime)
         {
-            float timer = 0f;
-            Color c = blackScreenImage.color;
-            while (timer < fadeWaitTime)
-            {
-                timer += Time.deltaTime;
-                c.a = timer / fadeWaitTime;
-                blackScreenImage.color = c;
-                yield return null; 
-            }
+            timer += Time.deltaTime;
+            c.a = timer / fadeInTime;
+            blackScreenImage.color = c;
+            yield return null; 
         }
+        c.a = 1;
+        blackScreenImage.color = c;
 
         if (CurrentBox != null && CurrentBox.isHiding && !CurrentBox.isTransitioning)
         {
             CurrentBox.isHiding = false; 
             OnPlayerExit?.Invoke();
 
+            gameObject.GetComponent<PlayerMovement>().enabled = true;
             MouseLook ml = gameObject.GetComponentInChildren<MouseLook>();
-            if (ml != null) { ml.isHiding = false; ml.hidingTransition = false; }
-            if (navmeshEdges != null) navmeshEdges.SetActive(true);
+            ml.isHiding = false; 
+            ml.hidingTransition = false;
+            navmeshEdges.SetActive(true);
         }
 
-        CharacterController cc = gameObject.GetComponent<CharacterController>();
-        cc.enabled = false;
         transform.position = RespawnPosition;
+        pm.enabled = true;
         cc.enabled = true;
 
+        // wait at black screen
+        yield return new WaitForSeconds(waitTime);
 
         //fade back in
-        if (blackScreenImage != null)
+        timer = 0f;
+        c = blackScreenImage.color;
+        while (timer < fadeOutTime)
         {
-            float timer = 0f;
-            Color c = blackScreenImage.color;
-            while (timer < fadeWaitTime)
-            {
-                timer += Time.deltaTime;
-                c.a = 1f - (timer / fadeWaitTime); 
-                blackScreenImage.color = c;
-                yield return null;
-            }
+            timer += Time.deltaTime;
+            c.a = 1f - (timer / fadeOutTime); 
+            blackScreenImage.color = c;
+            yield return null;
         }
+        c.a = 0;
+        blackScreenImage.color = c;
 
-        if (pm != null) pm.enabled = true;
         isRespawning = false; 
     }
 }
