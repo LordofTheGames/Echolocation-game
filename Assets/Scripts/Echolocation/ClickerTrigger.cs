@@ -40,7 +40,7 @@ public class ClickerTrigger : MonoBehaviour
 
     private float nextAvailableTime = 0f; // Tracks when the player is allowed to use clicker again
     private RectTransform cooldownBarRect;
-    private Vector2 newSizeDelta = new(300, 5);
+    private Vector2 newSizeDelta;
     
     void Start()
     {
@@ -56,6 +56,7 @@ public class ClickerTrigger : MonoBehaviour
             cooldownColor.a *= transparency;
             cooldownBar.color = cooldownColor;
             cooldownBar.gameObject.SetActive(false);
+            newSizeDelta = cooldownBarRect.sizeDelta;
         }
     }
 

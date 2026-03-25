@@ -5,7 +5,7 @@ public class TimedEchoEmitter : MonoBehaviour
 {
     public AudioClip pingSound;
 
-    [Range(0f, 30f)]
+    [Range(0f, 1f)]
     public float soundVolume = 1f;
 
     public float initialDelay = 0.2f;
