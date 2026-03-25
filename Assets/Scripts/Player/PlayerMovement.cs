@@ -33,9 +33,23 @@ public class PlayerMovement : MonoBehaviour
     {
         if (context.performed)
         {
+            if (isCrouching)
+            {
+                isCrouching = false;
+                isSprinting = true;
+                footstepsScript.CurrentState = MoveState.SPRINT;
+                return; 
+            }
+
             isSprinting = !isSprinting;
-            if (isSprinting && !isCrouching) footstepsScript.CurrentState = MoveState.SPRINT;
-            else footstepsScript.CurrentState = MoveState.WALK;
+            if (isSprinting) 
+            {
+                footstepsScript.CurrentState = MoveState.SPRINT;
+            }
+            else 
+            {
+                footstepsScript.CurrentState = MoveState.WALK;
+            }
         }
     }
 
