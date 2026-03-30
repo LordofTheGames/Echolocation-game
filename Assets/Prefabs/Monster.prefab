@@ -182,6 +182,7 @@ GameObject:
   m_Component:
   - component: {fileID: 576453552342798947}
   - component: {fileID: 7377758489746828082}
+  - component: {fileID: 6014912869232668478}
   - component: {fileID: 1997102751303061440}
   - component: {fileID: 8737043143605252243}
   - component: {fileID: 8738375180280089010}
@@ -238,6 +239,71 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7255270090644939075, guid: 202e36b5ef06dec4891d4bb4956578d4, type: 3}
+--- !u!114 &6014912869232668478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683829060095955525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d28dd8314ebe1c4eb3de1fa67297a30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  MoveSpeed_Patrol: 0
+  TurnSpeed_Patrol: 0
+  StoppingDistance_Patrol: 0
+  MoveRadius_Patrol: 0
+  MinWaitAfterMove_Patrol: 0
+  MaxWaitAfterMove_Patrol: 0
+  MoveSpeed_Investigate: 0
+  TurnSpeed_Investigate: 0
+  StoppingDistance_Investigate: 0
+  Repetitions_Investigate: 0
+  RadiusFromStartPoint_Investigate: 0
+  MinWaitBetweenRepetitions_Investigate: 0
+  MaxWaitBetweenRepetitions_Investigate: 0
+  MaxQuietSound_Sound: 0
+  MaxMediumSound_Sound: 0
+  QuietSounds:
+    MinWaitTime: 0
+    MaxWaitTime: 0
+    MoveSpeed: 0
+    TurnSpeed: 0
+    StoppingDistance: 0
+    RadiusFromSound: 0
+  MediumSounds:
+    MinWaitTime: 0
+    MaxWaitTime: 0
+    MoveSpeed: 0
+    TurnSpeed: 0
+    StoppingDistance: 0
+    RadiusFromSound: 0
+  LoudSounds:
+    MinWaitTime: 0
+    MaxWaitTime: 0
+    MoveSpeed: 0
+    TurnSpeed: 0
+    StoppingDistance: 0
+    RadiusFromSound: 0
+  MinSpeed_Chase: 0
+  MaxSpeed_Chase: 0
+  SpeedIncrement_Chase: 0
+  TurnSpeed_Chase: 0
+  StoppingDistance_Chase: 0
+  MoveSpeed_RunAway: 0
+  TurnSpeed_RunAway: 0
+  StoppingDistance_RunAway: 0
+  DistanceRunFromGrenade: 0
+  DistanceToTriggerInvestigation_Hiding: 0
+  MaxTimeBeforeInvestigation_Hiding: 0
+  MinInvestigationTime_Hiding: 0
+  MaxInvestigationTime_Hiding: 0
+  MinWaitBeforeGotoSound_Hiding: 0
+  MaxWaitBeforeGotoSound_Hiding: 0
+  MaxDistanceFromPlayer: 0
+  DistanceToMoveToIfFarFromPlayer: 0
 --- !u!195 &1997102751303061440
 NavMeshAgent:
   m_ObjectHideFlags: 0
