@@ -9,6 +9,7 @@ using Unity.Properties;
 public partial class PingGlobalEchoSystemAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
+    [SerializeReference] public BlackboardVariable<GameObject> Player;
 
     [Tooltip("Echo Projection Uniformity (0 = clumped, 1 = uniform)")]
     [SerializeReference] public BlackboardVariable<float> uniformity = new BlackboardVariable<float>(0);
@@ -28,13 +29,14 @@ public partial class PingGlobalEchoSystemAction : Action
 
     [SerializeReference] public BlackboardVariable<AudioClip> sound1;
     [SerializeReference] public BlackboardVariable<AudioClip> sound2;
+    [SerializeReference] public BlackboardVariable<float> soundVolume = new BlackboardVariable<float>(1);
     [SerializeReference] public BlackboardVariable<AudioSource> audioSource;
 
     protected override Status OnStart()
     {
         int soundNum = UnityEngine.Random.Range(1, 3);
-        if (soundNum == 1) audioSource.Value.PlayOneShot(sound1, 1);
-        if (soundNum == 2) audioSource.Value.PlayOneShot(sound2, 1);
+        if (soundNum == 1) audioSource.Value.PlayOneShot(sound1, soundVolume);
+        if (soundNum == 2) audioSource.Value.PlayOneShot(sound2, soundVolume);
 
         GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + positionOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume);
         return Status.Running;
