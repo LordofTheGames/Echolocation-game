@@ -251,59 +251,104 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2d28dd8314ebe1c4eb3de1fa67297a30, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  MoveSpeed_Patrol: 0
-  TurnSpeed_Patrol: 0
-  StoppingDistance_Patrol: 0
-  MoveRadius_Patrol: 0
+  NewVarsEvent: {fileID: 11400000, guid: 66dab9bf52afa9847823af1cb91f436b, type: 2}
+  MoveSpeed_Patrol: 6
+  TurnSpeed_Patrol: 5
+  StoppingDistance_Patrol: 2
+  MoveRadius_Patrol: 20
   MinWaitAfterMove_Patrol: 0
-  MaxWaitAfterMove_Patrol: 0
-  MoveSpeed_Investigate: 0
-  TurnSpeed_Investigate: 0
-  StoppingDistance_Investigate: 0
-  Repetitions_Investigate: 0
-  RadiusFromStartPoint_Investigate: 0
-  MinWaitBetweenRepetitions_Investigate: 0
-  MaxWaitBetweenRepetitions_Investigate: 0
-  MaxQuietSound_Sound: 0
-  MaxMediumSound_Sound: 0
+  MaxWaitAfterMove_Patrol: 1
+  EcholocationParams_Patrol:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  MoveSpeed_Investigate: 8
+  TurnSpeed_Investigate: 5
+  StoppingDistance_Investigate: 2
+  Repetitions_Investigate: 4
+  RadiusFromStartPoint_Investigate: 10
+  MinWaitBetweenRepetitions_Investigate: 1
+  MaxWaitBetweenRepetitions_Investigate: 1.5
+  EcholocationParams_Investigate:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  MaxQuietSound_Sound: 35
+  MaxMediumSound_Sound: 75
+  EcholocationParams_Sound:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
   QuietSounds:
-    MinWaitTime: 0
-    MaxWaitTime: 0
-    MoveSpeed: 0
-    TurnSpeed: 0
-    StoppingDistance: 0
-    RadiusFromSound: 0
+    MinWaitTime: 1
+    MaxWaitTime: 3
+    MoveSpeed: 4
+    StoppingDistance: 2
+    RadiusFromSound: 8
   MediumSounds:
-    MinWaitTime: 0
-    MaxWaitTime: 0
-    MoveSpeed: 0
-    TurnSpeed: 0
-    StoppingDistance: 0
-    RadiusFromSound: 0
+    MinWaitTime: 0.2
+    MaxWaitTime: 1
+    MoveSpeed: 7
+    StoppingDistance: 2
+    RadiusFromSound: 5
   LoudSounds:
     MinWaitTime: 0
     MaxWaitTime: 0
-    MoveSpeed: 0
-    TurnSpeed: 0
-    StoppingDistance: 0
-    RadiusFromSound: 0
-  MinSpeed_Chase: 0
-  MaxSpeed_Chase: 0
-  SpeedIncrement_Chase: 0
-  TurnSpeed_Chase: 0
-  StoppingDistance_Chase: 0
-  MoveSpeed_RunAway: 0
-  TurnSpeed_RunAway: 0
-  StoppingDistance_RunAway: 0
-  DistanceRunFromGrenade: 0
-  DistanceToTriggerInvestigation_Hiding: 0
-  MaxTimeBeforeInvestigation_Hiding: 0
-  MinInvestigationTime_Hiding: 0
-  MaxInvestigationTime_Hiding: 0
-  MinWaitBeforeGotoSound_Hiding: 0
-  MaxWaitBeforeGotoSound_Hiding: 0
-  MaxDistanceFromPlayer: 0
-  DistanceToMoveToIfFarFromPlayer: 0
+    MoveSpeed: 9
+    StoppingDistance: 2
+    RadiusFromSound: 2
+  MinSpeed_Chase: 10
+  MaxSpeed_Chase: 30
+  SpeedIncrement_Chase: 0.18
+  TurnSpeed_Chase: 10
+  StoppingDistance_Chase: 2
+  DistanceMonsterLosesPlayer_Chase: 15
+  EcholocationParams_Chase:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  MoveSpeed_RunAway: 13
+  TurnSpeed_RunAway: 5
+  StoppingDistance_RunAway: 2
+  EcholocationParams_RunAway:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  GrenadeActivationDistance: 15
+  DistanceRunFromGrenade: 50
+  DistanceToTriggerInvestigation_Hiding: 15
+  MaxTimeBeforeInvestigation_Hiding: 15
+  MinInvestigationTime_Hiding: 10
+  MaxInvestigationTime_Hiding: 18
+  MinWaitBeforeGotoSound_Hiding: 0.5
+  MaxWaitBeforeGotoSound_Hiding: 2
+  PatrolRadius_Hiding: 7
+  MoveSpeedGotoSound_Hiding: 6
+  TurnSpeedGotoSound_Hiding: 5
+  StoppingDistanceGotoSound_Hiding: 0.1
+  MoveSpeedPatrol_Hiding: 4
+  TurnSpeedPatrol_Hiding: 5
+  StoppingDistancePatrol_Hiding: 2
+  EcholocationParams_Hiding:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  MaxDistanceFromPlayer: 45
+  DistanceToMoveToIfFarFromPlayer: 35
+  MoveSpeedFarFromPlayer: 12
+  StoppingDistanceFarFromPlayer: 2
+  PlayerSeenScreamVolume: 1
+  GrenadeScreamVolume: 1
+  WaterfallScreamVolume: 1
+  HeardSoundGruntVolume: 1
+  ClickingVolume: 1
+  GrowlVolume: 1
 --- !u!195 &1997102751303061440
 NavMeshAgent:
   m_ObjectHideFlags: 0

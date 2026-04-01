@@ -10,6 +10,7 @@ public partial class RespawnPlayerAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Target;
     [SerializeReference] public BlackboardVariable<GameObject> ObjectPosition;
+    [SerializeReference] public BlackboardVariable<GameObject> Self;
 
     protected override Status OnStart()
     {
@@ -20,6 +21,10 @@ public partial class RespawnPlayerAction : Action
             script.Respawn();
         }
         else Debug.LogError("TRYING TO RESPAWN ON OBJECT WITH NO RESPAWN SCRIPT");
+
+        // make monster easier
+        // Self.Value.GetComponent<MonsterDifficultyManager>().OnPlayerDeath();
+
         return Status.Running;
     }
 
