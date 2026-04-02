@@ -182,9 +182,9 @@ GameObject:
   m_Component:
   - component: {fileID: 576453552342798947}
   - component: {fileID: 7377758489746828082}
-  - component: {fileID: 6014912869232668478}
   - component: {fileID: 1997102751303061440}
   - component: {fileID: 8737043143605252243}
+  - component: {fileID: 6014912869232668478}
   - component: {fileID: 8738375180280089010}
   - component: {fileID: 8193312070692757988}
   - component: {fileID: 8284764034434471042}
@@ -239,116 +239,6 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: -7255270090644939075, guid: 202e36b5ef06dec4891d4bb4956578d4, type: 3}
---- !u!114 &6014912869232668478
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5683829060095955525}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2d28dd8314ebe1c4eb3de1fa67297a30, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  NewVarsEvent: {fileID: 11400000, guid: 66dab9bf52afa9847823af1cb91f436b, type: 2}
-  MoveSpeed_Patrol: 6
-  TurnSpeed_Patrol: 5
-  StoppingDistance_Patrol: 2
-  MoveRadius_Patrol: 20
-  MinWaitAfterMove_Patrol: 0
-  MaxWaitAfterMove_Patrol: 1
-  EcholocationParams_Patrol:
-    uniformity: 0
-    numRays: 20000
-    angle: 100
-    visualVolume: 100
-  MoveSpeed_Investigate: 8
-  TurnSpeed_Investigate: 5
-  StoppingDistance_Investigate: 2
-  Repetitions_Investigate: 4
-  RadiusFromStartPoint_Investigate: 10
-  MinWaitBetweenRepetitions_Investigate: 1
-  MaxWaitBetweenRepetitions_Investigate: 1.5
-  EcholocationParams_Investigate:
-    uniformity: 0
-    numRays: 20000
-    angle: 100
-    visualVolume: 100
-  MaxQuietSound_Sound: 35
-  MaxMediumSound_Sound: 75
-  EcholocationParams_Sound:
-    uniformity: 0
-    numRays: 20000
-    angle: 100
-    visualVolume: 100
-  QuietSounds:
-    MinWaitTime: 1
-    MaxWaitTime: 3
-    MoveSpeed: 4
-    StoppingDistance: 2
-    RadiusFromSound: 8
-  MediumSounds:
-    MinWaitTime: 0.2
-    MaxWaitTime: 1
-    MoveSpeed: 7
-    StoppingDistance: 2
-    RadiusFromSound: 5
-  LoudSounds:
-    MinWaitTime: 0
-    MaxWaitTime: 0
-    MoveSpeed: 9
-    StoppingDistance: 2
-    RadiusFromSound: 2
-  MinSpeed_Chase: 10
-  MaxSpeed_Chase: 30
-  SpeedIncrement_Chase: 0.18
-  TurnSpeed_Chase: 10
-  StoppingDistance_Chase: 2
-  DistanceMonsterLosesPlayer_Chase: 15
-  EcholocationParams_Chase:
-    uniformity: 0
-    numRays: 20000
-    angle: 100
-    visualVolume: 100
-  MoveSpeed_RunAway: 13
-  TurnSpeed_RunAway: 5
-  StoppingDistance_RunAway: 2
-  EcholocationParams_RunAway:
-    uniformity: 0
-    numRays: 20000
-    angle: 100
-    visualVolume: 100
-  GrenadeActivationDistance: 15
-  DistanceRunFromGrenade: 50
-  DistanceToTriggerInvestigation_Hiding: 15
-  MaxTimeBeforeInvestigation_Hiding: 15
-  MinInvestigationTime_Hiding: 10
-  MaxInvestigationTime_Hiding: 18
-  MinWaitBeforeGotoSound_Hiding: 0.5
-  MaxWaitBeforeGotoSound_Hiding: 2
-  PatrolRadius_Hiding: 7
-  MoveSpeedGotoSound_Hiding: 6
-  TurnSpeedGotoSound_Hiding: 5
-  StoppingDistanceGotoSound_Hiding: 0.1
-  MoveSpeedPatrol_Hiding: 4
-  TurnSpeedPatrol_Hiding: 5
-  StoppingDistancePatrol_Hiding: 2
-  EcholocationParams_Hiding:
-    uniformity: 0
-    numRays: 20000
-    angle: 100
-    visualVolume: 100
-  MaxDistanceFromPlayer: 45
-  DistanceToMoveToIfFarFromPlayer: 35
-  MoveSpeedFarFromPlayer: 12
-  StoppingDistanceFarFromPlayer: 2
-  PlayerSeenScreamVolume: 1
-  GrenadeScreamVolume: 1
-  WaterfallScreamVolume: 1
-  HeardSoundGruntVolume: 1
-  ClickingVolume: 1
-  GrowlVolume: 1
 --- !u!195 &1997102751303061440
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -454,6 +344,117 @@ MonoBehaviour:
           m_Value1: 1858964397802573472
         Name: Player
         m_Value: {fileID: 0}
+--- !u!114 &6014912869232668478
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683829060095955525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d28dd8314ebe1c4eb3de1fa67297a30, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  NewVarsEvent: {fileID: 11400000, guid: 66dab9bf52afa9847823af1cb91f436b, type: 2}
+  UpdateVariables: 0
+  MoveSpeed_Patrol: 6
+  TurnSpeed_Patrol: 5
+  StoppingDistance_Patrol: 2
+  MoveRadius_Patrol: 20
+  MinWaitAfterMove_Patrol: 0
+  MaxWaitAfterMove_Patrol: 1
+  EcholocationParams_Patrol:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  MoveSpeed_Investigate: 8
+  TurnSpeed_Investigate: 5
+  StoppingDistance_Investigate: 2
+  Repetitions_Investigate: 4
+  RadiusFromStartPoint_Investigate: 10
+  MinWaitBetweenRepetitions_Investigate: 1
+  MaxWaitBetweenRepetitions_Investigate: 1.5
+  EcholocationParams_Investigate:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  MaxQuietSound_Sound: 35
+  MaxMediumSound_Sound: 75
+  EcholocationParams_Sound:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  QuietSounds:
+    MinWaitTime: 1
+    MaxWaitTime: 3
+    MoveSpeed: 4
+    StoppingDistance: 2
+    RadiusFromSound: 8
+  MediumSounds:
+    MinWaitTime: 0.2
+    MaxWaitTime: 1
+    MoveSpeed: 7
+    StoppingDistance: 2
+    RadiusFromSound: 5
+  LoudSounds:
+    MinWaitTime: 0
+    MaxWaitTime: 0
+    MoveSpeed: 9
+    StoppingDistance: 2
+    RadiusFromSound: 2
+  MinSpeed_Chase: 10
+  MaxSpeed_Chase: 30
+  SpeedIncrement_Chase: 0.18
+  TurnSpeed_Chase: 10
+  StoppingDistance_Chase: 2
+  DistanceMonsterLosesPlayer_Chase: 15
+  EcholocationParams_Chase:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  MoveSpeed_RunAway: 13
+  TurnSpeed_RunAway: 5
+  StoppingDistance_RunAway: 2
+  EcholocationParams_RunAway:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  GrenadeActivationDistance: 15
+  DistanceRunFromGrenade: 50
+  DistanceToTriggerInvestigation_Hiding: 15
+  MaxTimeBeforeInvestigation_Hiding: 15
+  MinInvestigationTime_Hiding: 10
+  MaxInvestigationTime_Hiding: 18
+  MinWaitBeforeGotoSound_Hiding: 0.5
+  MaxWaitBeforeGotoSound_Hiding: 2
+  MoveSpeedGotoSound_Hiding: 6
+  TurnSpeedGotoSound_Hiding: 5
+  StoppingDistanceGotoSound_Hiding: 0.1
+  PatrolRadius_Hiding: 7
+  MoveSpeedPatrol_Hiding: 4
+  TurnSpeedPatrol_Hiding: 5
+  StoppingDistancePatrol_Hiding: 2
+  EcholocationParams_Hiding:
+    uniformity: 0
+    numRays: 20000
+    angle: 100
+    visualVolume: 100
+  MaxDistanceFromPlayer: 45
+  DistanceToMoveToIfFarFromPlayer: 35
+  MoveSpeedFarFromPlayer: 12
+  StoppingDistanceFarFromPlayer: 2
+  PlayerSeenScreamVolume: 1
+  GrenadeScreamVolume: 1
+  WaterfallScreamVolume: 1
+  HeardSoundGruntVolume: 1
+  ClickingVolume: 1
+  GrowlVolume: 1
 --- !u!114 &8738375180280089010
 MonoBehaviour:
   m_ObjectHideFlags: 0

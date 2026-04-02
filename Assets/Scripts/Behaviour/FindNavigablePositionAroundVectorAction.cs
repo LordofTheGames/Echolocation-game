@@ -21,7 +21,6 @@ public partial class FindNavigablePositionAroundVectorAction : Action
     protected override Status OnStart()
     {
         checkCount = 0;
-        Debug.Log("RESETTING");
         agent = Agent.Value.GetComponent<NavMeshAgent>();
         return Status.Running;
     }
@@ -37,7 +36,6 @@ public partial class FindNavigablePositionAroundVectorAction : Action
         // if random position is not navigable, this is max distance SamplePosition will look to find navigable position
         float maxSearchDist = 4f;
         checkCount++;
-        Debug.Log(checkCount);
         if(NavMesh.SamplePosition(randomPosition, out hit, maxSearchDist, NavMesh.AllAreas))
         {
             NavMeshPath path = new NavMeshPath();
