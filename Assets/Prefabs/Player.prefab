@@ -261,6 +261,7 @@ GameObject:
   - component: {fileID: 896755040844005566}
   - component: {fileID: 7401529261617155565}
   - component: {fileID: 1248414904700985948}
+  - component: {fileID: 4936531735122794685}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -410,8 +411,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 7774423660450900798}
-  maxDistance: 5
-  sphereRadius: 0.28
+  maxDistance: 4
   loseDelay: 0.12
   interactMask:
     serializedVersion: 2
@@ -1173,6 +1173,18 @@ MonoBehaviour:
   waitTime: 1
   RespawnPosition: {x: 0, y: 0, z: 0}
   CurrentBox: {fileID: 0}
+--- !u!114 &4936531735122794685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8cbf91ca00ba234f84f08738844d6d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0
