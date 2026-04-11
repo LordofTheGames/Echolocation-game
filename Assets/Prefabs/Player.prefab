@@ -412,6 +412,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cam: {fileID: 7774423660450900798}
   maxDistance: 4
+  sphereRadius: 0.28
   loseDelay: 0.12
   interactMask:
     serializedVersion: 2
@@ -1185,6 +1186,60 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8cbf91ca00ba234f84f08738844d6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  MaxTime: 50
+  TimeBeforeStart: 20
+  lensDistortionData:
+    startingValue: 0
+    maxValue: -0.8
+    speed: 1
+  lensFlareData:
+    startingValue: 0
+    maxValue: 30
+    speed: 1
+  bloomData:
+    startingValue: 0.6
+    maxValue: 10
+    speed: 1
+  chromaticAberrationData:
+    startingValue: 0.2
+    maxValue: 1
+    speed: 1
+  whiteBalanceTempData:
+    startingValue: -15
+    maxValue: 4
+    speed: 1
+  whiteBalanceTintData:
+    startingValue: 0
+    maxValue: 16
+    speed: 1
+  vignetteData:
+    startingValue: 0.4
+    maxValue: 0.4
+    speed: 1
+  motionBlurData:
+    startingValue: 0.6
+    maxValue: 1
+    speed: 1
+  contrastData:
+    startingValue: 0
+    maxValue: -24
+    speed: 1
+  colourFilterRedData:
+    startingValue: 1
+    maxValue: 0.5377358
+    speed: 1
+  colourFilterGreenData:
+    startingValue: 1
+    maxValue: 0.2764774
+    speed: 1
+  colourFilterBlueData:
+    startingValue: 1
+    maxValue: 0.2764774
+    speed: 1
+  dirtIntensityData:
+    startingValue: 0
+    maxValue: 20
+    speed: 1
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0

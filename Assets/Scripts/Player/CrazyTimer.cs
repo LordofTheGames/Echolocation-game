@@ -5,8 +5,30 @@ using UnityEngine.Rendering.Universal;
 
 public class CrazyTimer : MonoBehaviour
 {
-    public float MaxTime = 40;
-    public float TimeBeforeStart = 10;
+    [Serializable]
+    public struct EffectData
+    {
+        public float startingValue;
+        public float maxValue;
+        public float speed;
+    }
+
+    public float MaxTime = 50;
+    public float TimeBeforeStart = 20;
+
+    public EffectData lensDistortionData = new EffectData{startingValue = 0, maxValue = -0.8f, speed = 1};
+    public EffectData lensFlareData = new EffectData{startingValue = 0, maxValue = 30, speed = 1};
+    public EffectData bloomData = new EffectData{startingValue = 0.6f, maxValue = 10, speed = 1};
+    public EffectData chromaticAberrationData = new EffectData{startingValue = 0.2f, maxValue = 1, speed = 1};
+    public EffectData whiteBalanceTempData = new EffectData{startingValue = -15, maxValue = 4, speed = 1};
+    public EffectData whiteBalanceTintData = new EffectData{startingValue = 0, maxValue = 16, speed = 1};
+    public EffectData vignetteData = new EffectData{startingValue = 0.4f, maxValue = 0.4f, speed = 1};
+    public EffectData motionBlurData = new EffectData{startingValue = 0.6f, maxValue = 1, speed = 1};
+    public EffectData contrastData = new EffectData{startingValue = 0, maxValue = -24, speed = 1};
+    public EffectData colourFilterRedData = new EffectData{startingValue = 1, maxValue = 0.5377358f, speed = 1};
+    public EffectData colourFilterGreenData = new EffectData{startingValue = 1, maxValue = 0.2764774f, speed = 1};
+    public EffectData colourFilterBlueData = new EffectData{startingValue = 1, maxValue = 0.2764774f, speed = 1};
+    public EffectData dirtIntensityData = new EffectData{startingValue = 0, maxValue = 20, speed = 1};
 
     private Volume volume;
     private Bloom bloom;
@@ -16,28 +38,30 @@ public class CrazyTimer : MonoBehaviour
     private ChromaticAberration chromaticAberration;
     private LensDistortion lensDistortion;
     private ScreenSpaceLensFlare lensFlare;
-    private DepthOfField depthOfField;
+    private ColorAdjustments colourAdjustments;
+    private Color colour;
 
     private float time = 0;
-    private float maxLensDistortion = 0;
-    private float lensDistortionSpeed = 1f;
-    private float maxLensFlare = 0;
-    private float lensFlareSpeed = 1f;
-    private float maxBloom = 0.6f;
-    private float bloomSpeed = 1;
-    private float maxChromaticAbberation = 0.2f;
-    private float chromaticAberrationSpeed = 1;
-    private float maxWBTemp = -15;
-    private float wbTempSpeed = 1;
-    private float maxWBTint = 0;
-    private float wbTintSpeed = 1;
-    private float maxVignette = 0.4f;
-    private float vignetteSpeed = 1;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         MaxTime -= TimeBeforeStart;
+
+        bloomData.maxValue -= bloomData.startingValue;
+        lensDistortionData.maxValue -= lensDistortionData.startingValue;
+        chromaticAberrationData.maxValue -= chromaticAberrationData.startingValue;
+        lensFlareData.maxValue -= lensFlareData.startingValue;
+        whiteBalanceTempData.maxValue -= whiteBalanceTempData.startingValue;
+        whiteBalanceTintData.maxValue -= whiteBalanceTintData.startingValue;
+        vignetteData.maxValue -= vignetteData.startingValue;
+        contrastData.maxValue -= contrastData.startingValue;
+        motionBlurData.maxValue -= motionBlurData.startingValue;
+        colourFilterRedData.maxValue -= colourFilterRedData.startingValue;
+        colourFilterBlueData.maxValue -= colourFilterBlueData.startingValue;
+        colourFilterGreenData.maxValue -= colourFilterGreenData.startingValue;
+        dirtIntensityData.maxValue -= dirtIntensityData.startingValue;
+
         volume = GameObject.Find("Global Volume").GetComponent<Volume>(); 
         volume.profile.TryGet(out bloom);
         volume.profile.TryGet(out motionBlur);
@@ -46,10 +70,26 @@ public class CrazyTimer : MonoBehaviour
         volume.profile.TryGet(out chromaticAberration);
         volume.profile.TryGet(out lensDistortion);
         volume.profile.TryGet(out lensFlare);
-        volume.profile.TryGet(out depthOfField);
+        volume.profile.TryGet(out colourAdjustments);
+
+        bloom.intensity.value = bloomData.startingValue;
+        lensDistortion.intensity.value = lensDistortionData.startingValue;
+        chromaticAberration.intensity.value = chromaticAberrationData.startingValue;
+        lensFlare.intensity.value = lensFlareData.startingValue;
+        whiteBalance.temperature.value = whiteBalanceTempData.startingValue;
+        whiteBalance.tint.value = whiteBalanceTintData.startingValue;
+        vignette.intensity.value = vignetteData.startingValue; 
+        motionBlur.intensity.value = motionBlurData.startingValue; 
+        colourAdjustments.contrast.value = contrastData.startingValue;
+        colour.r = colourFilterRedData.startingValue;
+        colour.g = colourFilterGreenData.startingValue;
+        colour.b = colourFilterBlueData.startingValue;
+        colour.a = 1; 
+        colourAdjustments.colorFilter.value = colour;
+        bloom.dirtIntensity.value = dirtIntensityData.startingValue;
+
     }
 
-    // Update is called once per frame
     void Update()
     {
         time += Time.deltaTime;
@@ -59,22 +99,50 @@ public class CrazyTimer : MonoBehaviour
             if (time - TimeBeforeStart > MaxTime) timePercent = 1;
             else timePercent = (time - TimeBeforeStart) / MaxTime;
 
-            float percent = (-Mathf.Cos((time - TimeBeforeStart) * 0.5f * bloomSpeed) + 1f) / 2f * timePercent;
+            // float percent = (-Mathf.Cos((time - TimeBeforeStart) * 0.5f) + 1f) / 2f * timePercent;
+            float percent = timePercent;
 
-            maxBloom = Mathf.Min(10 * percent * bloomSpeed, 10);
-            maxLensDistortion = Mathf.Max(-0.8f * percent * lensDistortionSpeed, -0.8f);
-            maxChromaticAbberation = Mathf.Min(1 * percent * chromaticAberrationSpeed, 1);
-            maxLensFlare = Mathf.Min(30 * percent * lensFlareSpeed, 30);
-            maxWBTemp = Mathf.Min(4 * percent * wbTempSpeed, 4);
-            maxWBTint = Mathf.Min(16 * percent * wbTintSpeed, 16);
-            maxVignette = Mathf.Min(0.5f * percent * vignetteSpeed, 0.5f);
+            bloom.intensity.value = calcValue(bloomData, percent);
+            bloom.dirtIntensity.value = calcValue(dirtIntensityData, percent);
+            lensDistortion.intensity.value = calcValue(lensDistortionData, percent);
+            chromaticAberration.intensity.value = calcValue(chromaticAberrationData, percent);
+            lensFlare.intensity.value = calcValue(lensFlareData, percent);
+            whiteBalance.temperature.value = calcValue(whiteBalanceTempData, percent);
+            whiteBalance.tint.value = calcValue(whiteBalanceTintData, percent);
+            vignette.intensity.value = calcValue(vignetteData, percent);
+            motionBlur.intensity.value = calcValue(motionBlurData, percent); 
+            colour.r = calcValue(colourFilterRedData, percent);
+            colour.g = calcValue(colourFilterGreenData, percent);
+            colour.b = calcValue(colourFilterBlueData, percent);
+            colourAdjustments.colorFilter.value = colour;
         }
-        bloom.intensity.value = maxBloom;
-        lensDistortion.intensity.value = maxLensDistortion;
-        chromaticAberration.intensity.value = maxChromaticAbberation;
-        lensFlare.intensity.value = maxLensFlare;
-        whiteBalance.temperature.value = maxWBTemp;
-        whiteBalance.tint.value = maxWBTint;
-        vignette.intensity.value = maxVignette;
+    }
+
+    private float calcValue(EffectData effectData, float percent)
+    {
+        if (effectData.maxValue >= effectData.startingValue)
+            return effectData.startingValue + Mathf.Min(effectData.maxValue * percent, effectData.maxValue);
+        else
+            return effectData.startingValue + Mathf.Max(effectData.maxValue * percent, effectData.maxValue);
+    }
+
+    public void ResetEffect()
+    {
+        time = 0;
+        bloom.intensity.value = bloomData.startingValue;
+        lensDistortion.intensity.value = lensDistortionData.startingValue;
+        chromaticAberration.intensity.value = chromaticAberrationData.startingValue;
+        lensFlare.intensity.value = lensFlareData.startingValue;
+        whiteBalance.temperature.value = whiteBalanceTempData.startingValue;
+        whiteBalance.tint.value = whiteBalanceTintData.startingValue;
+        vignette.intensity.value = vignetteData.startingValue; 
+        motionBlur.intensity.value = motionBlurData.startingValue; 
+        colourAdjustments.contrast.value = contrastData.startingValue;
+        colour.r = colourFilterRedData.startingValue;
+        colour.g = colourFilterGreenData.startingValue;
+        colour.b = colourFilterBlueData.startingValue;
+        colour.a = 1; 
+        colourAdjustments.colorFilter.value = colour;
+        bloom.dirtIntensity.value = dirtIntensityData.startingValue;
     }
 }
