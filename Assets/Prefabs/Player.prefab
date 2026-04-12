@@ -302,7 +302,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 263168
+    m_Bits: 262144
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -416,7 +416,7 @@ MonoBehaviour:
   loseDelay: 0.12
   interactMask:
     serializedVersion: 2
-    m_Bits: 131337
+    m_Bits: 1704201
   obstacleMask:
     serializedVersion: 2
     m_Bits: 53312
@@ -1186,15 +1186,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8cbf91ca00ba234f84f08738844d6d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Crazy1: {fileID: 8300000, guid: 3bc99e2ab426f1c4a97ed51a9968b42f, type: 3}
+  Crazy2: {fileID: 8300000, guid: 8f176169504e0a54db84e5a0d19511f9, type: 3}
   MaxTime: 50
   TimeBeforeStart: 20
   lensDistortionData:
     startingValue: 0
-    maxValue: -0.8
-    speed: 1
+    maxValue: -1
+    speed: 0.75
+  lensDistortionMinOscillationValue: -0.5
   lensFlareData:
     startingValue: 0
-    maxValue: 30
+    maxValue: 25
     speed: 1
   bloomData:
     startingValue: 0.6
@@ -1222,7 +1225,7 @@ MonoBehaviour:
     speed: 1
   contrastData:
     startingValue: 0
-    maxValue: -24
+    maxValue: -16
     speed: 1
   colourFilterRedData:
     startingValue: 1
@@ -1238,8 +1241,13 @@ MonoBehaviour:
     speed: 1
   dirtIntensityData:
     startingValue: 0
-    maxValue: 20
+    maxValue: 12
     speed: 1
+  soundVolumeData:
+    startingValue: 0
+    maxValue: 0.65
+    speed: 0.3
+  soundVolumeMinOscillationValue: 0.25
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0

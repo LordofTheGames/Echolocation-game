@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -13,22 +14,28 @@ public class CrazyTimer : MonoBehaviour
         public float speed;
     }
 
+    public AudioClip Crazy1;
+    public AudioClip Crazy2;
+
     public float MaxTime = 50;
     public float TimeBeforeStart = 20;
 
-    public EffectData lensDistortionData = new EffectData{startingValue = 0, maxValue = -0.8f, speed = 1};
-    public EffectData lensFlareData = new EffectData{startingValue = 0, maxValue = 30, speed = 1};
+    public EffectData lensDistortionData = new EffectData{startingValue = 0, maxValue = -1, speed = 1};
+    public float lensDistortionMinOscillationValue = -0.5f;
+    public EffectData lensFlareData = new EffectData{startingValue = 0, maxValue = 25, speed = 1};
     public EffectData bloomData = new EffectData{startingValue = 0.6f, maxValue = 10, speed = 1};
     public EffectData chromaticAberrationData = new EffectData{startingValue = 0.2f, maxValue = 1, speed = 1};
     public EffectData whiteBalanceTempData = new EffectData{startingValue = -15, maxValue = 4, speed = 1};
     public EffectData whiteBalanceTintData = new EffectData{startingValue = 0, maxValue = 16, speed = 1};
     public EffectData vignetteData = new EffectData{startingValue = 0.4f, maxValue = 0.4f, speed = 1};
     public EffectData motionBlurData = new EffectData{startingValue = 0.6f, maxValue = 1, speed = 1};
-    public EffectData contrastData = new EffectData{startingValue = 0, maxValue = -24, speed = 1};
+    public EffectData contrastData = new EffectData{startingValue = 0, maxValue = -16, speed = 1};
     public EffectData colourFilterRedData = new EffectData{startingValue = 1, maxValue = 0.5377358f, speed = 1};
     public EffectData colourFilterGreenData = new EffectData{startingValue = 1, maxValue = 0.2764774f, speed = 1};
     public EffectData colourFilterBlueData = new EffectData{startingValue = 1, maxValue = 0.2764774f, speed = 1};
-    public EffectData dirtIntensityData = new EffectData{startingValue = 0, maxValue = 20, speed = 1};
+    public EffectData dirtIntensityData = new EffectData{startingValue = 0, maxValue = 12, speed = 1};
+    public EffectData soundVolumeData = new EffectData{startingValue = 0, maxValue = 1, speed = 0.2f};
+    public float soundVolumeMinOscillationValue = 0.5f;
 
     private Volume volume;
     private Bloom bloom;
@@ -40,13 +47,21 @@ public class CrazyTimer : MonoBehaviour
     private ScreenSpaceLensFlare lensFlare;
     private ColorAdjustments colourAdjustments;
     private Color colour;
+    private bool playEffect = false;
 
     private float time = 0;
+    private AudioSource crazy1Source; 
+    private AudioSource crazy2Source; 
+    private bool soundPlaying;
+    private float volumeTimeBeforeStart = 0;
+    private float lensDistortionTimeBeforeStart = 0;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         MaxTime -= TimeBeforeStart;
+        volumeTimeBeforeStart = 0;
+        lensDistortionTimeBeforeStart = 0;
 
         bloomData.maxValue -= bloomData.startingValue;
         lensDistortionData.maxValue -= lensDistortionData.startingValue;
@@ -88,23 +103,38 @@ public class CrazyTimer : MonoBehaviour
         colourAdjustments.colorFilter.value = colour;
         bloom.dirtIntensity.value = dirtIntensityData.startingValue;
 
+        crazy1Source = gameObject.AddComponent<AudioSource>();
+        crazy1Source.spatialBlend = 0f; // Heard equally in both ears since it's coming from the player
+        crazy1Source.loop = true;
+        crazy1Source.clip = Crazy1;
+        crazy2Source = gameObject.AddComponent<AudioSource>();
+        crazy2Source.spatialBlend = 0f; // Heard equally in both ears since it's coming from the player
+        crazy2Source.loop = true;
+        crazy2Source.clip = Crazy2;
     }
 
     void Update()
     {
+        if (!playEffect) return;
+
         time += Time.deltaTime;
         if (time >= TimeBeforeStart)
         {
-            float timePercent;
-            if (time - TimeBeforeStart > MaxTime) timePercent = 1;
-            else timePercent = (time - TimeBeforeStart) / MaxTime;
+            if (!soundPlaying)
+            {
+                crazy1Source.volume = soundVolumeData.startingValue;
+                crazy1Source.Play();
+                crazy2Source.volume = soundVolumeData.startingValue;
+                crazy2Source.Play();
+                soundPlaying = true;
+            }
 
-            // float percent = (-Mathf.Cos((time - TimeBeforeStart) * 0.5f) + 1f) / 2f * timePercent;
-            float percent = timePercent;
+            float percent;
+            if (time - TimeBeforeStart > MaxTime) percent = 1;
+            else percent = (time - TimeBeforeStart) / MaxTime;
 
             bloom.intensity.value = calcValue(bloomData, percent);
             bloom.dirtIntensity.value = calcValue(dirtIntensityData, percent);
-            lensDistortion.intensity.value = calcValue(lensDistortionData, percent);
             chromaticAberration.intensity.value = calcValue(chromaticAberrationData, percent);
             lensFlare.intensity.value = calcValue(lensFlareData, percent);
             whiteBalance.temperature.value = calcValue(whiteBalanceTempData, percent);
@@ -115,6 +145,37 @@ public class CrazyTimer : MonoBehaviour
             colour.g = calcValue(colourFilterGreenData, percent);
             colour.b = calcValue(colourFilterBlueData, percent);
             colourAdjustments.colorFilter.value = colour;
+
+            if (percent * 1.75f < 1)
+            {
+                lensDistortion.intensity.value = calcValue(lensDistortionData, percent * 1.75f);
+            }
+            else
+            {
+                if (lensDistortionTimeBeforeStart == 0) lensDistortionTimeBeforeStart = time;
+                float lensDistPercent = (Mathf.Cos((time - lensDistortionTimeBeforeStart) * lensDistortionData.speed) + 1f) / 2f; // start at 1
+                float newMaxVal = lensDistortionData.maxValue - (lensDistortionMinOscillationValue - lensDistortionData.startingValue);
+                lensDistortion.intensity.value = lensDistortionMinOscillationValue + Mathf.Max(newMaxVal * lensDistPercent, newMaxVal);
+            }
+
+            float newVolume;
+            if (percent < 1)
+            {
+                newVolume = calcValue(soundVolumeData, percent);
+            }
+            else
+            {
+                if (volumeTimeBeforeStart == 0) volumeTimeBeforeStart = time;
+                float volumePercent = (Mathf.Cos((time - volumeTimeBeforeStart) * soundVolumeData.speed) + 1f) / 2f; // start at 1
+                float newMaxVal = soundVolumeData.maxValue - (soundVolumeMinOscillationValue - soundVolumeData.startingValue);
+                newVolume = soundVolumeMinOscillationValue + Mathf.Min(newMaxVal * volumePercent, newMaxVal);
+            }
+            crazy1Source.volume = newVolume;
+            crazy2Source.volume = newVolume;
+            float pitchPercent = (Mathf.Cos(time * 0.22f) + 1f) / 2f; // start at 1
+            float newPitch = 0.7f + Mathf.Min(0.5f * pitchPercent, 0.5f);
+            crazy1Source.pitch = newPitch;
+            crazy2Source.pitch = newPitch;
         }
     }
 
@@ -126,9 +187,35 @@ public class CrazyTimer : MonoBehaviour
             return effectData.startingValue + Mathf.Max(effectData.maxValue * percent, effectData.maxValue);
     }
 
+	private IEnumerator FadeOut(AudioSource audioSource, float duration)
+    {
+        float startVolume = audioSource.volume;
+        float currentTime = 0f;
+
+        while (currentTime < duration)
+        {
+            currentTime += Time.deltaTime;
+            
+            audioSource.volume = Mathf.Lerp(startVolume, 0f, currentTime / duration);
+            
+            yield return null; 
+        }
+
+        audioSource.volume = 0f;
+        audioSource.Stop();
+    }
+
     public void ResetEffect()
     {
         time = 0;
+        volumeTimeBeforeStart = 0;
+        lensDistortionTimeBeforeStart = 0;
+        if (soundPlaying)
+        {
+            StartCoroutine(FadeOut(crazy1Source, 0.7f));
+            StartCoroutine(FadeOut(crazy2Source, 0.7f));
+            soundPlaying = false;
+        }
         bloom.intensity.value = bloomData.startingValue;
         lensDistortion.intensity.value = lensDistortionData.startingValue;
         chromaticAberration.intensity.value = chromaticAberrationData.startingValue;
@@ -141,8 +228,28 @@ public class CrazyTimer : MonoBehaviour
         colour.r = colourFilterRedData.startingValue;
         colour.g = colourFilterGreenData.startingValue;
         colour.b = colourFilterBlueData.startingValue;
-        colour.a = 1; 
         colourAdjustments.colorFilter.value = colour;
         bloom.dirtIntensity.value = dirtIntensityData.startingValue;
+    }
+
+    public void FadeOutSounds()
+    {
+        if (soundPlaying)
+        {
+            StartCoroutine(FadeOut(crazy1Source, 0.7f));
+            StartCoroutine(FadeOut(crazy2Source, 0.7f));
+            soundPlaying = false;
+        }
+    }
+
+    public void StartEffect()
+    {
+        ResetEffect();
+        playEffect = true;
+    }
+
+    public void StopEffect()
+    {
+        playEffect = false;
     }
 }

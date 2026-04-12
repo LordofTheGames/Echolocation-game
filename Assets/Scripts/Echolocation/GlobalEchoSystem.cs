@@ -119,6 +119,7 @@ public class GlobalEchoSystem : MonoBehaviour
 
     [Header("Layers To Detect")]
     public LayerMask monsterLayer;
+    public LayerMask batLayer;
     public LayerMask interactableLayer;
     public LayerMask outlinedObjectLayer;
     public LayerMask metalLayer;
@@ -128,6 +129,8 @@ public class GlobalEchoSystem : MonoBehaviour
     public LayerMask railLayer;
     public LayerMask hideRockLayer;
     public LayerMask waterLayer;
+    public LayerMask keyLayer;
+    public LayerMask pillBoxLayer;
 
     void Start()
     {
@@ -160,6 +163,9 @@ public class GlobalEchoSystem : MonoBehaviour
         if ((railLayer.value & layerMask) > 0) return 7;            // Rail
         if ((hideRockLayer.value & layerMask) > 0) return 8;        // HideRock
         if ((waterLayer.value & layerMask) > 0) return 9;           // Water
+        if ((batLayer.value & layerMask) > 0) return 10;            // Bat
+        if ((keyLayer.value & layerMask) > 0) return 11;            // Key
+        if ((pillBoxLayer.value & layerMask) > 0) return 12;        // Pill Box
         return 0;                                                   // Default
     }
 

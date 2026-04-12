@@ -58,6 +58,7 @@ public class EcholocationManager : MonoBehaviour
 
     [Header("Colour Palettes")]
     public Color[] monsterColors = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
+    public Color[] batColors = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
     public Color[] interactableColors = new Color[3] {Color.green, new Color(0f, 0.8f, 0f), new Color(0f, 0.6f, 0f)};
     public Color[] defaultColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
     public Color[] metalColors = new Color[3] { Color.gray, new Color(0.8f, 0.8f, 0.8f), new Color(0.6f, 0.6f, 0.6f) };
@@ -67,6 +68,8 @@ public class EcholocationManager : MonoBehaviour
     public Color[] railColors = new Color[3] { new Color(0.3f, 0.3f, 0.3f), new Color(0.2f, 0.2f, 0.2f), new Color(0.1f, 0.1f, 0.1f) };
     public Color[] hideRockColors = new Color[3] { new Color(0.4f, 0.4f, 0.4f), new Color(0.35f, 0.35f, 0.35f), new Color(0.3f, 0.3f, 0.3f) };
     public Color[] waterColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
+    public Color[] keyColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
+    public Color[] pillBoxColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
         
     
 
@@ -437,6 +440,9 @@ public class EcholocationManager : MonoBehaviour
                         7 => railColors[vHit.colorVariant],
                         8 => hideRockColors[vHit.colorVariant],
                         9 => waterColors[vHit.colorVariant],
+                        10 => batColors[vHit.colorVariant],
+                        11 => keyColors[vHit.colorVariant],
+                        12 => pillBoxColors[vHit.colorVariant],
                         _ => defaultColors[vHit.colorVariant]
                     };
 

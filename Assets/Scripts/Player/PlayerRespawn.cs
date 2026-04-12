@@ -32,6 +32,7 @@ public class PlayerRespawn : MonoBehaviour
     public void Respawn()
     {
         if (!isRespawning) StartCoroutine(RespawnSequence());
+        gameObject.GetComponent<CrazyTimer>().ResetEffect();
     }
 
     private IEnumerator RespawnSequence()
@@ -68,12 +69,12 @@ public class PlayerRespawn : MonoBehaviour
             navmeshEdges.SetActive(true);
         }
 
+        // wait at black screen
+        yield return new WaitForSeconds(waitTime);
+
         transform.position = RespawnPosition;
         pm.enabled = true;
         cc.enabled = true;
-
-        // wait at black screen
-        yield return new WaitForSeconds(waitTime);
 
         //fade back in
         timer = 0f;

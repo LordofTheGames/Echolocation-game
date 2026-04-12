@@ -7,6 +7,7 @@ public class Tutorial : MonoBehaviour
     private Animator animator;
     private float micVolume;
     private GameObject player;
+    public GameObject warpPoint;
     
     public float volume = 0.8f;
     public AudioSource audioSource;
@@ -65,6 +66,10 @@ public class Tutorial : MonoBehaviour
         {
             animator.SetBool("Tutorial", false);
             tutorial = false;
+            PlayerRespawn script = player.GetComponent<PlayerRespawn>();
+            script.RespawnPosition = warpPoint.transform.position;
+            script.Respawn();
+            player.GetComponent<CrazyTimer>().StartEffect();
         }
     }
 
