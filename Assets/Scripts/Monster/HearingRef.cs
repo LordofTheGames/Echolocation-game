@@ -59,26 +59,26 @@ public class MonsterAI : MonoBehaviour, INoiseSensitive
     }
 
     // This function is called automatically by the Scanner when rays hit the monster
-    public void OnHeardScan(Transform source, float volume, bool isFootsteps, float priority)
+    public void OnHeardScan(Vector3 source, float volume, bool isFootsteps, float priority)
     {
-        if (source == null) return;
+        // if (source == null) return;
 
-        // A. Do I already know about this object?
-        if (!suspicionTracks.ContainsKey(source))
-        {
-            suspicionTracks.Add(source, new List<float>());
-        }
+        // // A. Do I already know about this object?
+        // if (!suspicionTracks.ContainsKey(source))
+        // {
+        //     suspicionTracks.Add(source, new List<float>());
+        // }
 
-        // B. Add a new "memory" of being hit right now
-        suspicionTracks[source].Add(Time.time);
+        // // B. Add a new "memory" of being hit right now
+        // suspicionTracks[source].Add(Time.time);
 
-        // C. Check Suspicion Level for THIS SPECIFIC object
-        int suspicionLevel = suspicionTracks[source].Count;
+        // // C. Check Suspicion Level for THIS SPECIFIC object
+        // int suspicionLevel = suspicionTracks[source].Count;
 
-        if (suspicionLevel >= raysToTrigger)
-        {
-            Investigate(source);
-        }
+        // if (suspicionLevel >= raysToTrigger)
+        // {
+        //     Investigate(source);
+        // }
     }
 
     void Investigate(Transform target)

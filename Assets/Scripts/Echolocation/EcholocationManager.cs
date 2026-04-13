@@ -260,12 +260,12 @@ public class EcholocationManager : MonoBehaviour
         initialMonsterVolume = monsterVolume;
         isFootstepsScan = isFootsteps;
 
-        // TODO: remove this when multiple ray bounces have been implemented
+        // FIXME: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
         GameObject monster = GameObject.FindGameObjectWithTag("Monster");
         if (monster != null) {
             INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
-            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform, monsterVolume, isFootsteps, priority);
+            if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform.position, monsterVolume, isFootsteps, priority);
         }
     }
 
@@ -453,21 +453,34 @@ public class EcholocationManager : MonoBehaviour
 
                 activeHitCount += currentBounceHits;
                         
-                // //TODO: add this when we have multiple ray bounces working
-                // for (int k = 0; k < monsterHits.Length; k++)
-                // {
-                //     int originalRayIndex = monsterHits[k].originalRayIndex;
-                //     float hitVolume = monsterHits[k].hitVolume;        
-                //     RaycastHit hit = results[originalRayIndex];
+                //TODO: add this when we have multiple ray bounces working
+                // Get the hit with the highest volume - makes the most sense for the monster to be interested in
+                // And will be the most direct from the monster to the source of noise (due to loss per meter and  bounce reduction)
+                float maxRayVolume = 0.0f;
+                Vector3 raySource = new Vector3(0f, 0f, 0f);
+                for (int k = 0; k < monsterHits.Length; k++)
+                {
+                    int originalRayIndex = monsterHits[k].originalRayIndex;
+                    float hitVolume = monsterHits[k].hitVolume;        
+                    RaycastHit hit = results[originalRayIndex];
 
-                //     INoiseSensitive sensitiveTarget = hit.collider.GetComponent<INoiseSensitive>();
+                    if (hitVolume > maxRayVolume)
+                    {
+                        maxRayVolume = hitVolume;
+                        raySource = hit.point;
+                    }
+                }
 
-                //     if (sensitiveTarget != null)
-                //     {
-                //         sensitiveTarget.OnHeardScan(sourceObj.transform, hitVolume, isFootstepsScan);
-                //         Debug.Log("Volume: " + hitVolume);
-                //     }
-                // }
+                // Alert the monster with the volume and the source of the ray
+                GameObject monster = GameObject.Find("Monster");
+                INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
+
+                if (sensitiveTarget != null)
+                {
+                    sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
+                    Debug.Log("Volume: " + maxRayVolume);
+                }
+
 
                 // Cleanup current "generation"
                 commands.Dispose();
