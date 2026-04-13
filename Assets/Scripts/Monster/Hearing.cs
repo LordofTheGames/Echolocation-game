@@ -12,24 +12,24 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive
     private float newMaxDist = 0;
 
     // This function is called automatically by the Scanner when rays hit the monster
-    public void OnHeardScan(Transform source, float volume, bool isFootsteps, float priority)
+    public void OnHeardScan(Vector3 source, float volume, bool isFootsteps, float priority)
     {
         if (source == null) return;
         if (volume <= 0) return;
 
         Vector3 eyePos = transform.position + Vector3.up * AgentEyeHeight;
-        float distance = Vector3.Distance(eyePos, source.position);
+        float distance = Vector3.Distance(eyePos, source);
         // TODO: this calculation is fairly arbritrary! improve it?
         newMaxDist = maxSoundDistance + (volume / 15f);
         if (distance <= newMaxDist)
         {
-            bool viewObstructed = Physics.Raycast(eyePos, source.position - eyePos, distance, ObstructionMask);
+            bool viewObstructed = Physics.Raycast(eyePos, source - eyePos, distance, ObstructionMask);
             // TODO: this calculation is fairly arbritrary! improve it?
             if (viewObstructed) newMaxDist *= 0.75f;  
 
             if (distance <= newMaxDist){
                 newSound = true;
-                newSource.transform = source;
+                newSource.transform.position = source;
                 newSource.volume = volume;
                 newSource.isFootsteps = isFootsteps;
             }
