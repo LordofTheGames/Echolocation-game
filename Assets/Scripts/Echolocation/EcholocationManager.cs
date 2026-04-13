@@ -354,6 +354,11 @@ public class EcholocationManager : MonoBehaviour
             qp.layerMask = scanLayers;
             qp.hitBackfaces = false;
 
+            // Variables for giving monster information about the ray with the loudest volume that hits the monster
+            bool hitMonster = false;
+            float maxRayVolume = 0.0f;
+            Vector3 raySource = new Vector3(0f, 0f, 0f);
+
             for (int bounce = 0; bounce <= maxBounces; bounce++)
             {
                 int rayCount = currentRays.Length;   // Initialise to current number of rays in "generation"
@@ -462,8 +467,7 @@ public class EcholocationManager : MonoBehaviour
                 //TODO: add this when we have multiple ray bounces working
                 // Get the hit with the highest volume - makes the most sense for the monster to be interested in
                 // And will be the most direct from the monster to the source of noise (due to loss per meter and  bounce reduction)
-                float maxRayVolume = 0.0f;
-                Vector3 raySource = new Vector3(0f, 0f, 0f);
+                if (monsterHits.Length > 0) hitMonster = true;
                 for (int k = 0; k < monsterHits.Length; k++)
                 {
                     int originalRayIndex = monsterHits[k].originalRayIndex;
@@ -477,16 +481,6 @@ public class EcholocationManager : MonoBehaviour
                     }
                 }
 
-                // Alert the monster with the volume and the source of the ray
-                GameObject monster = GameObject.Find("Monster");
-                INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
-
-                if (sensitiveTarget != null)
-                {
-                    sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
-                    Debug.Log("Volume: " + maxRayVolume);
-                }
-
 
                 // Cleanup current "generation"
                 commands.Dispose();
@@ -498,6 +492,22 @@ public class EcholocationManager : MonoBehaviour
                 // Swap to next generation
                 currentRays = nextRays;
             }
+
+            if (hitMonster)
+            {
+                // Alert the monster with the max volume and the source of the ray
+                GameObject monster = GameObject.Find("Monster");
+                if (monster != null)
+                {
+                    INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
+
+                    if (sensitiveTarget != null)
+                    {
+                        sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
+                    }
+                }
+            }
+            
         }
 
         // Final cleanup
