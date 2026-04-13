@@ -7,5 +7,6 @@ public enum MonsterMovementType
 	Patrolling,
 	Investigating,
 	Chasing,
-	RunningAway
+	RunningAway,
+	ScriptedScene
 }

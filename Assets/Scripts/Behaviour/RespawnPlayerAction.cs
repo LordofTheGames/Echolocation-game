@@ -10,7 +10,6 @@ public partial class RespawnPlayerAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Target;
     [SerializeReference] public BlackboardVariable<GameObject> ObjectPosition;
-    [SerializeReference] public BlackboardVariable<GameObject> Self;
 
     protected override Status OnStart()
     {

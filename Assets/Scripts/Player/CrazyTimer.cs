@@ -30,9 +30,9 @@ public class CrazyTimer : MonoBehaviour
     public EffectData vignetteData = new EffectData{startingValue = 0.4f, maxValue = 0.4f, speed = 1};
     public EffectData motionBlurData = new EffectData{startingValue = 0.6f, maxValue = 1, speed = 1};
     public EffectData contrastData = new EffectData{startingValue = 0, maxValue = -16, speed = 1};
-    public EffectData colourFilterRedData = new EffectData{startingValue = 1, maxValue = 0.5377358f, speed = 1};
-    public EffectData colourFilterGreenData = new EffectData{startingValue = 1, maxValue = 0.2764774f, speed = 1};
-    public EffectData colourFilterBlueData = new EffectData{startingValue = 1, maxValue = 0.2764774f, speed = 1};
+    public EffectData colourFilterRedData = new EffectData{startingValue = 1, maxValue = 0.5377358f, speed = 2};
+    public EffectData colourFilterGreenData = new EffectData{startingValue = 1, maxValue = 0.2764774f, speed = 2};
+    public EffectData colourFilterBlueData = new EffectData{startingValue = 1, maxValue = 0.2764774f, speed = 2};
     public EffectData dirtIntensityData = new EffectData{startingValue = 0, maxValue = 12, speed = 1};
     public EffectData soundVolumeData = new EffectData{startingValue = 0, maxValue = 1, speed = 0.2f};
     public float soundVolumeMinOscillationValue = 0.5f;
@@ -141,9 +141,9 @@ public class CrazyTimer : MonoBehaviour
             whiteBalance.tint.value = calcValue(whiteBalanceTintData, percent);
             vignette.intensity.value = calcValue(vignetteData, percent);
             motionBlur.intensity.value = calcValue(motionBlurData, percent); 
-            colour.r = calcValue(colourFilterRedData, percent);
-            colour.g = calcValue(colourFilterGreenData, percent);
-            colour.b = calcValue(colourFilterBlueData, percent);
+            colour.r = calcValue(colourFilterRedData, percent * colourFilterRedData.speed);
+            colour.g = calcValue(colourFilterGreenData, percent * colourFilterGreenData.speed);
+            colour.b = calcValue(colourFilterBlueData, percent * colourFilterBlueData.speed);
             colourAdjustments.colorFilter.value = colour;
 
             if (percent * 1.75f < 1)

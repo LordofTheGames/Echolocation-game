@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -75,8 +76,17 @@ public class Tutorial : MonoBehaviour
 
     public void OnNext(InputAction.CallbackContext context)
     {
-        
+        if(animator.GetCurrentAnimatorStateInfo(0).IsName("waterfall"))
+            StartCoroutine(WaitBeforeStarting(5));
         if(context.started) animator.SetTrigger("Next");
+    }
+    private IEnumerator WaitBeforeStarting(float seconds)
+    {
+            yield return new WaitForSeconds(seconds);
+            PlayerRespawn script = player.GetComponent<PlayerRespawn>();
+            script.RespawnPosition = warpPoint.transform.position;
+            script.Respawn();
+            player.GetComponent<CrazyTimer>().StartEffect();
     }
 
     public void OnEcho(InputAction.CallbackContext context)
