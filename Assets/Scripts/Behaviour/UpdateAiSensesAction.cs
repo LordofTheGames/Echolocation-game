@@ -82,7 +82,7 @@ public partial class UpdateAiSensesAction : Action
         if (source.HasValue)
         {
             newSoundToInvestigate.Value = true;
-            newSoundLocation.Value = source.Value.transform.position;
+            newSoundLocation.Value = source.Value.location;
             newSoundVolume.Value = source.Value.volume;
             newIsFootsteps.Value = source.Value.isFootsteps;
         } 
