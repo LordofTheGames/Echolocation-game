@@ -81,6 +81,36 @@ public class GlobalEchoSystem : MonoBehaviour
         }
     }
 
+    // USED FOR MAIN MENU
+    public static void PingCustomDuration(GameObject sourceObject, Vector3 position, float pulseDuration)
+    {
+        if (Instance != null && Instance.echoSystemPrefab != null)
+            Instance.SpawnPulseCustomDuration(pulseDuration, sourceObject, position, Vector3.forward, 360, 1, 20000, 100, 100, false, 1);
+        else
+            Debug.Log("GlobalEchoSystem is missing! Make sure you have a GlobalEchoManager GameObject in scene.");
+    }
+
+    // Takes in an angle between 0 and 360 degrees for shape of projection, and direction for direction to project in  
+    // Allows you to specify custom pulse duration
+    // USED FOR MAIN MENU
+    void SpawnPulseCustomDuration(float pulseDuration, GameObject sourceObject, Vector3 position, Vector3 direction, float angle, float uniformity, int numRays, float visualVolume, float monsterVolume, bool isFootsteps, float priority = 1)
+    {
+        GameObject pulse = Instantiate(echoSystemPrefab, position, Quaternion.identity); // Create (Instantiate) an instance of the EcholocationSystem.prefab at position, with rotation ... (identity means no rotation)
+
+        EcholocationManager manager = pulse.GetComponent<EcholocationManager>();
+        manager.pulseDuration = pulseDuration;
+
+        // Can add things later like: shape of projection + rotation, loudness, pitch, num rays (if not dependent on other things), etc.
+        // For example: manager.maxDistance = loudness * 0.5;
+
+        // Unity's main thread, upon Instantiate(), instantly creates the GameObject and calls its Awake() method,
+        // it then hands control back to the SpawnPulse() method,
+        // and once it finsihes execution the main thread is freed again and the GameObject's Start() method is called,
+        // so you can safely change variables of the manager here before the rays are actually fired.
+        if (manager != null)
+            manager.SetupScan(sourceObject, direction, angle, uniformity, numRays, visualVolume, monsterVolume, isFootsteps, colliderColorMap, priority);
+    }
+
 
 
     // --- Layer to HashMap conversion ---
@@ -89,6 +119,7 @@ public class GlobalEchoSystem : MonoBehaviour
 
     [Header("Layers To Detect")]
     public LayerMask monsterLayer;
+    public LayerMask batLayer;
     public LayerMask interactableLayer;
     public LayerMask outlinedObjectLayer;
     public LayerMask metalLayer;
@@ -98,6 +129,8 @@ public class GlobalEchoSystem : MonoBehaviour
     public LayerMask railLayer;
     public LayerMask hideRockLayer;
     public LayerMask waterLayer;
+    public LayerMask keyLayer;
+    public LayerMask pillBoxLayer;
 
     void Start()
     {
@@ -130,6 +163,9 @@ public class GlobalEchoSystem : MonoBehaviour
         if ((railLayer.value & layerMask) > 0) return 7;            // Rail
         if ((hideRockLayer.value & layerMask) > 0) return 8;        // HideRock
         if ((waterLayer.value & layerMask) > 0) return 9;           // Water
+        if ((batLayer.value & layerMask) > 0) return 10;            // Bat
+        if ((keyLayer.value & layerMask) > 0) return 11;            // Key
+        if ((pillBoxLayer.value & layerMask) > 0) return 12;        // Pill Box
         return 0;                                                   // Default
     }
 

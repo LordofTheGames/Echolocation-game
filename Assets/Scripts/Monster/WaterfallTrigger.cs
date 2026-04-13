@@ -27,5 +27,9 @@ public class WaterfallTrigger : MonoBehaviour
             agent.BlackboardReference.SetVariableValue("inWaterfall", !inWaterfall);
             agent.BlackboardReference.SetVariableValue("waterfallExitLocation", waterfallExitLocation.position);
         }
+        else if (other.CompareTag("Player"))
+        {
+            agent.BlackboardReference.SetVariableValue("playerInRespawn", false);
+        }
     }
 }

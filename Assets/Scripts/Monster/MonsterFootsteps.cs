@@ -30,6 +30,7 @@ public class MonsterFootsteps : MonoBehaviour
     public MoveSettings investigate = new MoveSettings { name = "Investigate", maxSpeed = 0f, stepDistance = 4f, volume = 5f, echoRays = 2000, maxDistance = 10f, volForMonster = 0f };
     public MoveSettings chase = new MoveSettings { name = "Chase", maxSpeed = 0f, stepDistance = 5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 0f };
     public MoveSettings runAway = new MoveSettings { name = "Run Away", maxSpeed = 0f, stepDistance = 5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 0f };
+    public MoveSettings scriptedScene = new MoveSettings { name = "Scripted Scene", maxSpeed = 0f, stepDistance = 5f, volume = 10f, echoRays = 5000, maxDistance = 20f, volForMonster = 0f };
 
 
     private Vector3 lastPos;
@@ -76,6 +77,9 @@ public class MonsterFootsteps : MonoBehaviour
                 break;
             case MonsterMovementType.RunningAway:
                 currentSettings = runAway;
+                break;
+            case MonsterMovementType.ScriptedScene:
+                currentSettings = scriptedScene;
                 break;
         }
 

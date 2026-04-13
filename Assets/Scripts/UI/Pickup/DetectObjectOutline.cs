@@ -108,22 +108,17 @@ public class DetectObjectOutline : MonoBehaviour
         current.SetOutlined(false);
 
         var button = FindInTarget<DoorButton>(current);
+        var pickup = FindInTarget<PickupItem>(current);
+        var hide = FindInTarget<HideInBox>(current);
+        var crazyReset = FindInTarget<ResetCrazyEffect>(current);
+
         if (button != null)
         {
             button.Interact();
             current = null;
             return;
         }
-
-        var pickup = current.GetComponent<PickupItem>();
-        if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
-        if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
-
-        var hide = current.GetComponent<HideInBox>();
-        if (!hide) hide = current.GetComponentInParent<HideInBox>();
-        if (!hide) hide = current.GetComponentInChildren<HideInBox>();
-
-        if (pickup != null)
+        else if (pickup != null)
         {
             pickup.Interact();
         }
@@ -132,6 +127,10 @@ public class DetectObjectOutline : MonoBehaviour
             currHideBox = hide;
             hide.Interact();
             isHiding = true;
+        }
+        else if (crazyReset != null)
+        {
+            crazyReset.ResetEffect();
         }
 
         current = null;

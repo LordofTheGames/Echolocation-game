@@ -260,6 +260,8 @@ GameObject:
   - component: {fileID: 3073600552268709393}
   - component: {fileID: 896755040844005566}
   - component: {fileID: 7401529261617155565}
+  - component: {fileID: 1248414904700985948}
+  - component: {fileID: 4936531735122794685}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -300,7 +302,7 @@ CharacterController:
     m_Bits: 0
   m_ExcludeLayers:
     serializedVersion: 2
-    m_Bits: 263168
+    m_Bits: 262144
   m_LayerOverridePriority: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
@@ -409,12 +411,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cam: {fileID: 7774423660450900798}
-  maxDistance: 5
+  maxDistance: 4
   sphereRadius: 0.28
   loseDelay: 0.12
   interactMask:
     serializedVersion: 2
-    m_Bits: 131337
+    m_Bits: 1704201
   obstacleMask:
     serializedVersion: 2
     m_Bits: 53312
@@ -1048,7 +1050,7 @@ MonoBehaviour:
     volume: 1
     echoRays: 10000
     maxDistance: 20
-    volForMonster: 140
+    volForMonster: 160
   waterCrouch:
     name: Water Crouch
     stepDistance: 2
@@ -1069,7 +1071,7 @@ MonoBehaviour:
     volume: 0.35
     echoRays: 15000
     maxDistance: 30
-    volForMonster: 170
+    volForMonster: 190
   metalCrouch:
     name: Crouch
     stepDistance: 2
@@ -1090,7 +1092,7 @@ MonoBehaviour:
     volume: 1
     echoRays: 12000
     maxDistance: 25
-    volForMonster: 170
+    volForMonster: 190
   woodCrouch:
     name: Crouch
     stepDistance: 2
@@ -1111,7 +1113,7 @@ MonoBehaviour:
     volume: 1
     echoRays: 10000
     maxDistance: 20
-    volForMonster: 120
+    volForMonster: 140
   dirtCrouch:
     name: Crouch
     stepDistance: 2
@@ -1132,7 +1134,7 @@ MonoBehaviour:
     volume: 1
     echoRays: 10000
     maxDistance: 10
-    volForMonster: 76
+    volForMonster: 96
   labCrouch:
     name: Lab Crouch
     stepDistance: 2
@@ -1153,7 +1155,99 @@ MonoBehaviour:
     volume: 1
     echoRays: 10000
     maxDistance: 23
-    volForMonster: 140
+    volForMonster: 160
+--- !u!114 &1248414904700985948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d309f66dade0fa6478d06642300c9ca7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  blackScreenImage: {fileID: 0}
+  fadeInTime: 0.5
+  fadeOutTime: 1
+  waitTime: 1
+  RespawnPosition: {x: 0, y: 0, z: 0}
+  CurrentBox: {fileID: 0}
+--- !u!114 &4936531735122794685
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b8cbf91ca00ba234f84f08738844d6d2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Crazy1: {fileID: 8300000, guid: 3bc99e2ab426f1c4a97ed51a9968b42f, type: 3}
+  Crazy2: {fileID: 8300000, guid: 8f176169504e0a54db84e5a0d19511f9, type: 3}
+  MaxTime: 210
+  TimeBeforeStart: 90
+  lensDistortionData:
+    startingValue: 0
+    maxValue: -1
+    speed: 0.75
+  lensDistortionMinOscillationValue: -0.5
+  lensFlareData:
+    startingValue: 0
+    maxValue: 25
+    speed: 1
+  bloomData:
+    startingValue: 0.6
+    maxValue: 10
+    speed: 1
+  chromaticAberrationData:
+    startingValue: 0.2
+    maxValue: 1
+    speed: 1
+  whiteBalanceTempData:
+    startingValue: -15
+    maxValue: 4
+    speed: 1
+  whiteBalanceTintData:
+    startingValue: 0
+    maxValue: 16
+    speed: 1
+  vignetteData:
+    startingValue: 0.4
+    maxValue: 0.4
+    speed: 1
+  motionBlurData:
+    startingValue: 0.6
+    maxValue: 1
+    speed: 1
+  contrastData:
+    startingValue: 0
+    maxValue: -16
+    speed: 1
+  colourFilterRedData:
+    startingValue: 1
+    maxValue: 0.5377358
+    speed: 2
+  colourFilterGreenData:
+    startingValue: 1
+    maxValue: 0.2764774
+    speed: 2
+  colourFilterBlueData:
+    startingValue: 1
+    maxValue: 0.2764774
+    speed: 2
+  dirtIntensityData:
+    startingValue: 0
+    maxValue: 12
+    speed: 1
+  soundVolumeData:
+    startingValue: 0
+    maxValue: 0.63
+    speed: 0.3
+  soundVolumeMinOscillationValue: 0.25
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0
