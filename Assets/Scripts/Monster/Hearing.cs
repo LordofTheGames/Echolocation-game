@@ -29,7 +29,7 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive
 
             if (distance <= newMaxDist){
                 newSound = true;
-                newSource.transform.position = source;
+                newSource.location = source;
                 newSource.volume = volume;
                 newSource.isFootsteps = isFootsteps;
             }

@@ -2,7 +2,7 @@ using UnityEngine;
 
 public struct SoundData 
 {
-    public Transform transform;
+    public Vector3 location;
     public float volume;
     public bool isFootsteps;
 }
