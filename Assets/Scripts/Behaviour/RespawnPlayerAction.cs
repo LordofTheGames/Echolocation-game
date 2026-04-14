@@ -16,6 +16,7 @@ public partial class RespawnPlayerAction : Action
         PlayerRespawn script = Target.Value.GetComponent<PlayerRespawn>();
         if (script != null)
         {
+            script.Lives -= 1;
             script.RespawnPosition = ObjectPosition.Value.transform.position;
             script.Respawn();
         }

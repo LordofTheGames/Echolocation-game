@@ -484,7 +484,6 @@ public class EcholocationManager : MonoBehaviour
                 if (sensitiveTarget != null)
                 {
                     sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
-                    Debug.Log("Volume: " + maxRayVolume);
                 }
 
 
