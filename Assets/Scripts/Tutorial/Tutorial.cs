@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 
 public enum TutorialStates
 {
+    // THE ORDER OF THESE IS IMPORTANT:
+    // It is the order that the prompts will be displayed in!
+    // (when nextState is called, it will set the next state to be the next one on the list)
     START,
     GOAL,
     MIC,
@@ -27,28 +30,28 @@ public enum TutorialStates
     MONSTER,
     DIFFERENT_SURFACES,
     WATERFALL,
-    CONGRATS,
-    END
+    CONGRATS
 }
 
 public class Tutorial : MonoBehaviour
 {
     public static Tutorial Instance;
-    private float micRelVolume;
-    private GameObject player;
-    public GameObject warpPoint;
     
-    public float volume = 0.8f;
     public AudioSource audioSource;
-    // [SerializeField] private bool tutorial = true;
-    [SerializeField] private Target walk, sprint;
-    [SerializeField] private ThrowTarget target;
-    [SerializeField] private GameObject look;
-    [SerializeField] private Camera cam;
-    [SerializeField] private AudioClip monsterSound;
-    [SerializeField] private InventoryManager inventory;
+    public AudioClip monsterSound;
+    public float monsterSoundVolume = 0.8f;
 
+    public GameObject lookTarget, walkTarget, sprintTarget, throwTarget;
+    public GameObject look;
+    public Camera cam;
+    public InventoryManager inventory;
+    public GameObject spawnPointAfterExit;
+
+    private GameObject player;
+    private MicInput micInput;
     private Dictionary<TutorialStates, GameObject> states;
+    private Dictionary<TutorialStates, List<GameObject>> stateObjects;
+    private TutorialStates currentState;
 
     private void Awake(){
         if (Instance != null && Instance != this)
@@ -61,78 +64,91 @@ public class Tutorial : MonoBehaviour
     private void Start()
     {
         player = GameObject.FindGameObjectWithTag("Player");
+        micInput = GameObject.Find("MicInput").GetComponent<MicInput>();
 
-        walk.OnCollision += OnWalk;
-        sprint.OnCollision += OnSprint;
-        target.OnCollision += OnTargetThrow;
+        // register functions to be called when certain events are triggered (event listeners)
+        // for example, OnWalk is called when walkTarget's Target script triggers its OnCollision event
+        walkTarget.GetComponent<Target>().OnCollision += OnWalk;
+        sprintTarget.GetComponent<Target>().OnCollision += OnSprint;
+        throwTarget.GetComponentInChildren<ThrowTarget>().OnCollision += OnTargetThrow;
         inventory.OnInventoryChanged += OnPick;
         Breakable.OnRockBroken += OnBreakTutorial;
         HideInBox.OnPlayerHide += OnHideTutorial;
         HideInBox.OnPlayerExit += OnExitTutorial;
 
-
-        // animator.SetBool("Tutorial", tutorial);
-        micRelVolume = GameObject.Find("MicInput").GetComponent<MicInput>().relativeVolume;
-
+        states = new Dictionary<TutorialStates, GameObject>();
+        stateObjects = new Dictionary<TutorialStates, List<GameObject>>();
         foreach (TutorialStates state in Enum.GetValues(typeof(TutorialStates)))
         {
-            states.Add(state, transform.Find("Canvas/" + state.ToString()).gameObject);
+            GameObject stateGO = transform.Find("Canvas/" + state.ToString()).gameObject;
+            if (stateGO == null)
+            {
+                Debug.LogError("ERROR: Cannot find \"" + state.ToString() + "\" GameObject (for tutorial)");
+                continue;
+            }
+            states.Add(state, stateGO); 
+            states[state].SetActive(false);
+            stateObjects[state] = new List<GameObject>();
         }
+
+        // ----------- ADD STATE OBJECTS HERE --------------
+        // add any objects that you want shown/hidden along with the state's prompt (e.g. targets)
+        // they will then be shown/hidden automatically (when nextState is called)
+        // you can add multiple objects to one state, and they will all turn on/off together
+        stateObjects[TutorialStates.LOOK].Add(lookTarget);
+        stateObjects[TutorialStates.WALK].Add(walkTarget);
+        stateObjects[TutorialStates.SPRINT].Add(sprintTarget);
+        stateObjects[TutorialStates.THROW].Add(throwTarget);
+        stateObjects[TutorialStates.THROW_2].Add(throwTarget);
+        stateObjects[TutorialStates.EMITTER_THROW].Add(throwTarget);
+        stateObjects[TutorialStates.SONIC_GRENADE_THROW].Add(throwTarget);
+
+        foreach (KeyValuePair<TutorialStates, List<GameObject>> kvp in stateObjects)
+            foreach (GameObject obj in kvp.Value) obj.SetActive(false);
+
+        currentState = TutorialStates.START;
+        states[currentState].SetActive(true);
+        foreach (GameObject obj in stateObjects[currentState]) obj.SetActive(true);
     }
 
-    private void FixedUpdate()
+    private void Update()
     {
-        // if(micRelVolume > 0.1 && animator.GetCurrentAnimatorStateInfo(0).IsName("mic")) 
-            // animator.SetTrigger("Change");
+        if(currentState == TutorialStates.MIC && micInput.relativeVolume > 0.1) 
+            nextState();
     }
 
     public void OnSkip(InputAction.CallbackContext context)
     {
         if (context.started)
         {
-            // animator.SetBool("Tutorial", false);
-            // tutorial = false;
-            PlayerRespawn script = player.GetComponent<PlayerRespawn>();
-            script.RespawnPosition = warpPoint.transform.position;
-            script.Respawn();
-            player.GetComponent<CrazyTimer>().StartEffect();
+            StartCoroutine(ExitTutorialAfterWait(0));
         }
     }
 
     public void OnNext(InputAction.CallbackContext context)
     {
-        // if(animator.GetCurrentAnimatorStateInfo(0).IsName("waterfall"))
-            StartCoroutine(WaitBeforeStarting(5));
-        // if(context.started) animator.SetTrigger("Next");
-    }
-    private IEnumerator WaitBeforeStarting(float seconds)
-    {
-            yield return new WaitForSeconds(seconds);
-            PlayerRespawn script = player.GetComponent<PlayerRespawn>();
-            script.RespawnPosition = warpPoint.transform.position;
-            script.Respawn();
-            player.GetComponent<CrazyTimer>().StartEffect();
+        if(context.started) nextState();
     }
 
     public void OnEcho(InputAction.CallbackContext context)
     {
-        // if(animator.GetCurrentAnimatorStateInfo(0).IsName("clicker")) 
-        //     animator.SetTrigger("Change");
+        if (currentState == TutorialStates.CLICKER)
+            nextState();
     }
 
     public void OnLook(InputAction.CallbackContext context)
     {
         float angle = Vector3.Dot(cam.transform.forward, look.transform.up);
 
-        // if(animator.GetCurrentAnimatorStateInfo(0).IsName("look") && angle > 0.85) 
-        //     animator.SetTrigger("Change");
+        if(currentState == TutorialStates.LOOK && angle > 0.85) 
+            nextState();
     }
 
     public void OnWalk()
     {
         var script = player.GetComponent<PlayerMovement>();
-        // if (animator.GetCurrentAnimatorStateInfo(0).IsName("walk") && !script.GetSprint()) 
-        //     animator.SetTrigger("Change");
+        if (currentState == TutorialStates.WALK && !script.GetSprint()) 
+            nextState();
     }
 
     public void OnCrouch(InputAction.CallbackContext context)
@@ -140,85 +156,106 @@ public class Tutorial : MonoBehaviour
         var script = player.GetComponent<PlayerMovement>();
 
         //switch when you uncrouch
-        // if(context.performed && animator.GetCurrentAnimatorStateInfo(0).IsName("crouch") && !script.GetCrouch()) 
-        //     animator.SetTrigger("Change");
+        if(context.performed && currentState == TutorialStates.CROUCH && !script.GetCrouch()) 
+            nextState();
     }
 
     public void OnSprint()
     {
         var script = player.GetComponent<PlayerMovement>();
-        // if(animator.GetCurrentAnimatorStateInfo(0).IsName("sprint") && script.GetSprint()) 
-        //     animator.SetTrigger("Change");
+        if(currentState == TutorialStates.SPRINT && script.GetSprint()) 
+            nextState();
     }
 
     public void OnPick()
     {
-        // if(animator.GetCurrentAnimatorStateInfo(0).IsName("pick")) 
-        //     animator.SetTrigger("Change");
+        if(currentState == TutorialStates.PICK) 
+            nextState();
     }
 
     public void OnThrow(InputAction.CallbackContext context)
     {
-        // if (context.started && animator.GetCurrentAnimatorStateInfo(0).IsName("throw"))
-        //     animator.SetTrigger("Change");
+        if (context.started && currentState == TutorialStates.THROW)
+            nextState();
     }
 
     public void OnTargetThrow(string hitTag)
     {
-        // if(animator.GetCurrentAnimatorStateInfo(0).IsName("throw2") && hitTag == "Throwable Rock") 
-        // {
-        //     animator.SetTrigger("Change");
-        // }
-        // else if (animator.GetCurrentAnimatorStateInfo(0).IsName("emitter throw") && hitTag == "Throwable Emitter")
-        // {
-        //     animator.SetTrigger("Change");
-        // }
-        // else if (animator.GetCurrentAnimatorStateInfo(0).IsName("sonic grenade throw") && hitTag == "Throwable Grenade")
-        // {
-        //     animator.SetTrigger("Change");
-        // }
+        if(currentState == TutorialStates.THROW_2 && hitTag == "Throwable Rock") 
+        {
+            nextState();
+        }
+        else if (currentState == TutorialStates.EMITTER_THROW && hitTag == "Throwable Emitter")
+        {
+            nextState();
+        }
+        else if (currentState == TutorialStates.SONIC_GRENADE_THROW && hitTag == "Throwable Grenade")
+        {
+            nextState();
+        }
     }
-
-    // public void OnOpen(InputAction.CallbackContext context)
-    // {
-    //     if(animator.GetCurrentAnimatorStateInfo(0).IsName("openinventory")) 
-    //         animator.SetTrigger("Change");
-    // }
 
     public void OnChoose(InputAction.CallbackContext context)
     {
-        // if(animator.GetCurrentAnimatorStateInfo(0).IsName("choosing")) 
-        //     animator.SetTrigger("Change");
+        if(currentState == TutorialStates.CHOOSING) 
+            nextState();
     }
-
-    // public void OnSelect(InputAction.CallbackContext context)
-    // {
-    //     if(animator.GetCurrentAnimatorStateInfo(0).IsName("select")) 
-    //         animator.SetTrigger("Change");
-    // }
-
 
     public void OnBreakTutorial()
     {
-        // if (animator.GetCurrentAnimatorStateInfo(0).IsName("break"))
-        //     animator.SetTrigger("Change");
+        if (currentState == TutorialStates.BREAK)
+            nextState();
     }
 
     public void OnHideTutorial()
     {
-        // if (animator.GetCurrentAnimatorStateInfo(0).IsName("hide"))
-        //     animator.SetTrigger("Change");
+        if (currentState == TutorialStates.HIDE)
+            nextState();
     }
 
     public void OnExitTutorial()
     {
-        // if (animator.GetCurrentAnimatorStateInfo(0).IsName("exit hide"))
-        //     animator.SetTrigger("Change");
+        if (currentState == TutorialStates.EXIT_HIDE)
+            nextState();
     }
 
     public void PlayMonsterSound()
     {
-        audioSource.PlayOneShot(monsterSound, volume);
+        audioSource.PlayOneShot(monsterSound, monsterSoundVolume);
+    }
+
+    // advances currentState to the next TutorialStates enum member
+    private void nextState()
+    {
+        TutorialStates finalState = (TutorialStates)Enum.GetValues(typeof(TutorialStates)).Length - 1;
+        if (currentState == finalState)
+        {
+        } 
+        else
+        {
+            states[currentState].SetActive(false);
+            foreach (GameObject obj in stateObjects[currentState]) obj.SetActive(false);
+            currentState += 1;
+            states[currentState].SetActive(true);
+            foreach (GameObject obj in stateObjects[currentState]) obj.SetActive(true);
+
+            // reached second-to-last, and currently transitioning to last state
+            if (currentState == finalState) StartCoroutine(ExitTutorialAfterWait(5));
+        }
+    }
+
+    private IEnumerator ExitTutorialAfterWait(float seconds)
+    {
+            yield return new WaitForSeconds(seconds);
+
+            states[currentState].SetActive(false);
+            foreach (GameObject obj in stateObjects[currentState]) obj.SetActive(false);
+            transform.Find("Canvas/Panel").gameObject.SetActive(false);
+
+            PlayerRespawn script = player.GetComponent<PlayerRespawn>();
+            script.RespawnPosition = spawnPointAfterExit.transform.position;
+            script.Respawn();
+            player.GetComponent<CrazyTimer>().StartEffect();
     }
 
 }
