@@ -9,6 +9,7 @@ public enum TutorialStates
     // THE ORDER OF THESE IS IMPORTANT:
     // It is the order that the prompts will be displayed in!
     // (when nextState is called, it will set the next state to be the next one on the list)
+    // each enum value should have a corresponding GameObject (containing the text etc.) with EXACTLY the same name
     START,
     GOAL,
     MIC,
