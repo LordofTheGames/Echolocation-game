@@ -13,6 +13,8 @@ public class PlayerRespawn : MonoBehaviour
 
     public float fadeInTime = 1.0f; 
     public float fadeOutTime = 1.0f; 
+    public float textFadeInTime = 1.0f; 
+    public float textFadeOutTime = 1.0f; 
     public float waitTime = 1.0f;
 
     public Vector3 RespawnPosition;
@@ -58,15 +60,19 @@ public class PlayerRespawn : MonoBehaviour
 
         //fade to black
         float timer = 0f;
+        float offset = fadeInTime - textFadeInTime;
         Color c = blackScreenImage.color;
         Color ct = livesText.color;
         while (timer < fadeInTime)
         {
             timer += Time.deltaTime;
             c.a = timer / fadeInTime;
-            // ct.a = timer / fadeInTime;
             blackScreenImage.color = c;
-            // livesText.color = ct;
+            if (timer > offset)
+            {
+                ct.a = (timer - offset) / textFadeInTime;
+                livesText.color = ct;
+            }
             yield return null; 
         }
         c.a = 1;
@@ -103,19 +109,19 @@ public class PlayerRespawn : MonoBehaviour
         timer = 0f;
         c = blackScreenImage.color;
         ct = livesText.color;
-        ct.a = 0;
-        livesText.color = ct;
         while (timer < fadeOutTime)
         {
             timer += Time.deltaTime;
             c.a = 1f - (timer / fadeOutTime); 
-            // ct.a = 1f - (timer / fadeOutTime);
             blackScreenImage.color = c;
-            // livesText.color = ct;
+            ct.a = Mathf.Max(0, 1f - (timer / textFadeOutTime));
+            livesText.color = ct;
             yield return null;
         }
         c.a = 0;
         blackScreenImage.color = c;
+        ct.a = 0;
+        livesText.color = ct;
 
         isRespawning = false; 
     }
