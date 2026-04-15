@@ -271,24 +271,20 @@ public class Tutorial : MonoBehaviour
             states[currentState].SetActive(false);
             foreach (GameObject obj in stateObjects[currentState]) obj.SetActive(false);
             
-            currentState += 1; // The state moves forward here
+            currentState += 1; 
             
             states[currentState].SetActive(true);
             foreach (GameObject obj in stateObjects[currentState]) obj.SetActive(true);
 
-            // --- ADD THIS NEW INITIALIZATION BLOCK ---
             if (currentState == TutorialStates.MIC)
             {
-                micHoldTimer = 0f; // Reset the internal timer
+                micHoldTimer = 0f;
                 if (micFillBar != null)
                 {
-                    micFillBar.fillAmount = 0f; // Visually empty the circle
-                    micFillBar.color = Color.white; // Ensure it starts white, not red
+                    micFillBar.fillAmount = 0f; 
+                    micFillBar.color = Color.white; 
                 }
             }
-            // -----------------------------------------
-
-            // (Your existing CLICKER_COOLDOWN time scale logic would go here too!)
 
             if (currentState == finalState) StartCoroutine(ExitTutorialAfterWait(5));
         }
