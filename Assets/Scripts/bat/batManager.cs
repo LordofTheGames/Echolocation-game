@@ -71,13 +71,22 @@ public class BatFlockManager : MonoBehaviour
     public float skin = 0.05f;
 
     public Transform playerCam;
-    public float obscureTriggerDistance = 15f;
+    public float obscureTriggerDistance = 10f;
     public float obscureDistance = 1.5f;
+
+    [Range(0f, 1f)]
+    [SerializeField] float minRelativeVolume = 0.35f;
+    [Range(0f, 1f)]
+    [SerializeField] float minRelativePitch = 0.35f;
+    [SerializeField] float holdTimeToScare = 1.0f;
 
     InputAction scareBatsAction;
     bool isObscuring;
     float scaredUntil;
     public bool IsObscuring => isObscuring;
+
+    private MicInput micInput;
+    float micHoldTimer;
 
     public Vector3 GetObscureTargetPosition()
     {
@@ -90,12 +99,43 @@ public class BatFlockManager : MonoBehaviour
 
     [HideInInspector] public readonly List<BatMovement> agents = new();
 
+    void Awake()
+    {
+        var micGo = GameObject.Find("MicInput");
+        if (micGo != null)
+            micInput = micGo.GetComponent<MicInput>();
+    }
+
     void Update()
     {
         if (!centerBat || !playerCam) return;
-        // float distance = Vector3.Distance(playerCam.position, centerBat.transform.position);
-        // if (!isObscuring && Time.time > scaredUntil && distance < obscureTriggerDistance)
-        //     isObscuring = true;
+        float distance = Vector3.Distance(playerCam.position, centerBat.transform.position);
+        bool inRange = distance < obscureTriggerDistance;
+
+        if (micInput != null)
+        {
+            if (!inRange)
+            {
+                micHoldTimer = 0f;
+            }
+            else if (micInput.relativePitch >= minRelativePitch && micInput.relativeVolume >= minRelativeVolume)
+            {
+                micHoldTimer += Time.deltaTime;
+                if (micHoldTimer >= holdTimeToScare)
+                {
+                    micHoldTimer = 0f;
+                    isObscuring = false;
+                    scaredUntil = Time.time + 4f;
+                }
+            }
+            else
+            {
+                micHoldTimer = 0f;
+            }
+        }
+
+        if (!isObscuring && Time.time > scaredUntil && distance < obscureTriggerDistance)
+            isObscuring = true;
     }
 
     void Start()
@@ -130,8 +170,14 @@ public class BatFlockManager : MonoBehaviour
             pos.y = spawnHeight + Random.Range(-0.2f, 0.2f);
 
             var go = Instantiate(batPrefab, pos, Quaternion.identity);
-            GlobalEchoSystem system = GameObject.Find("GlobalEchoSystem").GetComponent<GlobalEchoSystem>();
-            system.RegisterCollider(go.GetComponent<MeshCollider>());
+            var globalEcho = GameObject.Find("GlobalEchoSystem");
+            if (globalEcho != null)
+            {
+                var system = globalEcho.GetComponent<GlobalEchoSystem>();
+                var meshCol = go.GetComponent<MeshCollider>();
+                if (system != null && meshCol != null)
+                    system.RegisterCollider(meshCol);
+            }
 
             var agent = go.GetComponent<BatMovement>();
             if (!agent) agent = go.AddComponent<BatMovement>();
@@ -145,8 +191,8 @@ public class BatFlockManager : MonoBehaviour
     {
         if (context.performed)
         {
-            // isObscuring = false;
-            // scaredUntil = Time.time + 4f;
+            isObscuring = false;
+            scaredUntil = Time.time + 4f;
         }
     }
 
