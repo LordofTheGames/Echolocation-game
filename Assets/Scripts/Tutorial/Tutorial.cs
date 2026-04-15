@@ -53,6 +53,10 @@ public class Tutorial : MonoBehaviour
     private Dictionary<TutorialStates, GameObject> states;
     private Dictionary<TutorialStates, List<GameObject>> stateObjects;
     private TutorialStates currentState;
+    private bool hasFinishedTutorial = false;
+
+    private float micHoldTimer = 0;
+    private float requiredMicTime = 1.5f;
 
     private void Awake(){
         if (Instance != null && Instance != this)
@@ -114,14 +118,22 @@ public class Tutorial : MonoBehaviour
 
     private void Update()
     {
-        if(currentState == TutorialStates.MIC && micInput.relativeVolume > 0.1) 
-            nextState();
+        if(currentState == TutorialStates.MIC && micInput.relativeVolume > 0.001f)
+        {
+            micHoldTimer += Time.deltaTime; 
+            if (micHoldTimer >= requiredMicTime)
+            {
+                micHoldTimer = 0f;
+                nextState();
+            }
+        } 
     }
 
     public void OnSkip(InputAction.CallbackContext context)
     {
-        if (context.started)
+        if (context.started && !hasFinishedTutorial)
         {
+            hasFinishedTutorial = true;
             StartCoroutine(ExitTutorialAfterWait(0));
         }
     }
@@ -228,6 +240,8 @@ public class Tutorial : MonoBehaviour
     // advances currentState to the next TutorialStates enum member
     private void nextState()
     {
+        if (hasFinishedTutorial) return;
+
         TutorialStates finalState = (TutorialStates)Enum.GetValues(typeof(TutorialStates)).Length - 1;
         if (currentState == finalState)
         {
@@ -247,6 +261,8 @@ public class Tutorial : MonoBehaviour
 
     private IEnumerator ExitTutorialAfterWait(float seconds)
     {
+
+            hasFinishedTutorial = true;
             yield return new WaitForSeconds(seconds);
 
             states[currentState].SetActive(false);
