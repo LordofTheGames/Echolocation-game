@@ -15,6 +15,7 @@ public enum TutorialStates
     START,
     GOAL,
     MIC,
+    WARNING,
     CLICKER,
     CLICKER_COOLDOWN,
     LOOK,
@@ -59,7 +60,7 @@ public class Tutorial : MonoBehaviour
     private TutorialStates currentState;
     private bool hasFinishedTutorial = false;
 
-    private float micHoldTimer = 0;
+    private float micHoldTimer = 0f;
     private float requiredMicTime = 1.5f;
 
     private void Awake(){
@@ -131,7 +132,10 @@ public class Tutorial : MonoBehaviour
             if (micFillBar != null)
             {
                 micFillBar.fillAmount = micHoldTimer / requiredMicTime;
-                micFillBar.color = Color.Lerp(Color.white, Color.red, micFillBar.fillAmount);
+                if (micFillBar.fillAmount > 0.5)
+                    {
+                        micFillBar.color = Color.Lerp(Color.white, Color.white, micFillBar.fillAmount);
+                    }
             }
 
             if (micHoldTimer >= requiredMicTime)
@@ -140,15 +144,6 @@ public class Tutorial : MonoBehaviour
                 if (micFillBar != null) micFillBar.fillAmount = 0f; 
                 PlayMonsterSound(); 
                 nextState();
-            }
-        }
-        else 
-        {
-            micHoldTimer = Mathf.Max(0, micHoldTimer - Time.deltaTime);
-            if (micFillBar != null)
-            {
-                micFillBar.fillAmount = micHoldTimer / requiredMicTime;
-                micFillBar.color = Color.Lerp(Color.white, Color.red, micFillBar.fillAmount);
             }
         }
     }
@@ -275,15 +270,29 @@ public class Tutorial : MonoBehaviour
         {
             states[currentState].SetActive(false);
             foreach (GameObject obj in stateObjects[currentState]) obj.SetActive(false);
-            currentState += 1;
+            
+            currentState += 1; // The state moves forward here
+            
             states[currentState].SetActive(true);
             foreach (GameObject obj in stateObjects[currentState]) obj.SetActive(true);
 
-            // reached second-to-last, and currently transitioning to last state
+            // --- ADD THIS NEW INITIALIZATION BLOCK ---
+            if (currentState == TutorialStates.MIC)
+            {
+                micHoldTimer = 0f; // Reset the internal timer
+                if (micFillBar != null)
+                {
+                    micFillBar.fillAmount = 0f; // Visually empty the circle
+                    micFillBar.color = Color.white; // Ensure it starts white, not red
+                }
+            }
+            // -----------------------------------------
+
+            // (Your existing CLICKER_COOLDOWN time scale logic would go here too!)
+
             if (currentState == finalState) StartCoroutine(ExitTutorialAfterWait(5));
         }
     }
-
     private IEnumerator ExitTutorialAfterWait(float seconds)
     {
             hasFinishedTutorial = true;
