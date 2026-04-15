@@ -2,7 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.InputSystem;
+using System.Reflection;
 
 public enum TutorialStates
 {
@@ -47,6 +49,8 @@ public class Tutorial : MonoBehaviour
     public Camera cam;
     public InventoryManager inventory;
     public GameObject spawnPointAfterExit;
+
+    public Image micFillBar;
 
     private GameObject player;
     private MicInput micInput;
@@ -117,17 +121,38 @@ public class Tutorial : MonoBehaviour
     }
 
     private void Update()
+{
+    if (currentState == TutorialStates.MIC)
     {
-        if(currentState == TutorialStates.MIC && micInput.relativeVolume > 0.001f)
+        // Player is making noise
+        if (micInput.relativeVolume > 0.1f)
         {
-            micHoldTimer += Time.deltaTime; 
+            micHoldTimer += Time.deltaTime;
+            if (micFillBar != null)
+            {
+                micFillBar.fillAmount = micHoldTimer / requiredMicTime;
+                micFillBar.color = Color.Lerp(Color.white, Color.red, micFillBar.fillAmount);
+            }
+
             if (micHoldTimer >= requiredMicTime)
             {
-                micHoldTimer = 0f;
+                micHoldTimer = 0f; 
+                if (micFillBar != null) micFillBar.fillAmount = 0f; 
+                PlayMonsterSound(); 
                 nextState();
             }
-        } 
+        }
+        else 
+        {
+            micHoldTimer = Mathf.Max(0, micHoldTimer - Time.deltaTime);
+            if (micFillBar != null)
+            {
+                micFillBar.fillAmount = micHoldTimer / requiredMicTime;
+                micFillBar.color = Color.Lerp(Color.white, Color.red, micFillBar.fillAmount);
+            }
+        }
     }
+}
 
     public void OnSkip(InputAction.CallbackContext context)
     {
@@ -261,7 +286,6 @@ public class Tutorial : MonoBehaviour
 
     private IEnumerator ExitTutorialAfterWait(float seconds)
     {
-
             hasFinishedTutorial = true;
             yield return new WaitForSeconds(seconds);
 
