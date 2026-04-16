@@ -88,6 +88,7 @@ public class PlayerFootsteps : MonoBehaviour
     private float distanceTraveled;
     private MoveSettings currentSettings;
     private bool isRightFoot = false;
+    [SerializeField] private float teleportDistanceThreshold = 3f;
 
     void Start()
     {
@@ -107,6 +108,12 @@ public class PlayerFootsteps : MonoBehaviour
         currentPos = transform.position;
         currentPos.y = 0;
         float moveDistance = Vector3.Distance(currentPos, lastPos);
+
+        if (moveDistance > teleportDistanceThreshold)
+        {
+            distanceTraveled = 0f;
+            return;
+        }
 
         UpdateCurrentSettings();
 
