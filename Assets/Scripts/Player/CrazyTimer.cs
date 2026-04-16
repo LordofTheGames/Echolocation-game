@@ -14,14 +14,18 @@ public class CrazyTimer : MonoBehaviour
         public float speed;
     }
 
+    public bool isSprinting = false;
     public AudioClip Crazy1;
     public AudioClip Crazy2;
 
     public float EffectTime = 30;
     public float TimeBeforeStart = 20;
+    public float SprintEffectTime = 5f; 
+    public float SprintRecoverySpeed = 3f;
 
     public EffectData lensDistortionData = new EffectData { startingValue = 0, maxValue = -1, speed = 1 };
     public float lensDistortionMinOscillationValue = -0.5f;
+    public float lensDistortionMaxWhenSprinting = -0.6f;
     public EffectData lensFlareData = new EffectData { startingValue = 0, maxValue = 25, speed = 1 };
     public EffectData bloomData = new EffectData { startingValue = 0.6f, maxValue = 10, speed = 1 };
     public EffectData chromaticAberrationData = new EffectData { startingValue = 0.2f, maxValue = 1, speed = 1 };
@@ -48,8 +52,10 @@ public class CrazyTimer : MonoBehaviour
     private ColorAdjustments colourAdjustments;
     private Color colour;
     private bool playEffect = false;
-
-    private float time = 0;
+    
+    private float baseTime = 0;
+    private float sprintTimeOffset = 0;
+    
     private AudioSource crazy1Source;
     private AudioSource crazy2Source;
     private bool soundPlaying;
@@ -103,61 +109,93 @@ public class CrazyTimer : MonoBehaviour
     {
         if (!playEffect) return;
 
-        time += Time.deltaTime;
-        if (time >= TimeBeforeStart)
+        baseTime += Time.deltaTime;
+        if (isSprinting)
         {
-            if (!soundPlaying)
-            {
-                crazy1Source.volume = soundVolumeData.startingValue;
-                crazy1Source.Play();
-                crazy2Source.volume = soundVolumeData.startingValue;
-                crazy2Source.Play();
-                soundPlaying = true;
-            }
+            if (baseTime + sprintTimeOffset < TimeBeforeStart)
+                sprintTimeOffset = TimeBeforeStart - baseTime;
 
-            float percent = Mathf.Clamp01((time - TimeBeforeStart) / EffectTime);
+            float dynamicMultiplier = EffectTime / SprintEffectTime;
+            sprintTimeOffset += Time.deltaTime * (dynamicMultiplier - 1f);
+        }
+        else if (sprintTimeOffset > 0)
+        {
+            float rewindSpeed = EffectTime / SprintRecoverySpeed;
+            sprintTimeOffset = Mathf.MoveTowards(sprintTimeOffset, 0f, Time.deltaTime * rewindSpeed);
+        }
+        float time = baseTime + sprintTimeOffset;
 
-            bloom.intensity.Override(calcValue(bloomData, percent));
-            bloom.dirtIntensity.Override(calcValue(dirtIntensityData, percent));
-            chromaticAberration.intensity.Override(calcValue(chromaticAberrationData, percent));
-            lensFlare.intensity.Override(calcValue(lensFlareData, percent));
-            whiteBalance.temperature.Override(calcValue(whiteBalanceTempData, percent));
-            whiteBalance.tint.Override(calcValue(whiteBalanceTintData, percent));
-            vignette.intensity.Override(calcValue(vignetteData, percent));
-            motionBlur.intensity.Override(calcValue(motionBlurData, percent));
-            
-            colour.r = calcValue(colourFilterRedData, percent * colourFilterRedData.speed);
-            colour.g = calcValue(colourFilterGreenData, percent * colourFilterGreenData.speed);
-            colour.b = calcValue(colourFilterBlueData, percent * colourFilterBlueData.speed);
-            colourAdjustments.colorFilter.Override(colour);
 
-            if (percent * 1.75f < 1)
-            {
-                lensDistortion.intensity.Override(calcValue(lensDistortionData, percent * 1.75f));
-            }
-            else
-            {
-                if (lensDistortionTimeBeforeStart == 0) lensDistortionTimeBeforeStart = time;
-                float lensDistPercent = (Mathf.Cos((time - lensDistortionTimeBeforeStart) * lensDistortionData.speed) + 1f) / 2f; 
-                float oscillatedDistortion = Mathf.Lerp(lensDistortionMinOscillationValue, lensDistortionData.maxValue, lensDistPercent);
-                lensDistortion.intensity.Override(oscillatedDistortion);
-            }
+        if (time < TimeBeforeStart && soundPlaying)
+        {
+            soundPlaying = false;
+            crazy1Source.Stop();
+            crazy2Source.Stop();
+        }
 
-            float newVolume;
-            if (percent < 1)
-            {
-                newVolume = calcValue(soundVolumeData, percent);
-            }
-            else
-            {
-                if (volumeTimeBeforeStart == 0) volumeTimeBeforeStart = time;
-                float volumePercent = (Mathf.Cos((time - volumeTimeBeforeStart) * soundVolumeData.speed) + 1f) / 2f; 
-                newVolume = Mathf.Lerp(soundVolumeMinOscillationValue, soundVolumeData.maxValue, volumePercent);
-            }
-            
-            crazy1Source.volume = newVolume;
-            crazy2Source.volume = newVolume;
-            float pitchPercent = (Mathf.Cos(time * 0.22f) + 1f) / 2f; 
+        if (time >= TimeBeforeStart && !soundPlaying)
+        {
+            crazy1Source.volume = soundVolumeData.startingValue;
+            crazy1Source.Play();
+            crazy2Source.volume = soundVolumeData.startingValue;
+            crazy2Source.Play();
+            soundPlaying = true;
+        }
+        float percent = Mathf.Clamp01((time - TimeBeforeStart) / EffectTime);
+
+        bloom.intensity.Override(calcValue(bloomData, percent));
+        bloom.dirtIntensity.Override(calcValue(dirtIntensityData, percent));
+        chromaticAberration.intensity.Override(calcValue(chromaticAberrationData, percent));
+        lensFlare.intensity.Override(calcValue(lensFlareData, percent));
+        whiteBalance.temperature.Override(calcValue(whiteBalanceTempData, percent));
+        whiteBalance.tint.Override(calcValue(whiteBalanceTintData, percent));
+        vignette.intensity.Override(calcValue(vignetteData, percent));
+        motionBlur.intensity.Override(calcValue(motionBlurData, percent));
+        
+        colour.r = calcValue(colourFilterRedData, percent * colourFilterRedData.speed);
+        colour.g = calcValue(colourFilterGreenData, percent * colourFilterGreenData.speed);
+        colour.b = calcValue(colourFilterBlueData, percent * colourFilterBlueData.speed);
+        colourAdjustments.colorFilter.Override(colour);
+
+        float targetDistortion, distortionPercent;
+        if (isSprinting || sprintTimeOffset > 0) distortionPercent = percent;
+        else distortionPercent = percent * 1.75f;
+        if (distortionPercent < 1 || isSprinting || sprintTimeOffset > 0)  // oscillation "bounce" doesnt look good when player stops sprinting
+        {
+            if (isSprinting || sprintTimeOffset > 0)
+                targetDistortion = Mathf.Lerp(lensDistortionData.startingValue, lensDistortionMaxWhenSprinting, Mathf.Clamp01(distortionPercent));
+            else 
+                targetDistortion = calcValue(lensDistortionData, distortionPercent);
+            lensDistortionTimeBeforeStart = 0;
+        }
+        else
+        {
+            if (lensDistortionTimeBeforeStart == 0) lensDistortionTimeBeforeStart = baseTime;
+            float lensDistPercent = (Mathf.Cos((baseTime - lensDistortionTimeBeforeStart) * lensDistortionData.speed) + 1f) / 2f; 
+            targetDistortion = Mathf.Lerp(lensDistortionMinOscillationValue, lensDistortionData.maxValue, lensDistPercent);
+        }
+        float smoothedDistortion = Mathf.MoveTowards(lensDistortion.intensity.value, targetDistortion, Time.deltaTime * 3f);
+        lensDistortion.intensity.Override(smoothedDistortion);
+
+        float targetVolume;
+        if (percent < 1)
+        {
+            targetVolume = calcValue(soundVolumeData, percent);
+            volumeTimeBeforeStart = 0;
+        }
+        else
+        {
+            if (volumeTimeBeforeStart == 0) volumeTimeBeforeStart = baseTime;
+            float volumePercent = (Mathf.Cos((baseTime - volumeTimeBeforeStart) * soundVolumeData.speed) + 1f) / 2f; 
+            targetVolume = Mathf.Lerp(soundVolumeMinOscillationValue, soundVolumeData.maxValue, volumePercent);
+        }
+        float smoothedVolume = Mathf.MoveTowards(crazy1Source.volume, targetVolume, Time.deltaTime * 3f);
+        
+        if (soundPlaying)
+        {
+            crazy1Source.volume = smoothedVolume;
+            crazy2Source.volume = smoothedVolume;
+            float pitchPercent = (Mathf.Cos(baseTime * 0.22f) + 1f) / 2f; 
             float newPitch = 0.7f + Mathf.Min(0.5f * pitchPercent, 0.5f);
             crazy1Source.pitch = newPitch;
             crazy2Source.pitch = newPitch;
@@ -187,7 +225,10 @@ public class CrazyTimer : MonoBehaviour
 
     public void ResetEffect()
     {
-        time = 0;
+        baseTime = 0;
+        sprintTimeOffset = 0;
+        isSprinting = false;
+        
         volumeTimeBeforeStart = 0;
         lensDistortionTimeBeforeStart = 0;
         

@@ -26,7 +26,8 @@ public class PlayerMovement : MonoBehaviour
     private float defaultCamY;
     private PlayerFootsteps footstepsScript;
 
-    
+    private CrazyTimer crazyTimer;
+
 
     // hold shift
     public void OnSprint(InputAction.CallbackContext context)
@@ -92,6 +93,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         footstepsScript = gameObject.GetComponent<PlayerFootsteps>();
+        crazyTimer = gameObject.GetComponent<CrazyTimer>();
         defaultCamY = cameraTransform.localPosition.y;
     }
     // Update is called once per frame
@@ -115,7 +117,7 @@ public class PlayerMovement : MonoBehaviour
         // if crouching, sprinting is not allowed
         bool sprintAllowed = !isCrouching;
 
-        float currentSpeed;
+        float currentSpeed = walkSpeed;
         if (isCrouching)
         {
             currentSpeed = crouchSpeed;
@@ -130,11 +132,9 @@ public class PlayerMovement : MonoBehaviour
                 footstepsScript.CurrentState = MoveState.WALK;
             }
         }
-        else // walking
-        {
-            currentSpeed = walkSpeed;
-        }
-        
+
+        // play crazy effect faster if sprinting, turn it off if not
+        crazyTimer.isSprinting = isSprinting;
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         controller.Move(currentSpeed * Time.deltaTime * move);
