@@ -115,10 +115,11 @@ public class PlayerMovement : MonoBehaviour
         // if crouching, sprinting is not allowed
         bool sprintAllowed = !isCrouching;
 
-        float currentSpeed = walkSpeed;
-
+        float currentSpeed;
         if (isCrouching)
+        {
             currentSpeed = crouchSpeed;
+        }
         else if (sprintAllowed && isSprinting)
         {
             currentSpeed = sprintSpeed;
@@ -128,6 +129,10 @@ public class PlayerMovement : MonoBehaviour
                 isSprinting = false;
                 footstepsScript.CurrentState = MoveState.WALK;
             }
+        }
+        else // walking
+        {
+            currentSpeed = walkSpeed;
         }
         
 

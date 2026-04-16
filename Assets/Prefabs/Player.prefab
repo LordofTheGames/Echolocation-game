@@ -261,7 +261,7 @@ GameObject:
   - component: {fileID: 896755040844005566}
   - component: {fileID: 7401529261617155565}
   - component: {fileID: 1248414904700985948}
-  - component: {fileID: 4936531735122794685}
+  - component: {fileID: 2610361652763653379}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -1178,7 +1178,7 @@ MonoBehaviour:
   waitTime: 2
   RespawnPosition: {x: 0, y: 0, z: 0}
   CurrentBox: {fileID: 0}
---- !u!114 &4936531735122794685
+--- !u!114 &2610361652763653379
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1187,12 +1187,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 5235627052445221193}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8cbf91ca00ba234f84f08738844d6d2, type: 3}
+  m_Script: {fileID: 11500000, guid: 2178cd53c9ae7284e8a7205aba51259a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   Crazy1: {fileID: 8300000, guid: 3bc99e2ab426f1c4a97ed51a9968b42f, type: 3}
   Crazy2: {fileID: 8300000, guid: 8f176169504e0a54db84e5a0d19511f9, type: 3}
-  MaxTime: 210
+  EffectTime: 210
   TimeBeforeStart: 90
   lensDistortionData:
     startingValue: 0
@@ -1234,17 +1234,17 @@ MonoBehaviour:
   colourFilterRedData:
     startingValue: 1
     maxValue: 0.5377358
-    speed: 2
+    speed: 3
   colourFilterGreenData:
     startingValue: 1
     maxValue: 0.2764774
-    speed: 2
+    speed: 3
   colourFilterBlueData:
     startingValue: 1
     maxValue: 0.2764774
-    speed: 2
+    speed: 3
   dirtIntensityData:
-    startingValue: 0
+    startingValue: 0.1
     maxValue: 12
     speed: 1
   soundVolumeData:
