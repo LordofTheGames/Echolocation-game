@@ -143,6 +143,7 @@ public class MonsterDifficultyManager : MonoBehaviour
 
     public void OnPlayerDeath()
     {
+        return;
         // ----------------- Patrol Variables -----------------
         MoveSpeed_Patrol -= 1;
         TurnSpeed_Patrol -= 1;
