@@ -479,11 +479,14 @@ public class EcholocationManager : MonoBehaviour
 
                 // Alert the monster with the volume and the source of the ray
                 GameObject monster = GameObject.Find("Monster");
-                INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
-
-                if (sensitiveTarget != null)
+                if (monster != null)
                 {
-                    sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
+                    INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
+
+                    if (sensitiveTarget != null)
+                    {
+                        sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
+                    }
                 }
 
 
