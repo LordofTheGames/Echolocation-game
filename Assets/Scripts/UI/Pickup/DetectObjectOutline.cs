@@ -11,7 +11,7 @@ public class DetectObjectOutline : MonoBehaviour
     // [SerializeField] private float sphereRadius = 0.28f;
     // prevents flickering
     [SerializeField] private float loseDelay = 0.12f;
-    [SerializeField] private float pickupAngle = 100f;
+    [SerializeField] private float pickupAngle = 90f;
 
     [SerializeField] private LayerMask interactMask = ~0; 
     [SerializeField] private LayerMask obstacleMask = ~0; 
