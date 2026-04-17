@@ -532,11 +532,18 @@ public class EcholocationManager : MonoBehaviour
             }
         }
 
-        // If monster echo and "seen" player - actually alert the monster
-        if (monsterSeenPlayer)
+        // If monster echo, send the number of rays the hit the player to the monster - even if 0
+        if (isMonsterEcho)
         {
-            // TODO: method to actually alert Monster - Just give the player current location instead of ray hitpoint?
-            Debug.Log("Monster has seen the player with " + monsterSeenPlayerHits + " hits");
+            // Debug.Log("Monster has seen the player with " + monsterSeenPlayerHits + " hits");
+
+            GameObject monster = GameObject.Find("Monster");
+            IEchoSeesPlayerSensitive sensitiveTarget = monster.GetComponent<IEchoSeesPlayerSensitive>();
+
+            if (sensitiveTarget != null)
+            {
+                sensitiveTarget.OnMonsterEcholocation(monsterSeenPlayerHits);
+            }
         }
 
         // Final cleanup
