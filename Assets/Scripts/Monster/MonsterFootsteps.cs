@@ -118,6 +118,6 @@ public class MonsterFootsteps : MonoBehaviour
         float visualVolume = currentSettings.maxDistance * 2f;
         // Trigger Echo
         // We use footPos as origin, and transform.forward for direction (though if angle is 360, direction doesn't matter)
-        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, visualVolume, currentSettings.volForMonster, true);
+        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, visualVolume, currentSettings.volForMonster, true, isMonsterEcholocation: true);
     }
 }

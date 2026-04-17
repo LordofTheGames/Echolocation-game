@@ -323,6 +323,8 @@ public class EcholocationManager : MonoBehaviour
     {
         // If it's a monster echolocation and it "sees" the player set to true
         bool monsterSeenPlayer = false;
+        // Count number of hits
+        int monsterSeenPlayerHits = 0;
 
         GameObject sourceObj = (objectToIgnore != null) ? objectToIgnore : this.gameObject;
 
@@ -422,24 +424,32 @@ public class EcholocationManager : MonoBehaviour
 
                 // --- Assign colours (main thread unpacking) ---
                 int currentBounceHits = visualHits.Length;
+                int renderedHitsThisBounce = 0; // Track valid hits to prevent gaps in GPU arrays - player hits aren't rendered
 
                 // Unpack visual data and assign colours
                 for (int k  = 0; k < currentBounceHits; k++)
                 {
                     VisualHit vHit = visualHits[k];
 
-                    // Use global index so bounce 1 doesn't overwrite bounce 0
-                    int globalIndex = activeHitCount + k;
-
-                    if (globalIndex >= instanceMatrices.Length) break; // Safety if goes past safeBufferSize
-
-                    instanceMatrices[globalIndex] = vHit.matrix;
-
                     // If the monster produced the echolocation and the rays hit the player (using player category) alert monster
                     if (isMonsterEcho && (vHit.colorCategory == 13))
                     {
                         monsterSeenPlayer = true;
+                        monsterSeenPlayerHits++;
                     }
+
+                    // Skip this hit if it was a player hit so that it is not rendered
+                    if (vHit.colorCategory == 13)
+                    {
+                        continue;
+                    }
+
+                    // Use global index so bounce 1 doesn't overwrite bounce 0
+                    int globalIndex = activeHitCount + renderedHitsThisBounce;
+
+                    if (globalIndex >= instanceMatrices.Length) break; // Safety if goes past safeBufferSize
+
+                    instanceMatrices[globalIndex] = vHit.matrix;
 
                     // Assign colour
                     Color baseColor;
@@ -476,9 +486,11 @@ public class EcholocationManager : MonoBehaviour
 
                     // Calculate reveal time
                     instanceRevealTimes[globalIndex] = useSoundPropagation ? vHit.travelDistance / soundSpeed : 0f;
+
+                    renderedHitsThisBounce++;
                 }
 
-                activeHitCount += currentBounceHits;
+                activeHitCount += renderedHitsThisBounce;
                         
                 //TODO: add this when we have multiple ray bounces working
                 // Get the hit with the highest volume - makes the most sense for the monster to be interested in
@@ -524,7 +536,7 @@ public class EcholocationManager : MonoBehaviour
         if (monsterSeenPlayer)
         {
             // TODO: method to actually alert Monster - Just give the player current location instead of ray hitpoint?
-            Debug.Log("Monster has seen the Player");
+            Debug.Log("Monster has seen the player with " + monsterSeenPlayerHits + " hits");
         }
 
         // Final cleanup
