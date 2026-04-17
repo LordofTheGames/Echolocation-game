@@ -523,7 +523,7 @@ public class EcholocationManager : MonoBehaviour
         // If monster echo and "seen" player - actually alert the monster
         if (monsterSeenPlayer)
         {
-            // TODO: method to actually alert Monster
+            // TODO: method to actually alert Monster - Just give the player current location instead of ray hitpoint?
             Debug.Log("Monster has seen the Player");
         }
 
