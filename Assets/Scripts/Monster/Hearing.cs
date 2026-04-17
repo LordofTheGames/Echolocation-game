@@ -38,7 +38,7 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive, IEchoSeesPlayerSen
 
     public void OnMonsterEcholocation(int monsterSeenPlayerHits)
     {
-        Debug.Log("Monster seen player hits: " + monsterSeenPlayerHits);
+        // Debug.Log("Monster seen player hits: " + monsterSeenPlayerHits);
     }
 
     // called every frame by monster behaviour tree to check for new sounds
