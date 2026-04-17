@@ -131,6 +131,7 @@ public class GlobalEchoSystem : MonoBehaviour
     public LayerMask waterLayer;
     public LayerMask keyLayer;
     public LayerMask pillBoxLayer;
+    public LayerMask playerLayer;
 
     void Start()
     {
@@ -166,6 +167,7 @@ public class GlobalEchoSystem : MonoBehaviour
         if ((batLayer.value & layerMask) > 0) return 10;            // Bat
         if ((keyLayer.value & layerMask) > 0) return 11;            // Key
         if ((pillBoxLayer.value & layerMask) > 0) return 12;        // Pill Box
+        if ((playerLayer.value & layerMask) > 0) return 13;         // Player
         return 0;                                                   // Default
     }
 
