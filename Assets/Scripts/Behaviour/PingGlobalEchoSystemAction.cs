@@ -38,7 +38,7 @@ public partial class PingGlobalEchoSystemAction : Action
         if (soundNum == 1) audioSource.Value.PlayOneShot(sound1, soundVolume);
         if (soundNum == 2) audioSource.Value.PlayOneShot(sound2, soundVolume);
 
-        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + positionOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume);
+        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + positionOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true);
         return Status.Running;
     }
 

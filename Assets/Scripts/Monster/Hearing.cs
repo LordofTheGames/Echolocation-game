@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class HearingChecker : MonoBehaviour, INoiseSensitive
+public class HearingChecker : MonoBehaviour, INoiseSensitive, IEchoSeesPlayerSensitive
 {
     public float maxSoundDistance = 30f;
     public float AgentEyeHeight = 3.9f;
@@ -34,6 +34,11 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive
                 newSource.isFootsteps = isFootsteps;
             }
         }
+    }
+
+    public void OnMonsterEcholocation(int monsterSeenPlayerHits)
+    {
+        // Debug.Log("Monster seen player hits: " + monsterSeenPlayerHits);
     }
 
     // called every frame by monster behaviour tree to check for new sounds
