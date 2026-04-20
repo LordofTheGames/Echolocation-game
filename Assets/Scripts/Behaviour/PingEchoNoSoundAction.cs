@@ -28,7 +28,7 @@ public partial class PingEchoNoSoundAction : Action
 
     protected override Status OnStart()
     {
-        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + positionOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume);
+        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + positionOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true);
         return Status.Running;
     }
 
