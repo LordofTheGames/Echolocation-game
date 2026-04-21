@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class SimpleOverlayMap : MonoBehaviour
 {
@@ -24,8 +25,9 @@ public class SimpleOverlayMap : MonoBehaviour
     private static Sprite s_playerDotSprite;
 
     private bool _visible;
-    private bool _hasDistanceReference;
-    private float _distanceReference;
+
+    private List<Vector3> _blueDotWorldPositions = new List<Vector3>();
+    private List<RectTransform> _blueDotRects = new List<RectTransform>();
 
     private void Awake()
     {
@@ -59,7 +61,7 @@ public class SimpleOverlayMap : MonoBehaviour
 
     private static bool WasMapTogglePressedThisFrame()
     {
-        var kb = Keyboard.current ?? UnityEngine.InputSystem.InputSystem.GetDevice<Keyboard>();
+        var kb = Keyboard.current ?? InputSystem.GetDevice<Keyboard>();
         bool fromNew = kb != null && kb.xKey.wasPressedThisFrame;
         bool fromOld = Input.GetKeyDown(KeyCode.X);
         return fromNew || fromOld;
@@ -70,11 +72,6 @@ public class SimpleOverlayMap : MonoBehaviour
         if (_visible == on)
             return;
         _visible = on;
-        if (on)
-        {
-            _hasDistanceReference = false;
-            _distanceReference = 0f;
-        }
         if (_canvas != null)
             _canvas.gameObject.SetActive(on);
     }
@@ -121,39 +118,7 @@ public class SimpleOverlayMap : MonoBehaviour
         _playerDot.preserveAspect = true;
     }
 
-    private Vector2 GetPlayerMapAnchorInPanel()
-    {
-        float h = _panelRect.rect.height;
-        if (h < 2f)
-            return Vector2.zero;
-        float halfH = h * 0.5f;
-        float y = -halfH + playerMapBottomPadding + playerArrowSize.y * 0.5f;
-        return new Vector2(0f, y);
-    }
-
-    private Vector2 GetFixedKeyAnchorInPanel()
-    {
-        float h = _panelRect.rect.height;
-        if (h < 2f)
-            return Vector2.zero;
-        float halfH = h * 0.5f;
-        float y = halfH - keyMapTopPadding - keyMarkerSize.y * 0.5f;
-        return new Vector2(0f, y);
-    }
-
-    private Vector2 GetPlayerProgressAnchorInPanel(float progress01, float horizontal01)
-    {
-        Vector2 from = GetPlayerMapAnchorInPanel();
-        Vector2 to = GetFixedKeyAnchorInPanel();
-        Vector2 p = Vector2.Lerp(from, to, Mathf.Clamp01(progress01));
-
-        float halfW = _panelRect.rect.width * 0.5f;
-        float horizontalLimit = Mathf.Max(0f, halfW - playerArrowSize.x * 0.5f - 12f);
-        p.x = horizontal01 * horizontalLimit;
-        return p;
-    }
-
-    private void RefreshMarkers()
+   private void RefreshMarkers()
     {
         if (player == null)
         {
@@ -165,53 +130,80 @@ public class SimpleOverlayMap : MonoBehaviour
         if (player == null)
             return;
 
+        PickupItem targetKey = null;
         var pickups = FindObjectsByType<PickupItem>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
-        int keyCount = 0;
-        float bestSqr = float.MaxValue;
-        Vector3 nearestDelta = Vector3.zero;
         foreach (var p in pickups)
         {
-            if (p == null || !p.gameObject.activeInHierarchy || p.PickupItemType != ItemType.Key)
-                continue;
-            keyCount++;
-            Vector3 delta = player.position - p.transform.position;
-            float sqr = delta.sqrMagnitude;
-            if (sqr < bestSqr)
+            if (p != null && p.gameObject.activeInHierarchy && p.PickupItemType == ItemType.Key)
             {
-                bestSqr = sqr;
-                nearestDelta = delta;
+                targetKey = p;
+                break;
             }
         }
 
-        float progress01 = 0f;
-        float horizontal01 = 0f;
-        if (keyCount > 0)
-        {
-            float nearestDistance = Mathf.Sqrt(bestSqr);
-            if (!_hasDistanceReference)
-            {
-                _distanceReference = Mathf.Max(playerTravelToKeyDistance, nearestDistance);
-                _hasDistanceReference = true;
-            }
-
-            float refD = Mathf.Max(0.001f, _distanceReference);
-            progress01 = 1f - Mathf.Clamp01(nearestDistance / refD);
-            horizontal01 = Mathf.Clamp(nearestDelta.x / refD, -1f, 1f);
-        }
-
-        if (_playerDot != null)
-        {
-            _playerDot.rectTransform.anchoredPosition = GetPlayerProgressAnchorInPanel(progress01, horizontal01);
-            _playerDot.rectTransform.localEulerAngles = new Vector3(0f, 0f, -player.eulerAngles.y);
-        }
-
+        // Ensure the key marker UI exists
         if (_keyMarker == null)
             _keyMarker = BuildKeyIcon(_panelRect);
 
-        _keyMarker.SetAsFirstSibling();
-        _keyMarker.gameObject.SetActive(keyCount > 0);
-        if (keyCount > 0)
-            _keyMarker.anchoredPosition = GetFixedKeyAnchorInPanel();
+        _keyMarker.SetAsLastSibling(); // Ensure Key stays on top
+        _keyMarker.gameObject.SetActive(targetKey != null);
+
+        if (targetKey != null)
+        {
+            float panelHalfHeight = _panelRect.rect.height * 0.5f;
+            float panelHalfWidth = _panelRect.rect.width * 0.5f;
+
+            // Position the Key at the top of the map
+            float keyY = panelHalfHeight - keyMapTopPadding - (keyMarkerSize.y * 0.5f);
+            Vector2 keyUIPos = new Vector2(0f, keyY);
+            _keyMarker.anchoredPosition = keyUIPos;
+
+            // Calculate Map Scale
+            float fullPanelHeight = _panelRect.rect.height;
+            float pixelsPerUnit = fullPanelHeight / Mathf.Max(0.001f, playerTravelToKeyDistance);
+
+            // Update blue dots
+            for (int i = 0; i < _blueDotWorldPositions.Count; i++)
+            {
+                // Get offset from the key, exactly like the player does
+                Vector3 dotWorldOffset = _blueDotWorldPositions[i] - targetKey.transform.position;
+                Vector2 dotUiOffset = new Vector2(dotWorldOffset.x, dotWorldOffset.z);
+                Vector2 dotFinalPos = keyUIPos + (dotUiOffset * pixelsPerUnit);
+
+                // Clamp to panel boundaries so they don't bleed off the map
+                dotFinalPos.x = Mathf.Clamp(dotFinalPos.x, -panelHalfWidth + 8f, panelHalfWidth - 8f);
+                dotFinalPos.y = Mathf.Clamp(dotFinalPos.y, -panelHalfHeight + 8f, panelHalfHeight - 8f);
+
+                // Apply the position and ensure it is visible
+                _blueDotRects[i].anchoredPosition = dotFinalPos;
+                _blueDotRects[i].gameObject.SetActive(true);
+            }
+
+            // Get the 3D world offset (Player minus Key)
+            Vector3 worldOffset = player.position - targetKey.transform.position;
+            Vector2 uiOffset = new Vector2(worldOffset.x, worldOffset.z);
+            Vector2 finalPlayerPos = keyUIPos + (uiOffset * pixelsPerUnit);
+
+            // Clamp the player dot
+            finalPlayerPos.x = Mathf.Clamp(finalPlayerPos.x, -panelHalfWidth + (playerArrowSize.x * 0.5f), panelHalfWidth - (playerArrowSize.x * 0.5f));
+            finalPlayerPos.y = Mathf.Clamp(finalPlayerPos.y, -panelHalfHeight + (playerArrowSize.y * 0.5f), panelHalfHeight - (playerArrowSize.y * 0.5f));
+
+            // Update Player Dot UI
+            _playerDot.rectTransform.anchoredPosition = finalPlayerPos;
+            _playerDot.rectTransform.localEulerAngles = new Vector3(0f, 0f, -player.eulerAngles.y);
+            _playerDot.gameObject.SetActive(true);
+            _playerDot.transform.SetAsLastSibling(); // Ensure Player stays on top
+        }
+        else
+        {
+            if (_playerDot != null) _playerDot.gameObject.SetActive(false);
+            
+            for (int i = 0; i < _blueDotRects.Count; i++)
+            {
+                if (_blueDotRects[i] != null) 
+                    _blueDotRects[i].gameObject.SetActive(false);
+            }
+        }
     }
 
     private RectTransform BuildKeyIcon(RectTransform parent)
@@ -226,7 +218,7 @@ public class SimpleOverlayMap : MonoBehaviour
 
         var img = go.AddComponent<Image>();
         img.sprite = GetPlayerDotSprite();
-        img.color = new Color(0.25f, 0.95f, 0.4f, 1f);
+        img.color = Color.yellow;
         img.raycastTarget = false;
 
         return rt;
@@ -267,5 +259,39 @@ public class SimpleOverlayMap : MonoBehaviour
         }
 
         return s_playerDotSprite;
+    }
+
+    public void AddStaticBlueDot(Vector3 worldPosition)
+    {
+        _blueDotWorldPositions.Add(worldPosition);
+
+        // Create the UI element
+        var go = new GameObject("BlueDot");
+        go.transform.SetParent(_panelRect, false);
+        
+        var rt = go.AddComponent<RectTransform>();
+        rt.anchorMin = rt.anchorMax = new Vector2(0.5f, 0.5f);
+        rt.pivot = new Vector2(0.5f, 0.5f);
+        rt.sizeDelta = new Vector2(16f, 16f); // Slightly smaller than the key
+        
+        var img = go.AddComponent<Image>();
+        img.sprite = GetPlayerDotSprite();
+        img.color = new Color(0.2f, 0.6f, 1f, 1f); // Bright blue
+        img.raycastTarget = false;
+
+        // Push it to the back of the UI hierarchy so the player and key render on top of it
+        go.transform.SetAsFirstSibling();
+
+        _blueDotRects.Add(rt);
+        
+        // If the map is currently open, immediately refresh so it shows up
+        if (_visible)
+        {
+            RefreshMarkers();
+        }
+        else
+        {
+            go.SetActive(false); // Hide it until the map is opened
+        }
     }
 }
