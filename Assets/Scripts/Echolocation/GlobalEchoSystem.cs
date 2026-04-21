@@ -33,6 +33,9 @@ public class GlobalEchoSystem : MonoBehaviour
 
     // Actual funcitonality
 
+
+    // --- Visual Echolocation Effect ---
+
     [Header("Settings")]
     public GameObject echoSystemPrefab; // Drag EcholocationSystem.prefab here in inspector window
 
@@ -111,6 +114,19 @@ public class GlobalEchoSystem : MonoBehaviour
             manager.SetupScan(sourceObject, direction, angle, uniformity, numRays, visualVolume, monsterVolume, isFootsteps, colliderColorMap, priority);
     }
 
+
+    // --- Audio Echo Effect ---
+
+    [Header("Acoustic Audio System")]
+    public AcousticsManager acousticsManager; // Drag acoustics manager script here
+
+    public static void PingAudio(Vector3 position, AudioClip sound)
+    {
+        if (Instance != null && Instance.acousticsManager != null)
+        {
+            Instance.acousticsManager.TriggerAcousticPulse(position, sound, Instance.colliderColorMap);
+        }
+    }
 
 
     // --- Layer to HashMap conversion ---
