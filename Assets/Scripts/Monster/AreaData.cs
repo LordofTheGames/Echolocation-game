@@ -14,19 +14,4 @@ public class AreaData : MonoBehaviour
     public int forkEnd3;
 
     public List<NodeData> ExitNodes;
-
-    private Movement movementScript;
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        movementScript = GameObject.Find("Monster").GetComponent<Movement>();
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.name == "Monster")
-        {
-            movementScript.SetArea(name);
-        }
-    }
 }

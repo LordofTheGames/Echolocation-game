@@ -15,11 +15,15 @@ public class Area
     public TunnelPath tunnelPath; 
 }
 
+public enum ExitNodeLink {Fork1, Fork2, Fork3, Start, End, None}
+
 public struct ExitNode
 {
     public Vector3 position;
     public int index;
     public Area nextArea;
+
+    public ExitNodeLink tunnelEndLink; // only needed if exit node is part of cave room
 }
 
 public enum Direction {Increasing, Decreasing};
@@ -109,7 +113,7 @@ public class Movement : MonoBehaviour
             }
             foreach (NodeData exitnd in ad.ExitNodes)
             {
-                area.exitNodes.Add(new ExitNode{position = exitnd.transform.position, index = exitnd.index, nextArea = exitnd.nextArea});
+                area.exitNodes.Add(new ExitNode{position = exitnd.transform.position, nextArea = exitnd.nextArea, tunnelEndLink = exitnd.tunnelEndLink});
             }
 
             if (area.isTunnel)
@@ -151,43 +155,36 @@ public class Movement : MonoBehaviour
             currentNodeIdx = nextNodeIdx;
             unvisitedNodes.Remove(currentNodeIdx);
             visitedNodes.Add(currentNodeIdx);
+
+            currentNode = currentArea.nodes[currentNodeIdx];
+            return currentNode;
         }
         else
         {
             TunnelPath tp = currentArea.tunnelPath;
 
             // deal with at start/end
-            // FIXME:
-            bool atStartEnd = false;
-            if (!firstTunnelMove && tp.hasFork)
+            ExitNodeLink targetLink = ExitNodeLink.None;
+            if (!firstTunnelMove)
             {
-                if (currentNodeIdx == tp.forkEnd1)
-                {
-                    atStartEnd = true;
-                }
-                else if(currentNodeIdx == tp.forkEnd2)
-                {
-                    atStartEnd = true;
-                }
-                else if(currentNodeIdx == tp.forkEnd3)
-                {
-                    atStartEnd = true;
-                }
+                if (tp.hasFork && currentNodeIdx == tp.forkEnd1) targetLink = ExitNodeLink.Fork1;
+                else if(tp.hasFork && currentNodeIdx == tp.forkEnd2) targetLink = ExitNodeLink.Fork2;
+                else if(tp.hasFork && currentNodeIdx == tp.forkEnd3) targetLink = ExitNodeLink.Fork3;
+                else if (currentNodeIdx == tp.start) targetLink = ExitNodeLink.Start;
+                else if(currentNodeIdx == tp.end) targetLink = ExitNodeLink.End;
             }
-            else if (!firstTunnelMove)
+            
+            // at start/end
+            if (targetLink != ExitNodeLink.None)
             {
-                if (currentNodeIdx == tp.start)
-                {
-                    atStartEnd = true;
-                }
-                else if(currentNodeIdx == tp.end)
-                {
-                    atStartEnd = true;
-                }
+                ExitNode eNode = currentArea.exitNodes.Find(node => node.tunnelEndLink == targetLink);
+                currentNode = eNode.position;
+                currentNodeIdx = eNode.nextArea.nodes.IndexOf(currentNode);
+                firstTunnelMove = false;
+                return currentNode;
             }
-
             // not at start/end
-            if (!atStartEnd)
+            else 
             {
                 if (tp.hasFork && currentNodeIdx == tp.forkStart1)
                     calcForkNextNode(tp.forkStart1, tp.forkEnd1, tp.forkStart2, tp.forkEnd2, tp.forkStart3, tp.forkEnd3);
@@ -206,11 +203,12 @@ public class Movement : MonoBehaviour
                     }
                     currentNodeIdx += (currTunnelMoveDir == Direction.Increasing) ? 1 : -1;
                 }
+
+                currentNode = currentArea.nodes[currentNodeIdx];
+                firstTunnelMove = false;
+                return currentNode;
             }
         }
-
-        currentNode = currentArea.nodes[currentNodeIdx];
-        return currentNode;
     }
     private void calcForkNextNode(int forkStart, int forkEnd, int forkStart1, int forkEnd1, int forkStart2, int forkEnd2)
     {
@@ -318,7 +316,7 @@ public class Movement : MonoBehaviour
             {
                 directionChangeCount = 0;
                 directionChangeProb = 0.3f;
-                firstTunnelMove = false;
+                firstTunnelMove = true;
             }
             else
             {
@@ -329,11 +327,32 @@ public class Movement : MonoBehaviour
             }
         }
     }
-    public void SetTunnelNode(int idx)
+
+    public Vector3 ResetToPathfinding()
     {
-        // currentNode = nodes[currentArea].Find(node => node == position);
-        // currentNodeIdx = nodes[currentArea].IndexOf(currentNode);
-        currentArea.tunnelPath.triggeredNode = idx;
+        float minDistance = Mathf.Infinity;
+        Vector3 closestNode = currentArea.nodes[0];
+        foreach (Vector3 node in currentArea.nodes)
+        {
+            float dist = Vector3.Distance(node, transform.position);
+            if (minDistance > dist)
+            {
+                closestNode = node;
+                minDistance = dist;
+            } 
+        }
+        currentNode = closestNode;
+        currentNodeIdx = currentArea.nodes.IndexOf(currentNode);
+
+        if (currentArea.isTunnel)
+        {
+            // always pick increasing (for now)
+            currTunnelMoveDir = Direction.Increasing;
+            // setting this won't cause any problems if monster is just about to enter tunnel, but setting it to true might if monster is just about to exit tunnel
+            firstTunnelMove = false; 
+        }
+
+        return closestNode;
     }
 
     private T PickRandomFromList<T>(List<T> targetList)

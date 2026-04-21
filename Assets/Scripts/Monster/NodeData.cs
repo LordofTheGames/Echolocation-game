@@ -1,10 +1,13 @@
+using UnityEditor.EditorTools;
 using UnityEngine;
 
 public class NodeData : MonoBehaviour
 {
+    [Header("Only needed if node is exit node")]
     public bool isExitNode = false;
     public Area nextArea;
-    public int index;
+    [Header("Only needed if node is exit node and is linking from tunnel to area")]
+    public ExitNodeLink tunnelEndLink;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
