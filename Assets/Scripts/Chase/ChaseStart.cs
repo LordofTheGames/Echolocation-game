@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.Behavior;
 using Unity.Cinemachine;
 using UnityEngine;
 
@@ -12,17 +13,21 @@ public class ChaseStart : MonoBehaviour
     private Camera cam;
     private MouseLook ml;
     private PlayerMovement pm;
+    private BehaviorGraphAgent agent;
+    private RendererCutoff cutoff;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        GameObject monster = GameObject.Find("Monster");
+        agent = monster.GetComponent<BehaviorGraphAgent>();     
+        cutoff = monster.GetComponent<RendererCutoff>();
+        monsterCam = GameObject.Find("MonsterCam").GetComponent<CinemachineCamera>();
+        GameObject player = GameObject.Find("Player");
+        playerCam = player.GetComponentInChildren<CinemachineCamera>();
+        cam = player.GetComponentInChildren<Camera>();
+        ml = player.GetComponentInChildren<MouseLook>();
+        pm = player.GetComponent<PlayerMovement>();
     }
 
     void OnTriggerEnter(Collider other)
@@ -30,16 +35,15 @@ public class ChaseStart : MonoBehaviour
         if (GlassBroken && other.CompareTag("Player"))
         {
             GlassBroken = false;
-            playerCam = other.GetComponentInChildren<CinemachineCamera>();
-            monsterCam = GameObject.Find("MonsterCam").GetComponent<CinemachineCamera>();
-            cam = other.GetComponentInChildren<Camera>();
-            ml = other.GetComponentInChildren<MouseLook>();
-            pm = other.GetComponent<PlayerMovement>();
+
+            agent.BlackboardReference.SetVariableValue("chasePosition", true);
+            cutoff.Disable();
 
             playerCam.transform.rotation = cam.transform.rotation;
             ml.enabled = false;
             pm.enabled = false;
             playerCam.enabled = true;
+
             StartCoroutine(WaitForCutscene()); 
         }
     }
@@ -61,5 +65,6 @@ public class ChaseStart : MonoBehaviour
         playerCam.enabled = false;
         ml.enabled = true;
         pm.enabled = true;
+        agent.BlackboardReference.SetVariableValue("chaseStart", true);
     }
 }

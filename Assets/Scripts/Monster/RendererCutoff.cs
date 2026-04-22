@@ -13,6 +13,8 @@ public class RendererCutoff : MonoBehaviour
     private float currentCutoff;
     private static readonly int CutoffID = Shader.PropertyToID("_Cutoff");
 
+    private bool disabled = false;
+
     void Start()
     {
         meshRenderer = GetComponentInChildren<MeshRenderer>();
@@ -21,6 +23,8 @@ public class RendererCutoff : MonoBehaviour
 
     void Update()
     {
+        if (disabled) return;
+
         float distance = Vector3.Distance(transform.position, player.position);
         float targetCutoff;
 
@@ -64,5 +68,17 @@ public class RendererCutoff : MonoBehaviour
         // {
         //     if (!meshRenderer.enabled) meshRenderer.enabled = true;
         // }
+    }
+
+    public void Disable()
+    {
+            disabled = true;
+            meshRenderer.enabled = true;
+            meshRenderer.material.SetFloat(CutoffID, 0);
+    }
+
+    public void Enable()
+    {
+            disabled = false;
     }
 }
