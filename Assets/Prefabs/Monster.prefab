@@ -417,9 +417,10 @@ MonoBehaviour:
   MoveSpeed_Patrol: 6
   TurnSpeed_Patrol: 5
   StoppingDistance_Patrol: 2
-  MoveRadius_Patrol: 20
   MinWaitAfterMove_Patrol: 0
   MaxWaitAfterMove_Patrol: 1
+  MinRoomTime_Patrol: 8
+  MaxRoomTime_Patrol: 15
   EcholocationParams_Patrol:
     uniformity: 0
     numRays: 20000
@@ -468,6 +469,7 @@ MonoBehaviour:
   TurnSpeed_Chase: 10
   StoppingDistance_Chase: 2
   DistanceMonsterLosesPlayer_Chase: 15
+  FinalChaseSpeed_Chase: 11
   EcholocationParams_Chase:
     uniformity: 0
     numRays: 20000
@@ -505,6 +507,11 @@ MonoBehaviour:
   DistanceToMoveToIfFarFromPlayer: 35
   MoveSpeedFarFromPlayer: 12
   StoppingDistanceFarFromPlayer: 2
+  TimeUntilMovesClose: 60
+  DistanceToMoveAwayFromPlayer: 150
+  MoveSpeedAwayFromPlayer: 9
+  StoppingDistanceAwayFromPlayer: 2
+  TimeUntilMovesAway: 60
   PlayerSeenScreamVolume: 1
   GrenadeScreamVolume: 1
   WaterfallScreamVolume: 1
@@ -601,6 +608,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 337bdefd69b87ba4dafdc240cf594c03, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tunnelTurnAroundChance: 0.2
+  tunnelTurnAroundChanceDecreaseValue: 0.1
+  tunnelMaxTurns: 2
+  roomPickAreaJustVisitedOnExitChance: 0.3
+  roomPickVisitedNodeChance: 0.3
 --- !u!114 &8795594309079875185
 MonoBehaviour:
   m_ObjectHideFlags: 0
