@@ -22,6 +22,11 @@ public class Breakable : MonoBehaviour
 
     [SerializeField] private AudioSource audioSource;
 
+    public bool IsAlarmBox = false;
+    public AudioSource AlarmSound1;
+    public AudioSource AlarmSound2;
+    private ChaseStart cs;
+
     private bool hasBroken;
     private float holdTimer;
 
@@ -37,6 +42,7 @@ public class Breakable : MonoBehaviour
     {
         micInput = GameObject.Find("MicInput").GetComponent<MicInput>();
         player = GameObject.FindGameObjectWithTag("Player");
+        cs = GameObject.Find("Chase Trigger").GetComponent<ChaseStart>();
 
         if (intactObject != null) intactObject.SetActive(true);
         if (brokenObject != null) brokenObject.SetActive(false);
@@ -83,19 +89,30 @@ public class Breakable : MonoBehaviour
         {
             audioSource.PlayOneShot(breakSound, breakSoundVolume);
         }
+        if (IsAlarmBox)
+        {
+            cs.GlassBroken = true;
+            StartCoroutine(PlayAlarms());
+        } 
 
         StartCoroutine(HideBrokenVisualLater());
     }
 
     private IEnumerator HideBrokenVisualLater()
     {
-        if (secondsUntilHideBrokenVisual <= 0f) yield break;
-
+        if (secondsUntilHideBrokenVisual <= 0) yield break;
         yield return new WaitForSeconds(secondsUntilHideBrokenVisual);
-
         if (brokenObject != null)
         {
             brokenObject.SetActive(false);
         }
+    }
+
+    private IEnumerator PlayAlarms()
+    {
+        yield return new WaitForSeconds(3);
+        AlarmSound1.Play();
+        yield return new WaitForSeconds(3);
+        AlarmSound2.Play();
     }
 }

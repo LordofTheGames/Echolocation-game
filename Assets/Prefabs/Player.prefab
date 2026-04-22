@@ -99,6 +99,7 @@ GameObject:
   - component: {fileID: 7477274071433539147}
   - component: {fileID: 2147149018246509755}
   - component: {fileID: 3677165169037684896}
+  - component: {fileID: 11021785312262077}
   m_Layer: 7
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -114,7 +115,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4920237846165806001}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -242,6 +243,113 @@ MonoBehaviour:
   lightTransform: {fileID: 7770523898133361850}
   isHiding: 0
   hidingTransition: 0
+--- !u!114 &11021785312262077
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4920237846165806001}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72ece51f2901e7445ab60da3685d6b5f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShowDebugText: 0
+  ShowCameraFrustum: 0
+  IgnoreTimeScale: 0
+  WorldUpOverride: {fileID: 0}
+  ChannelMask: -1
+  UpdateMethod: 2
+  BlendUpdateMethod: 1
+  LensModeOverride:
+    Enabled: 0
+    DefaultMode: 2
+  DefaultBlend:
+    Style: 1
+    Time: 2
+    CustomCurve:
+      serializedVersion: 2
+      m_Curve: []
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+  CustomBlends: {fileID: 0}
+--- !u!1 &4989830808978464972
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4839815864973103908}
+  - component: {fileID: 4323783068960296646}
+  m_Layer: 0
+  m_Name: PlayerCam
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4839815864973103908
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4989830808978464972}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3853411543216132462}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4323783068960296646
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4989830808978464972}
+  m_Enabled: 0
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9dfa5b682dcd46bda6128250e975f58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Priority:
+    Enabled: 0
+    m_Value: 0
+  OutputChannel: 1
+  StandbyUpdate: 2
+  m_StreamingVersion: 20241001
+  m_LegacyPriority: 0
+  Target:
+    TrackingTarget: {fileID: 0}
+    LookAtTarget: {fileID: 0}
+    CustomLookAtTarget: 0
+  Lens:
+    FieldOfView: 60
+    OrthographicSize: 5
+    NearClipPlane: 0.3
+    FarClipPlane: 1000
+    Dutch: 0
+    ModeOverride: 0
+    PhysicalProperties:
+      GateFit: 2
+      SensorSize: {x: 21.946, y: 16.002}
+      LensShift: {x: 0, y: 0}
+      FocusDistance: 10
+      Iso: 200
+      ShutterSpeed: 0.005
+      Aperture: 16
+      BladeCount: 5
+      Curvature: {x: 2, y: 11}
+      BarrelClipping: 0.25
+      Anamorphism: 0
+  BlendHint: 0
 --- !u!1 &5235627052445221193
 GameObject:
   m_ObjectHideFlags: 0
@@ -261,7 +369,7 @@ GameObject:
   - component: {fileID: 896755040844005566}
   - component: {fileID: 7401529261617155565}
   - component: {fileID: 1248414904700985948}
-  - component: {fileID: 4936531735122794685}
+  - component: {fileID: 2610361652763653379}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -287,6 +395,7 @@ Transform:
   - {fileID: 7770523898133361850}
   - {fileID: 8179629045468587835}
   - {fileID: 6246126513533856795}
+  - {fileID: 4839815864973103908}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!143 &6022567831833219258
@@ -1178,7 +1287,7 @@ MonoBehaviour:
   waitTime: 2
   RespawnPosition: {x: 0, y: 0, z: 0}
   CurrentBox: {fileID: 0}
---- !u!114 &4936531735122794685
+--- !u!114 &2610361652763653379
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1187,18 +1296,22 @@ MonoBehaviour:
   m_GameObject: {fileID: 5235627052445221193}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b8cbf91ca00ba234f84f08738844d6d2, type: 3}
+  m_Script: {fileID: 11500000, guid: 2178cd53c9ae7284e8a7205aba51259a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isSprinting: 0
   Crazy1: {fileID: 8300000, guid: 3bc99e2ab426f1c4a97ed51a9968b42f, type: 3}
   Crazy2: {fileID: 8300000, guid: 8f176169504e0a54db84e5a0d19511f9, type: 3}
-  MaxTime: 210
+  EffectTime: 210
   TimeBeforeStart: 90
+  SprintEffectTime: 15
+  SprintRecoverySpeed: 4
   lensDistortionData:
     startingValue: 0
     maxValue: -1
     speed: 0.75
   lensDistortionMinOscillationValue: -0.5
+  lensDistortionMaxWhenSprinting: -1
   lensFlareData:
     startingValue: 0
     maxValue: 25
@@ -1234,17 +1347,17 @@ MonoBehaviour:
   colourFilterRedData:
     startingValue: 1
     maxValue: 0.5377358
-    speed: 2
+    speed: 3
   colourFilterGreenData:
     startingValue: 1
     maxValue: 0.2764774
-    speed: 2
+    speed: 3
   colourFilterBlueData:
     startingValue: 1
     maxValue: 0.2764774
-    speed: 2
+    speed: 3
   dirtIntensityData:
-    startingValue: 0
+    startingValue: 0.1
     maxValue: 12
     speed: 1
   soundVolumeData:
