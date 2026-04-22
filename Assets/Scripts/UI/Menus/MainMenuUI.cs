@@ -16,7 +16,7 @@ public class MainMenuUI : MonoBehaviour
 
 	private void LoadGameScene()
 	{
-		SceneManager.LoadScene("FINAL");
+		SceneManager.LoadScene("DifficultySelect");
 	}
 
 	IEnumerator FadeOutMusic(AudioSource audioSource, float duration)
