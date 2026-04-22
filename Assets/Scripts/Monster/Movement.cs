@@ -75,6 +75,12 @@ public class TunnelPath
 
 public class Movement : MonoBehaviour
 {
+    public float tunnelTurnAroundChance = 0.2f;
+    public float tunnelTurnAroundChanceDecreaseValue = 0.1f;
+    public float tunnelMaxTurns = 2;
+    public float roomPickAreaJustVisitedOnExitChance = 0.3f;
+    public float roomPickVisitedNodeChance = 0.3f;
+
     private Dictionary<string, Area> areas;
 
     private Area currentArea;
@@ -86,12 +92,14 @@ public class Movement : MonoBehaviour
 
     private Direction currTunnelMoveDir = Direction.Increasing;
     private int directionChangeCount = 0;
-    private float directionChangeProb = 0.2f;
+    private float directionChangeProb;
     private bool firstTunnelMove = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        directionChangeProb = tunnelTurnAroundChance;
+
         GameObject nodesObj = GameObject.Find("Monster Nav Nodes");
         areas = new Dictionary<string, Area>();
         visitedNodes = new List<int>();
@@ -150,10 +158,10 @@ public class Movement : MonoBehaviour
                 else
                 {
                     float roll = UnityEngine.Random.value;
-                    if (roll <= 0.7f) 
-                        nextNodeIdx = PickRandomFromList(unvisitedNodes);
-                    else 
+                    if (roll <= roomPickVisitedNodeChance) 
                         nextNodeIdx = PickRandomFromList(visitedNodes);
+                    else 
+                        nextNodeIdx = PickRandomFromList(unvisitedNodes);
                 }
             }
 
@@ -205,14 +213,18 @@ public class Movement : MonoBehaviour
                 else
                 {
                     float roll = UnityEngine.Random.value;
-                    if (roll <= directionChangeProb && directionChangeCount < 2) 
+                    if (roll <= directionChangeProb && directionChangeCount < tunnelMaxTurns) 
                     {
                         currTunnelMoveDir = (currTunnelMoveDir == Direction.Increasing) ? Direction.Decreasing : Direction.Increasing;
                         directionChangeCount++;
-                        directionChangeProb -= 0.1f;
+                        directionChangeProb -= tunnelTurnAroundChanceDecreaseValue;
                     }
                     currentNodeIdx += (currTunnelMoveDir == Direction.Increasing) ? 1 : -1;
                 }
+                // catch errors
+                if (currentNodeIdx < 0) currentNodeIdx = 1;
+                else if (currentNodeIdx > currentArea.nodes.Count - 1) currentNodeIdx = currentArea.nodes.Count - 2;
+
                 currentNode = currentArea.nodes[currentNodeIdx];
                 return currentNode;
             }
@@ -226,11 +238,11 @@ public class Movement : MonoBehaviour
         if (towardsForkDir != currTunnelMoveDir)
         {
             float roll = UnityEngine.Random.value;
-            if (roll <= directionChangeProb && directionChangeCount < 2)
+            if (roll <= directionChangeProb && directionChangeCount < tunnelMaxTurns)
             {
                 currTunnelMoveDir = towardsForkDir;
                 directionChangeCount++;
-                directionChangeProb -= 0.1f;
+                directionChangeProb -= tunnelTurnAroundChanceDecreaseValue;
             }
             else
             {
@@ -269,7 +281,7 @@ public class Movement : MonoBehaviour
 
             float roll = UnityEngine.Random.value;
             ExitNode chosenExit;
-            if (roll <= 0.3f) 
+            if (roll <= roomPickAreaJustVisitedOnExitChance) 
                 chosenExit = lastAreaExit;
             else 
                 chosenExit = PickRandomFromList(allOtherExits);
@@ -317,7 +329,7 @@ public class Movement : MonoBehaviour
             if (currentArea.isTunnel)
             {
                 directionChangeCount = 0;
-                directionChangeProb = 0.3f;
+                directionChangeProb = tunnelTurnAroundChance;
                 firstTunnelMove = true;
             }
             else
