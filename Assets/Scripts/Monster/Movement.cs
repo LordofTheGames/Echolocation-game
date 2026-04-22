@@ -75,7 +75,7 @@ public class TunnelPath
 
 public class Movement : MonoBehaviour
 {
-    private List<Area> areas;
+    private Dictionary<string, Area> areas;
 
     private Area currentArea;
     private Area lastArea;
@@ -86,34 +86,30 @@ public class Movement : MonoBehaviour
 
     private Direction currTunnelMoveDir = Direction.Increasing;
     private int directionChangeCount = 0;
-    private float directionChangeProb = 0.3f;
+    private float directionChangeProb = 0.2f;
     private bool firstTunnelMove = false;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         GameObject nodesObj = GameObject.Find("Monster Nav Nodes");
-        areas = new List<Area>();
+        areas = new Dictionary<string, Area>();
         visitedNodes = new List<int>();
         unvisitedNodes = new List<int>();
 
+        // initialise areas
         foreach(Transform areaObj in nodesObj.transform)
         {
             AreaData ad = areaObj.GetComponent<AreaData>();
             Area area = new Area {name = areaObj.name, isTunnel = ad.isTunnel};
-            areas.Add(area);
+            areas.Add(areaObj.name, area);
 
             area.nodes = new List<Vector3>();
-            area.exitNodes = new List<ExitNode>();
 
             foreach (Transform nodeObj in areaObj)
             {
                 NodeData n = nodeObj.GetComponent<NodeData>();
                 area.nodes.Add(nodeObj.position);
-            }
-            foreach (NodeData exitnd in ad.ExitNodes)
-            {
-                area.exitNodes.Add(new ExitNode{position = exitnd.transform.position, nextArea = exitnd.nextArea, tunnelEndLink = exitnd.tunnelEndLink});
             }
 
             if (area.isTunnel)
@@ -124,9 +120,18 @@ public class Movement : MonoBehaviour
                     area.tunnelPath = new TunnelPath(0, area.nodes.Count - 1);
             }
         }
+        // need to add exit nodes after as they link to areas, so need to init all areas first
+        foreach(Transform areaObj in nodesObj.transform)
+        {
+            AreaData ad = areaObj.GetComponent<AreaData>();
+            Area area = areas[areaObj.name];
+            area.exitNodes = new List<ExitNode>();
+            foreach (NodeData exitnd in ad.ExitNodes)
+                area.exitNodes.Add(new ExitNode{position = exitnd.transform.position, nextArea = areas[exitnd.nextArea.name], tunnelEndLink = exitnd.tunnelEndLink});
+        }
 
-        lastArea = areas[0]; //Tutorial tunnel
-        currentArea = areas[1]; //Bridge area
+        lastArea = areas["Start-Bridge"];
+        currentArea = areas["Bridge"];
         for (int i = 0; i < currentArea.nodes.Count; i++)
             unvisitedNodes.Add(i);
 
@@ -163,16 +168,22 @@ public class Movement : MonoBehaviour
         {
             TunnelPath tp = currentArea.tunnelPath;
 
+            // always move forward on first move
+            if (firstTunnelMove)
+            {
+                firstTunnelMove = false;
+                currentNodeIdx += (currTunnelMoveDir == Direction.Increasing) ? 1 : -1;
+                currentNode = currentArea.nodes[currentNodeIdx];
+                return currentNode;
+            }
+
             // deal with at start/end
             ExitNodeLink targetLink = ExitNodeLink.None;
-            if (!firstTunnelMove)
-            {
-                if (tp.hasFork && currentNodeIdx == tp.forkEnd1) targetLink = ExitNodeLink.Fork1;
-                else if(tp.hasFork && currentNodeIdx == tp.forkEnd2) targetLink = ExitNodeLink.Fork2;
-                else if(tp.hasFork && currentNodeIdx == tp.forkEnd3) targetLink = ExitNodeLink.Fork3;
-                else if (currentNodeIdx == tp.start) targetLink = ExitNodeLink.Start;
-                else if(currentNodeIdx == tp.end) targetLink = ExitNodeLink.End;
-            }
+            if (tp.hasFork && currentNodeIdx == tp.forkEnd1) targetLink = ExitNodeLink.Fork1;
+            else if(tp.hasFork && currentNodeIdx == tp.forkEnd2) targetLink = ExitNodeLink.Fork2;
+            else if(tp.hasFork && currentNodeIdx == tp.forkEnd3) targetLink = ExitNodeLink.Fork3;
+            else if (currentNodeIdx == tp.start) targetLink = ExitNodeLink.Start;
+            else if(currentNodeIdx == tp.end) targetLink = ExitNodeLink.End;
             
             // at start/end
             if (targetLink != ExitNodeLink.None)
@@ -180,7 +191,6 @@ public class Movement : MonoBehaviour
                 ExitNode eNode = currentArea.exitNodes.Find(node => node.tunnelEndLink == targetLink);
                 currentNode = eNode.position;
                 currentNodeIdx = eNode.nextArea.nodes.IndexOf(currentNode);
-                firstTunnelMove = false;
                 return currentNode;
             }
             // not at start/end
@@ -195,7 +205,7 @@ public class Movement : MonoBehaviour
                 else
                 {
                     float roll = UnityEngine.Random.value;
-                    if (roll <= directionChangeProb && directionChangeCount < 3) 
+                    if (roll <= directionChangeProb && directionChangeCount < 2) 
                     {
                         currTunnelMoveDir = (currTunnelMoveDir == Direction.Increasing) ? Direction.Decreasing : Direction.Increasing;
                         directionChangeCount++;
@@ -203,9 +213,7 @@ public class Movement : MonoBehaviour
                     }
                     currentNodeIdx += (currTunnelMoveDir == Direction.Increasing) ? 1 : -1;
                 }
-
                 currentNode = currentArea.nodes[currentNodeIdx];
-                firstTunnelMove = false;
                 return currentNode;
             }
         }
@@ -213,12 +221,12 @@ public class Movement : MonoBehaviour
     private void calcForkNextNode(int forkStart, int forkEnd, int forkStart1, int forkEnd1, int forkStart2, int forkEnd2)
     {
         TunnelPath tp = currentArea.tunnelPath;
-        Direction towardsForkDir = (forkStart < forkEnd) ? Direction.Increasing : Direction.Decreasing;
+        Direction towardsForkDir = (forkStart < forkEnd) ? Direction.Decreasing : Direction.Increasing;
         // if we are moving away from fork
         if (towardsForkDir != currTunnelMoveDir)
         {
             float roll = UnityEngine.Random.value;
-            if (roll <= directionChangeProb && directionChangeCount < 3)
+            if (roll <= directionChangeProb && directionChangeCount < 2)
             {
                 currTunnelMoveDir = towardsForkDir;
                 directionChangeCount++;
@@ -245,12 +253,6 @@ public class Movement : MonoBehaviour
         }
     }
 
-    // public Vector3 GetClosestNode(Vector3 position)
-    // {
-    //     // TODO: have a system for changing the current area automatically when the monster moves between them when chasing player?
-    //     // that way, we don't need this function as we can just make it walk in the current area, (and in the direction the player went if it is a tunnel)
-    //     return nodes[currentArea][0];
-    // }
 
     // TODO: will only be called when exiting room (not tunnel)???????????????????????
     public Vector3 NextArea()
@@ -306,7 +308,7 @@ public class Movement : MonoBehaviour
 
     public void SetArea(string name)
     {
-        Area newArea = areas.Find(area => area.name == name);
+        Area newArea = areas[name];
         if (newArea.name != currentArea.name)
         {
             lastArea = currentArea;
@@ -346,8 +348,6 @@ public class Movement : MonoBehaviour
 
         if (currentArea.isTunnel)
         {
-            // always pick increasing (for now)
-            currTunnelMoveDir = Direction.Increasing;
             // setting this won't cause any problems if monster is just about to enter tunnel, but setting it to true might if monster is just about to exit tunnel
             firstTunnelMove = false; 
         }
@@ -359,5 +359,10 @@ public class Movement : MonoBehaviour
     {
         int randomIndex = UnityEngine.Random.Range(0, targetList.Count);
         return targetList[randomIndex];
+    }
+
+    public bool inRoom()
+    {
+        return !currentArea.isTunnel;
     }
 }

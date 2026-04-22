@@ -13,5 +13,6 @@ public class AreaData : MonoBehaviour
     public int forkStart3;
     public int forkEnd3;
 
+    [Header("Exit nodes should be IN the nextArea\n(and as such cross the boundary)")]
     public List<NodeData> ExitNodes;
 }
