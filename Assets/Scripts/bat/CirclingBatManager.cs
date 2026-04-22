@@ -57,7 +57,6 @@ public class CirclingBatManager : MonoBehaviour
 
     void Start()
     {
-
         if (!string.IsNullOrEmpty(scareActionName))
         {
             scareBatsAction = InputSystem.actions.FindAction(scareActionName);

@@ -22,6 +22,8 @@ public class BatMovement : MonoBehaviour
     // When avoiding obstacles, randomly try out how many candidate directions
     [SerializeField] int avoidSamples = 18;
 
+    const int DepenetrateOverlapCapacity = 16;
+
     [SerializeField, Range(0f, 2f)] float heightAmp = 0.35f;
 
     //The frequency of ups and downs
@@ -43,7 +45,6 @@ public class BatMovement : MonoBehaviour
 
         Quaternion initRot = Quaternion.LookRotation(dir, Vector3.up);
 
-        // if the imported bat model does not face Unity's forward axis (Z+),
         // apply an extra Y rotation offset.
         if (Mathf.Abs(mgr.modelForwardOffsetY) > 0.01f)
             initRot *= Quaternion.Euler(0f, mgr.modelForwardOffsetY, 0f);
@@ -61,7 +62,8 @@ public class BatMovement : MonoBehaviour
         if (!mgr || !mgr.pointA || !mgr.pointB) return;
 
         // route switching
-        if (!mgr.IsObscuring && Vector3.Distance(transform.position, target.position) < mgr.waypointReach)
+        float waypointReachSq = mgr.waypointReach * mgr.waypointReach;
+        if (!mgr.IsObscuring && (transform.position - target.position).sqrMagnitude < waypointReachSq)
         {
             goingToB = !goingToB;
             target = goingToB ? mgr.pointB : mgr.pointA;
@@ -69,60 +71,15 @@ public class BatMovement : MonoBehaviour
 
         Vector3 pos = transform.position;
 
-        Vector3 separation = Vector3.zero;  //Push away from nearby bats
-        Vector3 alignment = Vector3.zero;   // Match direction of nearby bats
-        Vector3 cohesion = Vector3.zero;  // Move toward local group center
-
-        int nCount = 0;
-        Vector3 center = Vector3.zero;
-        Vector3 avgVelocity = Vector3.zero;
-
-        for (int i = 0; i < mgr.agents.Count; i++)
-        {
-            var other = mgr.agents[i];
-            if (!other || other == this) continue;
-
-            Vector3 diff = other.transform.position - pos;
-            float d = diff.magnitude;
-
-            if (d <= mgr.neighborRadius)
-            {
-                nCount++;
-                center += other.transform.position;
-                avgVelocity += other.velocity;
-
-                // If another bat is very close, generate separation force.
-                // The d*d term makes very close bats repel more strongly.
-                if (d <= mgr.separationRadius)
-                    separation -= diff / (d * d);
-            }
-        }
-
-        if (nCount > 0)
-        {
-            center /= nCount;
-            avgVelocity /= nCount;
-
-            Vector3 toCenter = center - pos;
-            float distToCenter = toCenter.magnitude;
-            if (distToCenter > 0.0001f)
-            {
-                // Cohesion pulls the bat toward the average neighbor position.
-                cohesion = toCenter.normalized;
-                // slightly strengthen cohesion to pull it back if it gets too far from the group
-                if (distToCenter > 2f) cohesion *= 1f + (distToCenter - 2f) * 0.15f;
-            }
-            else cohesion = Vector3.zero;
-            alignment = avgVelocity.sqrMagnitude > 0.01f ? avgVelocity.normalized : Vector3.zero;
-        }
+        if (!mgr.TryGetFlockingPreprocess(this, out Vector3 separation, out Vector3 alignment, out Vector3 cohesion))
+            separation = alignment = cohesion = Vector3.zero;
 
         float t = Time.time;
         // Calculate the bat's desired vertical oscillation height using a sine wave.
         float heightTarget = heightBase + Mathf.Sin(t * heightFreq + heightPhase) * heightAmp;
 
         Vector3 seekTargetPos;
-        // If the flock is currently obscuring the player and this bat IS the center bat,
-        // then fly toward the obscure target position (usually in front of the player camera)
+
         if (mgr.IsObscuring && mgr.centerBat != null && mgr.centerBat == this)
             seekTargetPos = mgr.GetObscureTargetPosition();
         else if (mgr.centerBat != null && mgr.centerBat != this)
@@ -130,9 +87,6 @@ public class BatMovement : MonoBehaviour
         else
             seekTargetPos = target.position;
 
-        // If it is the leader bat that is currently performing the action of blocking the player,
-        // then its height is the same as the point that blocks the target.
-        // Otherwise, continue to rise and fall at the normal flight altitude.
         float yTarget = (mgr.IsObscuring && mgr.centerBat == this) ? seekTargetPos.y : heightTarget;
         Vector3 target3D = new Vector3(seekTargetPos.x, yTarget, seekTargetPos.z);
         Vector3 seek = (target3D - pos).normalized;
@@ -318,6 +272,8 @@ public class BatMovement : MonoBehaviour
     void Depenetrate()
     {
         if (depenetrateCapsule == null) InitDepenetrateCapsule();
+        if (depenetrateOverlapBuffer == null)
+            depenetrateOverlapBuffer = new Collider[DepenetrateOverlapCapacity];
 
         float r = Mathf.Max(0.02f, mgr.agentRadius);
         Vector3 pos = transform.position;
@@ -331,10 +287,11 @@ public class BatMovement : MonoBehaviour
         depenetrateCapsule.direction = 1;
         depenetrateCapsule.center = Vector3.zero;
 
-        Collider[] overlap = Physics.OverlapCapsule(p1, p2, r, mgr.obstacleMask, QueryTriggerInteraction.Ignore);
-        for (int i = 0; i < overlap.Length; i++)
+        int overlapCount = Physics.OverlapCapsuleNonAlloc(
+            p1, p2, r, depenetrateOverlapBuffer, mgr.obstacleMask, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < overlapCount; i++)
         {
-            var col = overlap[i];
+            var col = depenetrateOverlapBuffer[i];
             if (Physics.ComputePenetration(
                 depenetrateCapsule, center, Quaternion.identity,
                 col, col.transform.position, col.transform.rotation,
@@ -349,6 +306,7 @@ public class BatMovement : MonoBehaviour
     }
 
     CapsuleCollider depenetrateCapsule;
+    Collider[] depenetrateOverlapBuffer;
 
     void InitDepenetrateCapsule()
     {
@@ -356,6 +314,7 @@ public class BatMovement : MonoBehaviour
         go.hideFlags = HideFlags.HideAndDontSave;
         depenetrateCapsule = go.AddComponent<CapsuleCollider>();
         depenetrateCapsule.isTrigger = true;
+        depenetrateOverlapBuffer = new Collider[DepenetrateOverlapCapacity];
     }
     // This function moves the bat while handling collisions in a smooth way.
     // Instead of letting the bat pass through walls or stop abruptly,

@@ -14,6 +14,8 @@ public class CirclingBatMovement : MonoBehaviour
 
     [HideInInspector] public Vector3 velocity;
 
+    const int DepenetrateOverlapCapacity = 16;
+
     public void Init(CirclingBatManager manager, float randomSeed)
     {
         mgr = manager;
@@ -156,6 +158,7 @@ public class CirclingBatMovement : MonoBehaviour
     }
 
     CapsuleCollider depenetrateCapsule;
+    Collider[] depenetrateOverlapBuffer;
 
     void InitDepenetrateCapsule()
     {
@@ -163,11 +166,14 @@ public class CirclingBatMovement : MonoBehaviour
         go.hideFlags = HideFlags.HideAndDontSave;
         depenetrateCapsule = go.AddComponent<CapsuleCollider>();
         depenetrateCapsule.isTrigger = true;
+        depenetrateOverlapBuffer = new Collider[DepenetrateOverlapCapacity];
     }
 
     void Depenetrate()
     {
         if (depenetrateCapsule == null) InitDepenetrateCapsule();
+        if (depenetrateOverlapBuffer == null)
+            depenetrateOverlapBuffer = new Collider[DepenetrateOverlapCapacity];
 
         float r = Mathf.Max(0.02f, mgr.agentRadius);
         Vector3 pos = transform.position;
@@ -181,10 +187,11 @@ public class CirclingBatMovement : MonoBehaviour
         depenetrateCapsule.direction = 1;
         depenetrateCapsule.center = Vector3.zero;
 
-        Collider[] overlap = Physics.OverlapCapsule(p1, p2, r, mgr.obstacleMask, QueryTriggerInteraction.Ignore);
-        for (int i = 0; i < overlap.Length; i++)
+        int overlapCount = Physics.OverlapCapsuleNonAlloc(
+            p1, p2, r, depenetrateOverlapBuffer, mgr.obstacleMask, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < overlapCount; i++)
         {
-            var col = overlap[i];
+            var col = depenetrateOverlapBuffer[i];
             if (Physics.ComputePenetration(
                 depenetrateCapsule, center, Quaternion.identity,
                 col, col.transform.position, col.transform.rotation,
@@ -225,4 +232,3 @@ public class CirclingBatMovement : MonoBehaviour
         p2 = center - Vector3.up * half;
     }
 }
-
