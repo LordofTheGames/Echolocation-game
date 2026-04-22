@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class HearingChecker : MonoBehaviour, INoiseSensitive, IEchoSeesPlayerSensitive
@@ -21,7 +20,7 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive, IEchoSeesPlayerSen
         Vector3 eyePos = transform.position + Vector3.up * AgentEyeHeight;
         float distance = Vector3.Distance(eyePos, source);
         // TODO: this calculation is fairly arbritrary! improve it?
-        newMaxDist = maxSoundDistance + (volume / 15f);
+        newMaxDist = maxSoundDistance + (volume / 10f);
         if (distance <= newMaxDist)
         {
             bool viewObstructed = Physics.Raycast(eyePos, source - eyePos, distance, ObstructionMask);
@@ -54,10 +53,11 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive, IEchoSeesPlayerSen
     {
         if (ShowDebugVisuals)
         {
-            if (newMaxDist == 0) newMaxDist = maxSoundDistance;
+            // if (newMaxDist == 0) newMaxDist = maxSoundDistance;
             Vector3 eyePos = transform.position + Vector3.up * AgentEyeHeight;
             Gizmos.color = Color.green;
-            Gizmos.DrawWireSphere(eyePos, newMaxDist);
+            // Gizmos.DrawWireSphere(eyePos, newMaxDist);
+            Gizmos.DrawWireSphere(eyePos, maxSoundDistance);
         }
     }
 }
