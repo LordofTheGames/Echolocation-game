@@ -26,6 +26,7 @@ public class Breakable : MonoBehaviour
     public AudioSource AlarmSound1;
     public AudioSource AlarmSound2;
     private ChaseStart cs;
+    private FlashLights fl;
 
     private bool hasBroken;
     private float holdTimer;
@@ -42,6 +43,7 @@ public class Breakable : MonoBehaviour
         micInput = GameObject.Find("MicInput").GetComponent<MicInput>();
         player = GameObject.FindGameObjectWithTag("Player");
         cs = GameObject.Find("Chase Trigger").GetComponent<ChaseStart>();
+        fl = GameObject.Find("ChasePos").GetComponent<FlashLights>();
 
         if (intactObject != null) intactObject.SetActive(true);
         if (brokenObject != null) brokenObject.SetActive(false);
@@ -90,6 +92,7 @@ public class Breakable : MonoBehaviour
         if (IsAlarmBox)
         {
             cs.GlassBroken = true;
+            fl.flashLights();
             StartCoroutine(PlayAlarms());
         } 
 
