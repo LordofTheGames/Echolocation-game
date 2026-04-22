@@ -101,11 +101,10 @@ public class PlayerMovement : MonoBehaviour
     {
 
         // change height when crouching
-        float targetY = isCrouching ? defaultCamY - 0.3f : defaultCamY;
-
-        Vector3 camPos = cameraTransform.localPosition;
-        camPos.y = Mathf.Lerp(camPos.y, targetY, Time.deltaTime * 10);
-        cameraTransform.localPosition = camPos;
+        float targetYScale = isCrouching? 0.5f : 1;
+        Vector3 scale = transform.localScale;
+        scale.y =  Mathf.Lerp(transform.localScale.y, targetYScale, Time.deltaTime * 10);
+        transform.localScale = scale;
 
         //checking if we hit the ground to reset our falling velocity, otherwise we will fall faster the next time
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
