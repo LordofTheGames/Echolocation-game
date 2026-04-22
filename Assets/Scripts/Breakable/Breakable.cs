@@ -89,9 +89,8 @@ public class Breakable : MonoBehaviour
         }
         if (IsAlarmBox)
         {
-            AlarmSound1.Play();
-            AlarmSound2.Play();
             cs.GlassBroken = true;
+            StartCoroutine(PlayAlarms());
         } 
 
         StartCoroutine(HideBrokenVisualLater());
@@ -105,5 +104,13 @@ public class Breakable : MonoBehaviour
         {
             brokenObject.SetActive(false);
         }
+    }
+
+    private IEnumerator PlayAlarms()
+    {
+        yield return new WaitForSeconds(3);
+        AlarmSound1.Play();
+        yield return new WaitForSeconds(3);
+        AlarmSound2.Play();
     }
 }
