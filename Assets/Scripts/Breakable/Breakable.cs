@@ -35,6 +35,7 @@ public class Breakable : MonoBehaviour
     private MicInput micInput;
 
     public static event Action OnRockBroken;
+    public static event Action<Breakable> OnBroken;
 
     public bool HasBroken => hasBroken;
 
@@ -79,6 +80,7 @@ public class Breakable : MonoBehaviour
         if (hasBroken) return;
 
         OnRockBroken?.Invoke(); // Tell the game the player broke a rock
+        OnBroken?.Invoke(this);
 
         hasBroken = true;
 
