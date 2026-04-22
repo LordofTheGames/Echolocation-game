@@ -36,78 +36,110 @@ public class CirclingBatMovement : MonoBehaviour
 
     void Update()
     {
-
         float dt = Time.deltaTime;
-        float t = Time.time;
         Vector3 pos = transform.position;
 
         if (!mgr.IsScared)
+            UpdateIdleMotion(dt, pos);
+        else if (!TryUpdateEscapeMotion(dt, pos))
+            return;
+
+        ApplyMovement(dt);
+        ApplyRotation(dt);
+    }
+
+    void UpdateIdleMotion(float dt, Vector3 pos)
+    {
+        float t = Time.time;
+        ApplyIdleVerticalBob(dt, t);
+        ApplyIdleHomeReturn(dt, pos);
+        ClampIdleHorizontalSpeed();
+        ApplyIdleHardClampPull(dt, pos);
+    }
+
+    void ApplyIdleVerticalBob(float dt, float t)
+    {
+        float u = Mathf.Repeat(seed * 0.318309886f + 0.271f, 1f);
+        float u2 = Mathf.Repeat(seed * 0.479f + 0.631f, 1f);
+        float phase1 = u * 6.283185f;
+        float phase2 = u2 * 6.283185f;
+        float bobHz1 = 1.05f + u * 0.55f;
+        float bobHz2 = 1.75f + u2 * 0.65f;
+        float w1 = Mathf.PI * 2f * bobHz1;
+        float w2 = Mathf.PI * 2f * bobHz2;
+        float ampMain = 0.38f + u * 0.28f;
+        float ampFlutter = 0.22f;
+        float targetVy = ampMain * w1 * Mathf.Cos(w1 * t + phase1) + ampFlutter * w2 * Mathf.Cos(w2 * t + phase2);
+
+        float vyBlend = 5.5f;
+        velocity.y = Mathf.Lerp(velocity.y, targetVy, Mathf.Clamp01(vyBlend * dt));
+    }
+
+    void ApplyIdleHomeReturn(float dt, Vector3 pos)
+    {
+        Vector3 flat = pos - homePosition;
+        flat.y = 0f;
+        float returnStrength = 2.2f;
+        velocity.x -= flat.x * returnStrength * dt;
+        velocity.z -= flat.z * returnStrength * dt;
+        velocity.y += (homePosition.y - pos.y) * 1.8f * dt;
+
+        velocity *= Mathf.Clamp01(1f - 1.1f * dt);
+    }
+
+    void ClampIdleHorizontalSpeed()
+    {
+        float idleMaxSpeed = Mathf.Max(1.1f, mgr.minSpeed * 0.85f);
+        float vMag = velocity.magnitude;
+        if (vMag > idleMaxSpeed)
+            velocity = velocity / vMag * idleMaxSpeed;
+    }
+
+    void ApplyIdleHardClampPull(float dt, Vector3 pos)
+    {
+        Vector3 toCenter = mgr.centerPoint.position - pos;
+        toCenter.y = 0f;
+        float distToCenter = toCenter.magnitude;
+        if (distToCenter > mgr.hardClampRadius && distToCenter > 0.001f)
+            velocity += (toCenter / distToCenter) * (mgr.pullBackWeight * 0.45f) * dt;
+    }
+
+    bool TryUpdateEscapeMotion(float dt, Vector3 pos)
+    {
+        if (mgr.endPoint == null)
         {
-            float u = Mathf.Repeat(seed * 0.318309886f + 0.271f, 1f);
-            float u2 = Mathf.Repeat(seed * 0.479f + 0.631f, 1f);
-            float phase1 = u * 6.283185f;
-            float phase2 = u2 * 6.283185f;
-            float bobHz1 = 1.05f + u * 0.55f;
-            float bobHz2 = 1.75f + u2 * 0.65f;
-            float w1 = Mathf.PI * 2f * bobHz1;
-            float w2 = Mathf.PI * 2f * bobHz2;
-            float ampMain = 0.38f + u * 0.28f;
-            float ampFlutter = 0.22f;
-            float targetVy = ampMain * w1 * Mathf.Cos(w1 * t + phase1) + ampFlutter * w2 * Mathf.Cos(w2 * t + phase2);
-
-            float vyBlend = 5.5f;
-            velocity.y = Mathf.Lerp(velocity.y, targetVy, Mathf.Clamp01(vyBlend * dt));
-
-            Vector3 flat = pos - homePosition;
-            flat.y = 0f;
-            float returnStrength = 2.2f;
-            velocity.x -= flat.x * returnStrength * dt;
-            velocity.z -= flat.z * returnStrength * dt;
-            velocity.y += (homePosition.y - pos.y) * 1.8f * dt;
-
-            velocity *= Mathf.Clamp01(1f - 1.1f * dt);
-
-            float idleMaxSpeed = Mathf.Max(1.1f, mgr.minSpeed * 0.85f);
-            float vMag = velocity.magnitude;
-            if (vMag > idleMaxSpeed)
-                velocity = velocity / vMag * idleMaxSpeed;
-
-            Vector3 toCenter = mgr.centerPoint.position - pos;
-            toCenter.y = 0f;
-            float distToCenter = toCenter.magnitude;
-            if (distToCenter > mgr.hardClampRadius && distToCenter > 0.001f)
-                velocity += (toCenter / distToCenter) * (mgr.pullBackWeight * 0.45f) * dt;
+            mgr.NotifyAgentDespawn(this);
+            Destroy(gameObject);
+            return false;
         }
-        else
+
+        Vector3 escapeTarget = mgr.endPoint.position;
+        Vector3 toEscape = escapeTarget - pos;
+        float dist = toEscape.magnitude;
+
+        if (dist < mgr.despawnDistance)
         {
-            if (mgr.endPoint == null)
-            {
-                mgr.NotifyAgentDespawn(this);
-                Destroy(gameObject);
-                return;
-            }
-
-            Vector3 escapeTarget = mgr.endPoint.position;
-            Vector3 toEscape = escapeTarget - pos;
-            float dist = toEscape.magnitude;
-
-            if (dist < mgr.despawnDistance)
-            {
-                mgr.NotifyAgentDespawn(this);
-                Destroy(gameObject);
-                return;
-            }
-
-            Vector3 dir = dist > 0.001f ? toEscape / dist : transform.forward;
-            float targetSpeed = Mathf.Max(mgr.maxSpeed * mgr.escapeSpeedMultiplier, mgr.minSpeed);
-            float newSpeed = Mathf.MoveTowards(velocity.magnitude, targetSpeed, mgr.acceleration * dt);
-            velocity = dir * newSpeed;
+            mgr.NotifyAgentDespawn(this);
+            Destroy(gameObject);
+            return false;
         }
 
+        Vector3 dir = dist > 0.001f ? toEscape / dist : transform.forward;
+        float targetSpeed = Mathf.Max(mgr.maxSpeed * mgr.escapeSpeedMultiplier, mgr.minSpeed);
+        float newSpeed = Mathf.MoveTowards(velocity.magnitude, targetSpeed, mgr.acceleration * dt);
+        velocity = dir * newSpeed;
+        return true;
+    }
+
+    void ApplyMovement(float dt)
+    {
         Vector3 delta = velocity * dt;
         MoveWithSlide(delta);
         if (mgr.depenetrateAfterMove) Depenetrate();
+    }
 
+    void ApplyRotation(float dt)
+    {
         if (!mgr.IsScared)
             ClampWithinRadius();
 
