@@ -63,7 +63,7 @@ public class Tutorial : MonoBehaviour
 
     public void OnSkip(InputAction.CallbackContext context)
     {
-        if (context.started)
+        if (context.started && tutorial == true)
         {
             animator.SetBool("Tutorial", false);
             tutorial = false;

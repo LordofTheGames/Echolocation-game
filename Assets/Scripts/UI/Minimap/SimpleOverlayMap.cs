@@ -52,19 +52,27 @@ public class SimpleOverlayMap : MonoBehaviour
             return;
         }
 
-        if (WasMapTogglePressedThisFrame())
-            SetVisible(!_visible);
+        // if (WasMapTogglePressedThisFrame())
+        //     SetVisible(!_visible);
 
         if (_visible)
             RefreshMarkers();
     }
 
-    private static bool WasMapTogglePressedThisFrame()
+    // private static bool WasMapTogglePressedThisFrame()
+    // {
+    //     var kb = Keyboard.current ?? InputSystem.GetDevice<Keyboard>();
+    //     bool fromNew = kb != null && kb.xKey.wasPressedThisFrame;
+    //     bool fromOld = Input.GetKeyDown(KeyCode.X);
+    //     return fromNew || fromOld;
+    // }
+
+    public void OnOpenMap(InputAction.CallbackContext context)
     {
-        var kb = Keyboard.current ?? InputSystem.GetDevice<Keyboard>();
-        bool fromNew = kb != null && kb.xKey.wasPressedThisFrame;
-        bool fromOld = Input.GetKeyDown(KeyCode.X);
-        return fromNew || fromOld;
+        if (context.performed)
+        {
+            SetVisible(!_visible);
+        }
     }
 
     private void SetVisible(bool on)
