@@ -511,13 +511,17 @@ public class EcholocationManager : MonoBehaviour
                 }
 
                 // Alert the monster with the volume and the source of the ray
-                GameObject monster = GameObject.Find("Monster");
-                INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
+                // TODO: add this when echo system working
+                // GameObject monster = GameObject.Find("Monster");
+                // if (monster != null)
+                // {
+                //     INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
 
-                if (sensitiveTarget != null)
-                {
-                    sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
-                }
+                //     if (sensitiveTarget != null)
+                //     {
+                //         sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
+                //     }
+                // }
 
 
                 // Cleanup current "generation"

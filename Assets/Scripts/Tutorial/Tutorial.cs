@@ -70,7 +70,8 @@ public class Tutorial : MonoBehaviour
             PlayerRespawn script = player.GetComponent<PlayerRespawn>();
             script.RespawnPosition = warpPoint.transform.position;
             script.Respawn();
-            player.GetComponent<CrazyTimer>().StartEffect();
+            CrazyTimer ct = player.GetComponent<CrazyTimer>();
+            if (ct != null) ct.StartEffect();
         }
     }
 

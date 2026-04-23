@@ -1,0 +1,70 @@
+using System.Collections;
+using Unity.Behavior;
+using Unity.Cinemachine;
+using UnityEngine;
+
+public class ChaseStart : MonoBehaviour
+{
+
+    public bool GlassBroken = false;
+    
+    private CinemachineCamera monsterCam;
+    private CinemachineCamera playerCam;
+    private Camera cam;
+    private MouseLook ml;
+    private PlayerMovement pm;
+    private BehaviorGraphAgent agent;
+    private RendererCutoff cutoff;
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        GameObject monster = GameObject.Find("Monster");
+        agent = monster.GetComponent<BehaviorGraphAgent>();     
+        cutoff = monster.GetComponent<RendererCutoff>();
+        monsterCam = GameObject.Find("MonsterCam").GetComponent<CinemachineCamera>();
+        GameObject player = GameObject.Find("Player");
+        playerCam = player.GetComponentInChildren<CinemachineCamera>();
+        cam = player.GetComponentInChildren<Camera>();
+        ml = player.GetComponentInChildren<MouseLook>();
+        pm = player.GetComponent<PlayerMovement>();
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (GlassBroken && other.CompareTag("Player"))
+        {
+            GlassBroken = false;
+
+            agent.BlackboardReference.SetVariableValue("chasePosition", true);
+            cutoff.Disable();
+
+            playerCam.transform.rotation = cam.transform.rotation;
+            ml.enabled = false;
+            pm.enabled = false;
+            playerCam.enabled = true;
+
+            StartCoroutine(WaitForCutscene()); 
+        }
+    }
+
+    IEnumerator WaitForCutscene()
+    {
+        yield return new WaitForSeconds(0.1f);
+        monsterCam.enabled = true;
+
+        var brain = Camera.main.GetComponent<CinemachineBrain>();
+        yield return new WaitUntil(() => brain.IsBlending);
+        yield return new WaitUntil(() => !brain.IsBlending);
+        yield return new WaitForSeconds(3f);
+        monsterCam.enabled = false;
+        yield return new WaitUntil(() => brain.IsBlending);
+        yield return new WaitUntil(() => !brain.IsBlending);
+
+        yield return new WaitForSeconds(0.1f);
+        playerCam.enabled = false;
+        ml.enabled = true;
+        pm.enabled = true;
+        agent.BlackboardReference.SetVariableValue("chaseStart", true);
+    }
+}
