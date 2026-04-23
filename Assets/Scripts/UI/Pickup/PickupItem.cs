@@ -5,6 +5,8 @@ public class PickupItem : MonoBehaviour
     [SerializeField] private ItemType itemType = ItemType.Rock;
     [SerializeField] private int amount = 1;
 
+    public ItemType PickupItemType => itemType;
+
     public void Interact()
     {
         if (InventoryManager.Instance != null)
