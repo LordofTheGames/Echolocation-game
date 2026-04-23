@@ -101,7 +101,7 @@ public class PlayerMovement : MonoBehaviour
     {
 
         // change height when crouching
-        float targetYScale = isCrouching? 0.5f : 1;
+        float targetYScale = isCrouching? 0.68f : 1;
         Vector3 scale = transform.localScale;
         scale.y =  Mathf.Lerp(transform.localScale.y, targetYScale, Time.deltaTime * 10);
         transform.localScale = scale;

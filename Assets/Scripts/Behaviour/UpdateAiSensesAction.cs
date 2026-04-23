@@ -80,7 +80,19 @@ public partial class UpdateAiSensesAction : Action
     private void updateDotsSight()
     {
         int hits = hearingScript.PlayerSightCheck();
-        if (hits != 0) Debug.Log("Seen with " + hits + " hits");
+        if (hits != 0)
+        {
+            targetSeen.Value = true;
+            // secondToLastLocation = lastLocation.Value;
+            lastLocation.Value = Target.Value.transform.position;
+            // lastDirection.Value = lastLocation.Value - secondToLastLocation;
+
+            Debug.Log("Seen with " + hits + " hits");
+        } 
+        else
+        {
+            targetSeen.Value = false;
+        }
     }
 
     private void updateHearing()
