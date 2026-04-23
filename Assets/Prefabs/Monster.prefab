@@ -429,8 +429,8 @@ MonoBehaviour:
   MoveSpeed_Investigate: 8
   TurnSpeed_Investigate: 5
   StoppingDistance_Investigate: 2
-  Repetitions_Investigate: 4
-  RadiusFromStartPoint_Investigate: 10
+  Repetitions_Investigate: 2
+  RadiusFromStartPoint_Investigate: 5
   MinWaitBetweenRepetitions_Investigate: 1
   MaxWaitBetweenRepetitions_Investigate: 1.5
   EcholocationParams_Investigate:
@@ -438,31 +438,31 @@ MonoBehaviour:
     numRays: 20000
     angle: 100
     visualVolume: 100
-  MaxQuietSound_Sound: 35
-  MaxMediumSound_Sound: 75
+  MaxQuietSound_Sound: 50
+  MaxMediumSound_Sound: 100
   EcholocationParams_Sound:
     uniformity: 0
     numRays: 20000
     angle: 100
     visualVolume: 100
   QuietSounds:
-    MinWaitTime: 1
-    MaxWaitTime: 3
-    MoveSpeed: 4
-    StoppingDistance: 2
-    RadiusFromSound: 8
-  MediumSounds:
     MinWaitTime: 0.2
-    MaxWaitTime: 1
-    MoveSpeed: 7
-    StoppingDistance: 2
-    RadiusFromSound: 5
+    MaxWaitTime: 0.4
+    MoveSpeed: 4.2
+    StoppingDistance: 1
+    RadiusFromSound: 3
+  MediumSounds:
+    MinWaitTime: 0.5
+    MaxWaitTime: 0.8
+    MoveSpeed: 5.3
+    StoppingDistance: 1
+    RadiusFromSound: 1.5
   LoudSounds:
-    MinWaitTime: 0
-    MaxWaitTime: 0
-    MoveSpeed: 9
+    MinWaitTime: 0.8
+    MaxWaitTime: 1.5
+    MoveSpeed: 8.8
     StoppingDistance: 2
-    RadiusFromSound: 2
+    RadiusFromSound: 0.5
   MinSpeed_Chase: 10
   MaxSpeed_Chase: 30
   SpeedIncrement_Chase: 0.18
@@ -590,7 +590,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f41b16a884a77ea4ea05efabe713814e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSoundDistance: 10
+  minDots: 45
+  maxSoundDistance: 8
   AgentEyeHeight: 3.9
   ObstructionMask:
     serializedVersion: 2

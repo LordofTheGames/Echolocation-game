@@ -55,8 +55,9 @@ public partial class UpdateAiSensesAction : Action
 
     protected override Status OnUpdate()
     {
-        updateFOV();
+        // updateFOV();
         updateHearing();
+        updateDotsSight();
         return Status.Success;
     }
 
@@ -74,6 +75,12 @@ public partial class UpdateAiSensesAction : Action
             }
         }
         targetSeen.Value = false;
+    }
+
+    private void updateDotsSight()
+    {
+        int hits = hearingScript.PlayerSightCheck();
+        if (hits != 0) Debug.Log("Seen with " + hits + " hits");
     }
 
     private void updateHearing()

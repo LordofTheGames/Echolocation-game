@@ -24,11 +24,11 @@ public partial class PingEchoNoSoundAction : Action
     [Tooltip("Volume of sound (used for AI reactions)")]
     [SerializeReference] public BlackboardVariable<float> monsterVolume = new BlackboardVariable<float>(0);
 
-    [SerializeReference] public BlackboardVariable<Vector3> positionOffset = new BlackboardVariable<Vector3>(new(0, 1, 0));
+    [SerializeReference] public BlackboardVariable<Vector3> MonsterHeightOffset;
 
     protected override Status OnStart()
     {
-        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + positionOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true);
+        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true);
         return Status.Running;
     }
 
