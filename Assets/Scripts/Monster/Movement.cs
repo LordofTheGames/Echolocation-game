@@ -1,0 +1,380 @@
+using System;
+using System.Collections.Generic;
+using NUnit.Framework;
+using Unity.Behavior;
+using UnityEngine;
+using UnityEngine.UIElements;
+
+public class Area
+{
+    public string name;
+    public bool isTunnel;
+    
+    public List<Vector3> nodes = new List<Vector3>();
+    public List<ExitNode> exitNodes = new List<ExitNode>();
+    public TunnelPath tunnelPath; 
+}
+
+public enum ExitNodeLink {Fork1, Fork2, Fork3, Start, End, None}
+
+public struct ExitNode
+{
+    public Vector3 position;
+    public int index;
+    public Area nextArea;
+
+    public ExitNodeLink tunnelEndLink; // only needed if exit node is part of cave room
+}
+
+public enum Direction {Increasing, Decreasing};
+
+public class TunnelPath
+{
+    public int triggeredNode;
+
+    public bool hasFork;
+
+    public int start;
+    public int end;
+
+    public int forkStart1;
+    public int forkEnd1;
+    public int forkStart2;
+    public int forkEnd2;
+    public int forkStart3;
+    public int forkEnd3;
+
+    public TunnelPath(int start, int end)
+    {
+        triggeredNode = start;
+        hasFork = false;
+        this.start = start;
+        this.end = end;
+        forkStart1 = 0;
+        forkStart2 = 0;
+        forkStart3 = 0;
+        forkEnd1 = 0;
+        forkEnd2 = 0;
+        forkEnd3 = 0;
+    }
+    public TunnelPath(int forkStart1, int forkEnd1, int forkStart2, int forkEnd2, int forkStart3, int forkEnd3)
+    {
+        triggeredNode = forkEnd1;
+        hasFork = true;
+        start = 0;
+        end = 0;
+        this.forkStart1 = forkStart1;
+        this.forkStart2 = forkStart2;
+        this.forkStart3 = forkStart3;
+        this.forkEnd1 = forkEnd1;
+        this.forkEnd2 = forkEnd2;
+        this.forkEnd3 = forkEnd3;
+    }
+}
+
+
+public class Movement : MonoBehaviour
+{
+    public float tunnelTurnAroundChance = 0.2f;
+    public float tunnelTurnAroundChanceDecreaseValue = 0.1f;
+    public float tunnelMaxTurns = 2;
+    public float roomPickAreaJustVisitedOnExitChance = 0.3f;
+    public float roomPickVisitedNodeChance = 0.3f;
+
+    private Dictionary<string, Area> areas;
+
+    private Area currentArea;
+    private Area lastArea;
+    private Vector3 currentNode;
+    private int currentNodeIdx;
+    private List<int> unvisitedNodes;
+    private List<int> visitedNodes;
+
+    private Direction currTunnelMoveDir = Direction.Increasing;
+    private int directionChangeCount = 0;
+    private float directionChangeProb;
+    private bool firstTunnelMove = false;
+
+    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    void Start()
+    {
+        directionChangeProb = tunnelTurnAroundChance;
+
+        GameObject nodesObj = GameObject.Find("Monster Nav Nodes");
+        areas = new Dictionary<string, Area>();
+        visitedNodes = new List<int>();
+        unvisitedNodes = new List<int>();
+
+        // initialise areas
+        foreach(Transform areaObj in nodesObj.transform)
+        {
+            AreaData ad = areaObj.GetComponent<AreaData>();
+            Area area = new Area {name = areaObj.name, isTunnel = ad.isTunnel};
+            areas.Add(areaObj.name, area);
+
+            area.nodes = new List<Vector3>();
+
+            foreach (Transform nodeObj in areaObj)
+            {
+                NodeData n = nodeObj.GetComponent<NodeData>();
+                area.nodes.Add(nodeObj.position);
+            }
+
+            if (area.isTunnel)
+            {
+                if (ad.hasFork)
+                    area.tunnelPath = new TunnelPath(ad.forkStart1, ad.forkEnd1, ad.forkStart2, ad.forkEnd2, ad.forkStart3, ad.forkEnd3);
+                else
+                    area.tunnelPath = new TunnelPath(0, area.nodes.Count - 1);
+            }
+        }
+        // need to add exit nodes after as they link to areas, so need to init all areas first
+        foreach(Transform areaObj in nodesObj.transform)
+        {
+            AreaData ad = areaObj.GetComponent<AreaData>();
+            Area area = areas[areaObj.name];
+            area.exitNodes = new List<ExitNode>();
+            foreach (NodeData exitnd in ad.ExitNodes)
+                area.exitNodes.Add(new ExitNode{position = exitnd.transform.position, nextArea = areas[exitnd.nextArea.name], tunnelEndLink = exitnd.tunnelEndLink});
+        }
+
+        lastArea = areas["Start-Bridge"];
+        currentArea = areas["Bridge"];
+        for (int i = 0; i < currentArea.nodes.Count; i++)
+            unvisitedNodes.Add(i);
+
+        currentNodeIdx = -1; // make the first use of NextNode pick any node in bridge area!
+    }
+
+    public Vector3 NextNode() // TODO: low(er) chance of going to a node already been to in this room, until been to all nodes (or lower chance of turning around for corridors)
+    {
+        if (currentArea.isTunnel == false)
+        {
+            int nextNodeIdx = currentNodeIdx;
+            while(nextNodeIdx == currentNodeIdx) 
+            {
+                if (unvisitedNodes.Count == 0) nextNodeIdx = PickRandomFromList(visitedNodes);
+                else if (visitedNodes.Count == 0) nextNodeIdx = PickRandomFromList(unvisitedNodes);
+                else
+                {
+                    float roll = UnityEngine.Random.value;
+                    if (roll <= roomPickVisitedNodeChance) 
+                        nextNodeIdx = PickRandomFromList(visitedNodes);
+                    else 
+                        nextNodeIdx = PickRandomFromList(unvisitedNodes);
+                }
+            }
+
+            currentNodeIdx = nextNodeIdx;
+            unvisitedNodes.Remove(currentNodeIdx);
+            visitedNodes.Add(currentNodeIdx);
+
+            currentNode = currentArea.nodes[currentNodeIdx];
+            return currentNode;
+        }
+        else
+        {
+            TunnelPath tp = currentArea.tunnelPath;
+
+            // always move forward on first move
+            if (firstTunnelMove)
+            {
+                firstTunnelMove = false;
+                currentNodeIdx += (currTunnelMoveDir == Direction.Increasing) ? 1 : -1;
+                currentNode = currentArea.nodes[currentNodeIdx];
+                return currentNode;
+            }
+
+            // deal with at start/end
+            ExitNodeLink targetLink = ExitNodeLink.None;
+            if (tp.hasFork && currentNodeIdx == tp.forkEnd1) targetLink = ExitNodeLink.Fork1;
+            else if(tp.hasFork && currentNodeIdx == tp.forkEnd2) targetLink = ExitNodeLink.Fork2;
+            else if(tp.hasFork && currentNodeIdx == tp.forkEnd3) targetLink = ExitNodeLink.Fork3;
+            else if (currentNodeIdx == tp.start) targetLink = ExitNodeLink.Start;
+            else if(currentNodeIdx == tp.end) targetLink = ExitNodeLink.End;
+            
+            // at start/end
+            if (targetLink != ExitNodeLink.None)
+            {
+                ExitNode eNode = currentArea.exitNodes.Find(node => node.tunnelEndLink == targetLink);
+                currentNode = eNode.position;
+                currentNodeIdx = eNode.nextArea.nodes.IndexOf(currentNode);
+                return currentNode;
+            }
+            // not at start/end
+            else 
+            {
+                if (tp.hasFork && currentNodeIdx == tp.forkStart1)
+                    calcForkNextNode(tp.forkStart1, tp.forkEnd1, tp.forkStart2, tp.forkEnd2, tp.forkStart3, tp.forkEnd3);
+                else if (tp.hasFork && currentNodeIdx == tp.forkStart2)
+                    calcForkNextNode(tp.forkStart2, tp.forkEnd2, tp.forkStart1, tp.forkEnd1, tp.forkStart3, tp.forkEnd3);
+                else if (tp.hasFork && currentNodeIdx == tp.forkStart3)
+                    calcForkNextNode(tp.forkStart3, tp.forkEnd3, tp.forkStart1, tp.forkEnd1, tp.forkStart2, tp.forkEnd2);
+                else
+                {
+                    float roll = UnityEngine.Random.value;
+                    if (roll <= directionChangeProb && directionChangeCount < tunnelMaxTurns) 
+                    {
+                        currTunnelMoveDir = (currTunnelMoveDir == Direction.Increasing) ? Direction.Decreasing : Direction.Increasing;
+                        directionChangeCount++;
+                        directionChangeProb -= tunnelTurnAroundChanceDecreaseValue;
+                    }
+                    currentNodeIdx += (currTunnelMoveDir == Direction.Increasing) ? 1 : -1;
+                }
+                // catch errors
+                if (currentNodeIdx < 0) currentNodeIdx = 1;
+                else if (currentNodeIdx > currentArea.nodes.Count - 1) currentNodeIdx = currentArea.nodes.Count - 2;
+
+                currentNode = currentArea.nodes[currentNodeIdx];
+                return currentNode;
+            }
+        }
+    }
+    private void calcForkNextNode(int forkStart, int forkEnd, int forkStart1, int forkEnd1, int forkStart2, int forkEnd2)
+    {
+        TunnelPath tp = currentArea.tunnelPath;
+        Direction towardsForkDir = (forkStart < forkEnd) ? Direction.Decreasing : Direction.Increasing;
+        // if we are moving away from fork
+        if (towardsForkDir != currTunnelMoveDir)
+        {
+            float roll = UnityEngine.Random.value;
+            if (roll <= directionChangeProb && directionChangeCount < tunnelMaxTurns)
+            {
+                currTunnelMoveDir = towardsForkDir;
+                directionChangeCount++;
+                directionChangeProb -= tunnelTurnAroundChanceDecreaseValue;
+            }
+            else
+            {
+                currentNodeIdx += (currTunnelMoveDir == Direction.Increasing) ? 1 : -1;
+            }
+        }
+        if (towardsForkDir == currTunnelMoveDir)
+        {
+            float roll = UnityEngine.Random.value;
+            if (roll <= 0.5f)
+            {
+                currTunnelMoveDir = (forkEnd1 < forkStart1) ? Direction.Decreasing : Direction.Increasing;
+                currentNodeIdx = forkStart1;
+            }
+            else 
+            {
+                currTunnelMoveDir = (forkEnd2 < forkStart2) ? Direction.Decreasing : Direction.Increasing;
+                currentNodeIdx = forkStart2;
+            }
+        }
+    }
+
+
+    // TODO: will only be called when exiting room (not tunnel)???????????????????????
+    public Vector3 NextArea()
+    {
+        if (currentArea.isTunnel == false)
+        {
+            ExitNode lastAreaExit = new ExitNode();
+            List<ExitNode> allOtherExits = new List<ExitNode>();
+            foreach (ExitNode exitNode in currentArea.exitNodes)
+            {
+                if (exitNode.nextArea.name == lastArea.name) lastAreaExit = exitNode;
+                else allOtherExits.Add(exitNode);
+            }
+
+            float roll = UnityEngine.Random.value;
+            ExitNode chosenExit;
+            if (roll <= roomPickAreaJustVisitedOnExitChance) 
+                chosenExit = lastAreaExit;
+            else 
+                chosenExit = PickRandomFromList(allOtherExits);
+
+            currentNode = chosenExit.position;
+            currentNodeIdx = chosenExit.nextArea.nodes.IndexOf(currentNode);
+            // if (chosenExit.nextArea.isTunnel)  WE CAN ASSUME THIS!!!
+            // work out tunnel starting direction
+            TunnelPath tp = chosenExit.nextArea.tunnelPath;
+            if (tp.hasFork)
+            {
+                if (currentNodeIdx == tp.forkEnd1)
+                    currTunnelMoveDir = (tp.forkEnd1 < tp.forkStart1) ? Direction.Increasing : Direction.Decreasing;
+                else if (currentNodeIdx == tp.forkEnd2)
+                    currTunnelMoveDir = (tp.forkEnd2 < tp.forkStart2) ? Direction.Increasing : Direction.Decreasing;
+                else if (currentNodeIdx == tp.forkEnd3)
+                    currTunnelMoveDir = (tp.forkEnd3 < tp.forkStart3) ? Direction.Increasing : Direction.Decreasing;
+            }
+            else
+            {
+                if (currentNodeIdx == tp.start)
+                    currTunnelMoveDir = (tp.start < tp.end) ? Direction.Increasing : Direction.Decreasing;
+                else if (currentNodeIdx == tp.end)
+                    currTunnelMoveDir = (tp.start < tp.end) ? Direction.Decreasing : Direction.Increasing;
+            }
+        }
+        else
+        {
+            // FIXME:            
+        }
+        return currentNode;
+    }
+
+    // TODO: go close to player - should be some chance of going to room with player in, else go to adjacent rooms??? or nodes close to player?? or nodes close to "room that player's in"'s exits?
+    // Solution: call normal close to player function, then continue from new position doing room/tunnel logic (should all work due to auto room transitions)
+
+    public void SetArea(string name)
+    {
+        Area newArea = areas[name];
+        if (newArea.name != currentArea.name)
+        {
+            lastArea = currentArea;
+            currentArea = newArea;
+
+            if (currentArea.isTunnel)
+            {
+                directionChangeCount = 0;
+                directionChangeProb = tunnelTurnAroundChance;
+                firstTunnelMove = true;
+            }
+            else
+            {
+                visitedNodes.Clear();
+                unvisitedNodes.Clear();
+                for (int i = 0; i < currentArea.nodes.Count; i++)
+                    unvisitedNodes.Add(i);
+            }
+        }
+    }
+
+    public Vector3 ResetToPathfinding()
+    {
+        float minDistance = Mathf.Infinity;
+        Vector3 closestNode = currentArea.nodes[0];
+        foreach (Vector3 node in currentArea.nodes)
+        {
+            float dist = Vector3.Distance(node, transform.position);
+            if (minDistance > dist)
+            {
+                closestNode = node;
+                minDistance = dist;
+            } 
+        }
+        currentNode = closestNode;
+        currentNodeIdx = currentArea.nodes.IndexOf(currentNode);
+
+        if (currentArea.isTunnel)
+        {
+            // setting this won't cause any problems if monster is just about to enter tunnel, but setting it to true might if monster is just about to exit tunnel
+            firstTunnelMove = false; 
+        }
+
+        return closestNode;
+    }
+
+    private T PickRandomFromList<T>(List<T> targetList)
+    {
+        int randomIndex = UnityEngine.Random.Range(0, targetList.Count);
+        return targetList[randomIndex];
+    }
+
+    public bool inRoom()
+    {
+        return !currentArea.isTunnel;
+    }
+}
