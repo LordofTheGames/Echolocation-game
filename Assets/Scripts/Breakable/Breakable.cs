@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using System;
+using Unity.Behavior;
 
 [SelectionBase]
 public class Breakable : MonoBehaviour
@@ -34,7 +35,7 @@ public class Breakable : MonoBehaviour
     private GameObject player;
     private MicInput micInput;
 
-    public static event Action OnRockBroken;
+    public static event System.Action OnRockBroken;
     public static event Action<Breakable> OnBroken;
 
     public bool HasBroken => hasBroken;
@@ -96,6 +97,7 @@ public class Breakable : MonoBehaviour
             cs.GlassBroken = true;
             fl.flashLights();
             StartCoroutine(PlayAlarms());
+            GameObject.Find("Monster").GetComponent<BehaviorGraphAgent>().BlackboardReference.SetVariableValue("chaseInit", true);
         } 
 
         StartCoroutine(HideBrokenVisualLater());
@@ -115,7 +117,6 @@ public class Breakable : MonoBehaviour
     {
         yield return new WaitForSeconds(3);
         AlarmSound1.Play();
-        yield return new WaitForSeconds(3);
         AlarmSound2.Play();
     }
 }

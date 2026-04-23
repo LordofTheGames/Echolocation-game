@@ -507,11 +507,11 @@ MonoBehaviour:
   DistanceToMoveToIfFarFromPlayer: 35
   MoveSpeedFarFromPlayer: 12
   StoppingDistanceFarFromPlayer: 2
-  TimeUntilMovesClose: 90
+  TimeUntilMovesClose: 60
   DistanceToMoveAwayFromPlayer: 150
   MoveSpeedAwayFromPlayer: 9
   StoppingDistanceAwayFromPlayer: 2
-  TimeUntilMovesAway: 90
+  TimeUntilMovesAway: 60
   PlayerSeenScreamVolume: 1
   GrenadeScreamVolume: 1
   WaterfallScreamVolume: 1
@@ -712,6 +712,7 @@ MonoBehaviour:
     echoRays: 5000
     maxDistance: 8
     volForMonster: 0
+  teleportDistanceThreshold: 3
 --- !u!82 &8255928641836917361
 AudioSource:
   m_ObjectHideFlags: 0

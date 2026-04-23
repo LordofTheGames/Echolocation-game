@@ -13,6 +13,7 @@ public class ChaseStart : MonoBehaviour
     private Camera cam;
     private MouseLook ml;
     private PlayerMovement pm;
+    private CrazyTimer ct;
     private BehaviorGraphAgent agent;
     private RendererCutoff cutoff;
 
@@ -28,6 +29,7 @@ public class ChaseStart : MonoBehaviour
         cam = player.GetComponentInChildren<Camera>();
         ml = player.GetComponentInChildren<MouseLook>();
         pm = player.GetComponent<PlayerMovement>();
+        ct = player.GetComponent<CrazyTimer>();
     }
 
     void OnTriggerEnter(Collider other)
@@ -51,12 +53,15 @@ public class ChaseStart : MonoBehaviour
     IEnumerator WaitForCutscene()
     {
         yield return new WaitForSeconds(0.1f);
+        ct.SprintEffectTime = 70;
+        ct.EffectTime = 1000;
+        ct.ResetEffect();
         monsterCam.enabled = true;
 
         var brain = Camera.main.GetComponent<CinemachineBrain>();
         yield return new WaitUntil(() => brain.IsBlending);
         yield return new WaitUntil(() => !brain.IsBlending);
-        yield return new WaitForSeconds(3f);
+        yield return new WaitForSeconds(1.5f);
         monsterCam.enabled = false;
         yield return new WaitUntil(() => brain.IsBlending);
         yield return new WaitUntil(() => !brain.IsBlending);
