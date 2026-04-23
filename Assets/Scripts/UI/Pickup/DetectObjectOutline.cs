@@ -252,7 +252,7 @@ public class DetectObjectOutline : MonoBehaviour
                 continue;
             }
 
-            Vector3 targetPoint = col.bounds.center;
+            Vector3 targetPoint = GetBestTargetPoint(col, origin);
             Vector3 toTarget = targetPoint - origin;
             float distance = toTarget.magnitude;
 
@@ -264,11 +264,11 @@ public class DetectObjectOutline : MonoBehaviour
             float angle = Vector3.Angle(forward, dirToTarget);
             if (angle > pickupAngle)
                 continue;
-            if (Physics.Linecast(origin, targetPoint, obstacleMask, QueryTriggerInteraction.Ignore))
+            if (!HasLineOfSight(col, origin))
                 continue;
 
             float angleScore = angle * 2f;
-            float distanceScore = distance * 1f;
+            float distanceScore = distance;
             float score = angleScore + distanceScore;
 
             if (score < bestScore)
@@ -278,6 +278,58 @@ public class DetectObjectOutline : MonoBehaviour
             }
         }
         return best;
+    }
+        private Vector3 GetBestTargetPoint(Collider col, Vector3 origin)
+    {
+        Bounds b = col.bounds;
+
+        Vector3 center = b.center;
+        Vector3 upperCenter = new Vector3(b.center.x, b.center.y + b.extents.y * 0.5f, b.center.z);
+        Vector3 top = new Vector3(b.center.x, b.max.y, b.center.z);
+
+        float centerHeightDiff = Mathf.Abs(origin.y - center.y);
+        float upperHeightDiff = Mathf.Abs(origin.y - upperCenter.y);
+        float topHeightDiff = Mathf.Abs(origin.y - top.y);
+
+        Vector3 best = center;
+        float bestDiff = centerHeightDiff;
+
+        if (upperHeightDiff < bestDiff)
+        {
+            best = upperCenter;
+            bestDiff = upperHeightDiff;
+        }
+
+        if (topHeightDiff < bestDiff)
+        {
+            best = top;
+        }
+
+        return best;
+    }
+
+    private bool HasLineOfSight(Collider col, Vector3 origin)
+    {
+        Bounds b = col.bounds;
+
+        Vector3[] testPoints = new Vector3[]
+        {
+            b.center,
+            new Vector3(b.center.x, b.center.y + b.extents.y * 0.35f, b.center.z),
+            new Vector3(b.center.x, b.max.y, b.center.z)
+        };
+
+        for (int i = 0; i < testPoints.Length; i++)
+        {
+            Vector3 dir = testPoints[i] - origin;
+            float dist = dir.magnitude;
+            if (dist <= 0.001f) return true;
+
+            if (!Physics.Raycast(origin, dir.normalized, dist, obstacleMask, QueryTriggerInteraction.Ignore))
+                return true;
+        }
+
+        return false;
     }
     public void SetEnabled(bool value)
     {
