@@ -7229,6 +7229,10 @@ PrefabInstance:
       propertyPath: m_BackGroundColor.r
       value: 0.13207549
       objectReference: {fileID: 0}
+    - target: {fileID: 5854448093715619173, guid: c32e4dc05462de04382f1c00e51849b9, type: 3}
+      propertyPath: m_CullingMask.m_Bits
+      value: 3669606
+      objectReference: {fileID: 0}
     - target: {fileID: 8256680665586651830, guid: c32e4dc05462de04382f1c00e51849b9, type: 3}
       propertyPath: player
       value: 
@@ -20889,14 +20893,6 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 2106793542126640623}
-    - target: {fileID: 3847562910483657284, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 3847562910483657284, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
-      propertyPath: TurnOnEzMap
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 6597633081369023712, guid: 4324c4f6435afc540bf33c6901a61750, type: 3}
       propertyPath: m_LocalPosition.x
       value: 494.69012
@@ -26276,38 +26272,6 @@ PrefabInstance:
     - target: {fileID: 5683829060095955525, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
       propertyPath: m_Name
       value: Monster
-      objectReference: {fileID: 0}
-    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
-      propertyPath: MoveSpeed_Patrol
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
-      propertyPath: TimeUntilMovesAway
-      value: 60
-      objectReference: {fileID: 0}
-    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
-      propertyPath: MaxQuietSound_Sound
-      value: 70
-      objectReference: {fileID: 0}
-    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
-      propertyPath: FinalChaseSpeed_Chase
-      value: 10.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
-      propertyPath: MaxDistanceFromPlayer
-      value: 35
-      objectReference: {fileID: 0}
-    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
-      propertyPath: DistanceToMoveAwayFromPlayer
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
-      propertyPath: DistanceToMoveToIfFarFromPlayer
-      value: 25
-      objectReference: {fileID: 0}
-    - target: {fileID: 8491061249567926694, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
-      propertyPath: maxSoundDistance
-      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
       propertyPath: managedReferences[1914981334647308923].m_Value
@@ -37255,41 +37219,9 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 370860275}
     m_Modifications:
-    - target: {fileID: 441513535564540931, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1442039299137006807, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1442039299137006807, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_ShowMaskGraphic
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1750454272437597661, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Texture
-      value: 
-      objectReference: {fileID: 8600000, guid: 5af1b1faff2f8497089b9c89eb9376ec, type: 2}
-    - target: {fileID: 1750454272437597661, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Maskable
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1750454272437597661, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Material
-      value: 
-      objectReference: {fileID: 2100000, guid: 2a8a3ed2d9861d44bb31b42daf0b5af5, type: 2}
-    - target: {fileID: 2841548944112694747, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 442.92
-      objectReference: {fileID: 0}
     - target: {fileID: 2933804017785261461, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
       propertyPath: m_Name
       value: EzMap
-      objectReference: {fileID: 0}
-    - target: {fileID: 2933804017785261461, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3849994328711587200, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
       propertyPath: m_Pivot.x
@@ -37375,34 +37307,6 @@ PrefabInstance:
       propertyPath: player
       value: 
       objectReference: {fileID: 2106793542126640623}
-    - target: {fileID: 6480074655381818324, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Color.a
-      value: 0.6
-      objectReference: {fileID: 0}
-    - target: {fileID: 6480074655381818324, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Color.b
-      value: 0.103773594
-      objectReference: {fileID: 0}
-    - target: {fileID: 6480074655381818324, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Color.g
-      value: 0.103773594
-      objectReference: {fileID: 0}
-    - target: {fileID: 6480074655381818324, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Color.r
-      value: 0.103773594
-      objectReference: {fileID: 0}
-    - target: {fileID: 6480074655381818324, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Enabled
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6480074655381818324, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_Material
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 7333334793204851461, guid: 67b5e3dce2efb014cbc16ac7d6062a24, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -39750,29 +39654,13 @@ PrefabInstance:
       propertyPath: targetBreakable
       value: 
       objectReference: {fileID: 544998862619626731}
-    - target: {fileID: 2664764399815128095, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
-      propertyPath: m_LocalScale.x
-      value: 14.000001
-      objectReference: {fileID: 0}
-    - target: {fileID: 2664764399815128095, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
-      propertyPath: m_LocalScale.y
-      value: 14.000001
-      objectReference: {fileID: 0}
-    - target: {fileID: 2664764399815128095, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
-      propertyPath: m_LocalScale.z
-      value: 14.000001
-      objectReference: {fileID: 0}
-    - target: {fileID: 2664764399815128095, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 3073600552268709393, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: mic
       value: 
       objectReference: {fileID: 1998086073}
     - target: {fileID: 3853411543216132462, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -178.5
+      value: -183.65
       objectReference: {fileID: 0}
     - target: {fileID: 3853411543216132462, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_LocalPosition.y
@@ -39780,7 +39668,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3853411543216132462, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 50.5
+      value: 62.3
       objectReference: {fileID: 0}
     - target: {fileID: 3853411543216132462, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_LocalRotation.w
@@ -39813,10 +39701,6 @@ PrefabInstance:
     - target: {fileID: 5235627052445221193, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_Name
       value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 5235627052445221193, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 7900835251262604122, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: hidePanel
@@ -39858,10 +39742,6 @@ PrefabInstance:
       propertyPath: breakableVolumePanel
       value: 
       objectReference: {fileID: 1350835673}
-    - target: {fileID: 8053794633716408341, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
-      propertyPath: m_Name
-      value: EzMapMask
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

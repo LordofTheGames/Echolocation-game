@@ -414,7 +414,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NewVarsEvent: {fileID: 11400000, guid: 66dab9bf52afa9847823af1cb91f436b, type: 2}
   UpdateVariables: 0
-  MoveSpeed_Patrol: 6
+  MoveSpeed_Patrol: 5
   TurnSpeed_Patrol: 5
   StoppingDistance_Patrol: 2
   MinWaitAfterMove_Patrol: 0
@@ -438,7 +438,7 @@ MonoBehaviour:
     numRays: 20000
     angle: 100
     visualVolume: 100
-  MaxQuietSound_Sound: 50
+  MaxQuietSound_Sound: 70
   MaxMediumSound_Sound: 100
   EcholocationParams_Sound:
     uniformity: 0
@@ -469,7 +469,7 @@ MonoBehaviour:
   TurnSpeed_Chase: 10
   StoppingDistance_Chase: 2
   DistanceMonsterLosesPlayer_Chase: 15
-  FinalChaseSpeed_Chase: 11
+  FinalChaseSpeed_Chase: 10.5
   EcholocationParams_Chase:
     uniformity: 0
     numRays: 20000
@@ -503,12 +503,12 @@ MonoBehaviour:
     numRays: 20000
     angle: 100
     visualVolume: 100
-  MaxDistanceFromPlayer: 45
-  DistanceToMoveToIfFarFromPlayer: 35
+  MaxDistanceFromPlayer: 35
+  DistanceToMoveToIfFarFromPlayer: 25
   MoveSpeedFarFromPlayer: 12
   StoppingDistanceFarFromPlayer: 2
   TimeUntilMovesClose: 60
-  DistanceToMoveAwayFromPlayer: 150
+  DistanceToMoveAwayFromPlayer: 100
   MoveSpeedAwayFromPlayer: 9
   StoppingDistanceAwayFromPlayer: 2
   TimeUntilMovesAway: 60
@@ -591,7 +591,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   minDots: 45
-  maxSoundDistance: 8
+  maxSoundDistance: 9.5
   AgentEyeHeight: 3.9
   ObstructionMask:
     serializedVersion: 2
