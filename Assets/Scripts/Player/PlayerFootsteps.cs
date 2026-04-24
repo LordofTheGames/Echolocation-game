@@ -218,7 +218,9 @@ public class PlayerFootsteps : MonoBehaviour
         }
 
         audioSource.pitch = Random.Range(0.92f, 1.08f);
+        
         audioSource.PlayOneShot(clipToPlay, currentSettings.volume);
+        GlobalEchoSystem.PingAudio(transform.position, clipToPlay, currentSettings.volume);
 
         // Calculate Foot Position
         isRightFoot = !isRightFoot; 

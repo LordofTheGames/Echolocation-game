@@ -120,10 +120,21 @@ public class GlobalEchoSystem : MonoBehaviour
     [Header("Acoustic Audio System")]
     public AcousticsManager acousticsManager; // Drag acoustics manager script here
 
-    public static void PingAudio(Vector3 position, AudioClip sound)
+    public static void PingAudio(Vector3 position, AudioClip sound, float volume = 1f)
     {
         if (Instance != null && Instance.acousticsManager != null)
         {
+            // Play the DRY sound automatically through the Csound Receiver
+            if (AcousticReceiver.Instance != null)
+            {
+                AudioSource receiverSource = AcousticReceiver.Instance.GetComponent<AudioSource>();
+                if (receiverSource != null)
+                {
+                    receiverSource.PlayOneShot(sound, volume);
+                }
+            }
+
+            // Trigger the WET acoustic rays
             Instance.acousticsManager.TriggerAcousticPulse(position, sound, Instance.colliderColorMap);
         }
     }

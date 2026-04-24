@@ -1,0 +1,233 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5403007686520480757
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 8655791413496560301}
+  - component: {fileID: 3714147688545389995}
+  - component: {fileID: 8642006757813243097}
+  - component: {fileID: 645240905314104527}
+  - component: {fileID: 5240855874105889388}
+  m_Layer: 7
+  m_Name: AcousticEars
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &8655791413496560301
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5403007686520480757}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -9.370675, y: 1.9264823, z: -15.735403}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &3714147688545389995
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5403007686520480757}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!82 &8642006757813243097
+AudioSource:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5403007686520480757}
+  m_Enabled: 1
+  serializedVersion: 4
+  OutputAudioMixerGroup: {fileID: 0}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 0}
+  m_PlayOnAwake: 1
+  m_Volume: 1
+  m_Pitch: 1
+  Loop: 1
+  Mute: 0
+  Spatialize: 0
+  SpatializePostEffects: 0
+  Priority: 128
+  DopplerLevel: 1
+  MinDistance: 1
+  MaxDistance: 500
+  Pan2D: 0
+  rolloffMode: 0
+  BypassEffects: 0
+  BypassListenerEffects: 0
+  BypassReverbZones: 0
+  rolloffCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panLevelCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  spreadCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  reverbZoneMixCustomCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0.33333334
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+--- !u!114 &645240905314104527
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5403007686520480757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3d20258c641c94f0ea3dc32cfe3de904, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  logCsoundOutput: 0
+  mute: 0
+  processClipAudio: 1
+  loudVolumeWarning: 1
+  loudWarningThreshold: 10
+  overrideSamplingRate: 0
+  audioRate: 48000
+  controlRate: 48000
+  csoundScore: 
+  environmentSettings: []
+  _csoundFileGUID: 4bad5c3605ff73b47b2ba9ac6a797750
+  _csoundString: "<CsoundSynthesizer>\r\n<CsOptions>\r\n-n -d\r\n</CsOptions>\r\n<CsInstruments>\r\nsr
+    = 44100\r\nksmps = 32\r\nnchnls = 2\r\n0dbfs = 1.0\r\n\r\ninstr 1 \r\n    ; 1.
+    Read p-fields. Delay and Energy MUST be i-rate for the delay opcode!\r\n    iDelay
+    = p4\r\n    i63    = p5\r\n    i125   = p6\r\n    i250   = p7\r\n    i500   =
+    p8\r\n    i1k    = p9\r\n    i2k    = p10\r\n    i4k    = p11\r\n    i8k    =
+    p12\r\n    i16k   = p13\r\n\r\n    ; 2. Grab the live audio playing from the
+    Unity AudioSource (The dry footstep)\r\n    aInL, aInR ins\r\n    \r\n    ; Mix
+    down to mono for DSP processing\r\n    aDryIn = (aInL + aInR) * 0.5 \r\n    \r\n   
+    ; 3. Spatial Delay (Requires i-rate delay time, 5.0 is max buffer)\r\n    aDelayed
+    delay aDryIn, iDelay, 5.0\r\n\r\n    ; 4. 9-Band Frequency Attenuation (Bandpass
+    filters)\r\n    aB1 butterbp aDelayed, 63, 30\r\n    aB2 butterbp aDelayed, 125,
+    60\r\n    aB3 butterbp aDelayed, 250, 125\r\n    aB4 butterbp aDelayed, 500,
+    250\r\n    aB5 butterbp aDelayed, 1000, 500\r\n    aB6 butterbp aDelayed, 2000,
+    1000\r\n    aB7 butterbp aDelayed, 4000, 2000\r\n    aB8 butterbp aDelayed, 8000,
+    4000\r\n    aB9 butterbp aDelayed, 16000, 8000\r\n    \r\n    ; 5. Multiply each
+    band by the energy left after bouncing\r\n    aFilteredMix = (aB1*i63) + (aB2*i125)
+    + (aB3*i250) + (aB4*i500) + (aB5*i1k) + (aB6*i2k) + (aB7*i4k) + (aB8*i8k) + (aB9*i16k)\r\n\r\n   
+    ; 6. Schroeder's Reverb (Scale delay to create reverb tail)\r\n    kReverbTime
+    = iDelay * 10 \r\n    aReverb reverb aFilteredMix, kReverbTime\r\n\r\n    ; Output
+    the original dry sound PLUS the new wet reverb\r\n    outs aInL + aReverb, aInR
+    + aReverb\r\nendin\r\n\r\n</CsInstruments>\r\n</CsoundSynthesizer>"
+  _csoundFileName: Acoustics.csd
+  _csoundAsset: {fileID: 102900000, guid: 4bad5c3605ff73b47b2ba9ac6a797750, type: 3}
+  _channels: []
+  _availableAudioChannels: []
+  _audioChannelsBufferSize: 32
+  _drawCsoundString: 0
+  _drawTestScore: 0
+  _drawSettings: 1
+  _drawChannels: 0
+  _drawAudioChannels: 0
+  _drawPresets: 0
+  _drawPresetsLoad: 0
+  _drawPresetsSave: 0
+  _drawPresetsImport: 0
+  _showRuntimeEnvironmentPath: 0
+  _currentPreset: 
+  _currentPresetSaveFolder: 
+  _currentPresetLoadFolder: 
+  webGLAssetsList: []
+--- !u!114 &5240855874105889388
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5403007686520480757}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2d68d192a56485549b291545354c62eb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  transitionSpeed: 3
+  defaultRadius: 1
+  targetRadius: 1

@@ -68,6 +68,7 @@ public class AcousticsManager : MonoBehaviour
         var qp = QueryParameters.Default;
         qp.layerMask = acousticBounceLayers;
         qp.hitBackfaces = false;
+        qp.hitTriggers = QueryTriggerInteraction.Collide;
 
         for (int bounce = 0; bounce <= maxBounces; bounce++)
         {
@@ -257,7 +258,6 @@ public class AcousticsManager : MonoBehaviour
             if (!successfulHitsQueue.IsEmpty())
             {
                 NativeArray<AcousticHit> hits = successfulHitsQueue.ToArray(Allocator.Temp);
-                successfulHitsQueue.Dispose();
 
                 foreach (var hit in hits)
                 {

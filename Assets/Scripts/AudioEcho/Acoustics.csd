@@ -1,6 +1,6 @@
 <CsoundSynthesizer>
 <CsOptions>
--odac
+-n -d
 </CsOptions>
 <CsInstruments>
 sr = 44100
@@ -9,25 +9,28 @@ nchnls = 2
 0dbfs = 1.0
 
 instr 1 
-    ; Read directly from the p-fields passed by the C# string
-    kDelay = p4
-    k63    = p5
-    k125   = p6
-    k250   = p7
-    k500   = p8
-    k1k    = p9
-    k2k    = p10
-    k4k    = p11
-    k8k    = p12
-    k16k   = p13
+    ; 1. Read p-fields. Delay and Energy MUST be i-rate for the delay opcode!
+    iDelay = p4
+    i63    = p5
+    i125   = p6
+    i250   = p7
+    i500   = p8
+    i1k    = p9
+    i2k    = p10
+    i4k    = p11
+    i8k    = p12
+    i16k   = p13
 
-    ; The dry sound from Unity 
-    aDryIn chnget "unity_audio_in" 
+    ; 2. Grab the live audio playing from the Unity AudioSource (The dry footstep)
+    aInL, aInR ins
     
-    ; 1. Spatial Delay based on Ray Distance
-    aDelayed delay aDryIn, i(kDelay), 5.0
+    ; Mix down to mono for DSP processing
+    aDryIn = (aInL + aInR) * 0.5 
+    
+    ; 3. Spatial Delay (Requires i-rate delay time, 5.0 is max buffer)
+    aDelayed delay aDryIn, iDelay, 5.0
 
-    ; 2. 9-Band Frequency Attenuation (Bandpass filters)
+    ; 4. 9-Band Frequency Attenuation (Bandpass filters)
     aB1 butterbp aDelayed, 63, 30
     aB2 butterbp aDelayed, 125, 60
     aB3 butterbp aDelayed, 250, 125
@@ -38,15 +41,15 @@ instr 1
     aB8 butterbp aDelayed, 8000, 4000
     aB9 butterbp aDelayed, 16000, 8000
     
-    ; Multiply each band by the energy left after bouncing
-    aFilteredMix = (aB1*k63) + (aB2*k125) + (aB3*k250) + (aB4*k500) + (aB5*k1k) + (aB6*k2k) + (aB7*k4k) + (aB8*k8k) + (aB9*k16k)
+    ; 5. Multiply each band by the energy left after bouncing
+    aFilteredMix = (aB1*i63) + (aB2*i125) + (aB3*i250) + (aB4*i500) + (aB5*i1k) + (aB6*i2k) + (aB7*i4k) + (aB8*i8k) + (aB9*i16k)
 
-    ; 3. Schroeder's Reverb
-    kReverbTime = kDelay * 10 
+    ; 6. Schroeder's Reverb (Scale delay to create reverb tail)
+    kReverbTime = iDelay * 10 
     aReverb reverb aFilteredMix, kReverbTime
 
-    ; Output Left and Right
-    outs aReverb, aReverb
+    ; Output the original dry sound PLUS the new wet reverb
+    outs aInL + aReverb, aInR + aReverb
 endin
 
 </CsInstruments>
