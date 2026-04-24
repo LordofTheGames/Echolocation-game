@@ -66,10 +66,18 @@ public class ChaseStart : MonoBehaviour
         yield return new WaitUntil(() => brain.IsBlending);
         yield return new WaitUntil(() => !brain.IsBlending);
 
-        yield return new WaitForSeconds(0.1f);
+        // Add "Run!" message
+        GameObject finalChaseMessage = GameObject.Find("Final Chase Message");
+        finalChaseMessage.SetActive(true);
+
+        yield return new WaitForSeconds(0.5f);
         playerCam.enabled = false;
         ml.enabled = true;
         pm.enabled = true;
         agent.BlackboardReference.SetVariableValue("chaseStart", true);
+
+        yield return new WaitForSeconds(3);
+        finalChaseMessage.SetActive(false);
+
     }
 }
