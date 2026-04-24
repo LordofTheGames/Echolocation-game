@@ -32,10 +32,10 @@ public class MonsterDifficultyManager : MonoBehaviour
     public float MoveSpeed_Patrol = 6;
     public float TurnSpeed_Patrol = 5;
     public float StoppingDistance_Patrol = 2;
-    [Tooltip("When picking a new location to patrol to, how far from current position to look")]
-    public float MoveRadius_Patrol = 20;
     public float MinWaitAfterMove_Patrol = 0;
     public float MaxWaitAfterMove_Patrol = 1;
+    public float MinRoomTime_Patrol = 8;
+    public float MaxRoomTime_Patrol = 15;
     public EcholocationParams EcholocationParams_Patrol = new EcholocationParams {uniformity = 0, numRays = 20000, angle = 100, visualVolume = 100};
 
     // -------------- Investigate Variables ---------------
@@ -72,6 +72,7 @@ public class MonsterDifficultyManager : MonoBehaviour
     public float StoppingDistance_Chase = 2;
     [Tooltip("Once monster has seen player, monster is locked on unless player gets this distance away")] 
     public float DistanceMonsterLosesPlayer_Chase = 15;
+    public float FinalChaseSpeed_Chase = 12;
     public EcholocationParams EcholocationParams_Chase = new EcholocationParams {uniformity = 0, numRays = 20000, angle = 100, visualVolume = 100};
 
     // ---------------- Run Away Variables ----------------
@@ -125,6 +126,13 @@ public class MonsterDifficultyManager : MonoBehaviour
     public float DistanceToMoveToIfFarFromPlayer = 35;
     public float MoveSpeedFarFromPlayer = 12;
     public float StoppingDistanceFarFromPlayer = 2;
+    public float TimeUntilMovesClose = 60;
+    // --------- Move Away From Player Variables ----------
+    [Header("Move Away From Player Variables")]
+    public float DistanceToMoveAwayFromPlayer = 150;
+    public float MoveSpeedAwayFromPlayer = 9;
+    public float StoppingDistanceAwayFromPlayer = 2;
+    public float TimeUntilMovesAway = 60;
 
     // ---------- Sound Effect Volume Variables -----------
     [Header("Sound Effect Volume Variables")]
@@ -143,13 +151,16 @@ public class MonsterDifficultyManager : MonoBehaviour
 
     public void OnPlayerDeath()
     {
+        return;
+
         // ----------------- Patrol Variables -----------------
         MoveSpeed_Patrol -= 1;
         TurnSpeed_Patrol -= 1;
         StoppingDistance_Patrol += 1;
-        // MoveRadius_Patrol -= 1;
         MinWaitAfterMove_Patrol += 1;
         MaxWaitAfterMove_Patrol += 1;
+        MinRoomTime_Patrol += 1;
+        MaxRoomTime_Patrol += 1;
         // EcholocationParams_Patrol.uniformity -= 1;
         // EcholocationParams_Patrol.numRays -= 1;
         // EcholocationParams_Patrol.angle -= 1;
@@ -198,6 +209,7 @@ public class MonsterDifficultyManager : MonoBehaviour
         TurnSpeed_Chase -= 1;
         StoppingDistance_Chase += 1;
         DistanceMonsterLosesPlayer_Chase -= 1;
+        FinalChaseSpeed_Chase -= 1;
         // EcholocationParams_Chase.uniformity -= 1;
         // EcholocationParams_Chase.numRays -= 1;
         // EcholocationParams_Chase.angle -= 1;
@@ -240,6 +252,12 @@ public class MonsterDifficultyManager : MonoBehaviour
         DistanceToMoveToIfFarFromPlayer += 1;
         MoveSpeedFarFromPlayer -= 1;
         StoppingDistanceFarFromPlayer += 1;
+        TimeUntilMovesClose += 1;
+        // --------- Move Away From Player Variables ----------
+        DistanceToMoveAwayFromPlayer += 1;
+        MoveSpeedAwayFromPlayer += 1;
+        StoppingDistanceAwayFromPlayer += 1;
+        TimeUntilMovesAway -= 1;
 
         // ---------- Sound Effect Volume Variables -----------
         // PlayerSeenScreamVolume -= 1;

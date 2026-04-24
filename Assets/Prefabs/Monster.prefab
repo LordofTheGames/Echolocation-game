@@ -189,6 +189,7 @@ GameObject:
   - component: {fileID: 8193312070692757988}
   - component: {fileID: 8284764034434471042}
   - component: {fileID: 8491061249567926694}
+  - component: {fileID: 4211793844371950918}
   - component: {fileID: 8795594309079875185}
   - component: {fileID: 3235923388471130729}
   - component: {fileID: 1766991889299169475}
@@ -280,15 +281,15 @@ MonoBehaviour:
   - rid: 2320555136217252138
   - rid: 1914980985187598590
   - rid: 1914981334647308923
-  - rid: 1914981334647308924
   - rid: 1989111657100738632
-  - rid: 1989111657100738633
   - rid: 8625079667245974039
   - rid: 8625079667245974040
   - rid: 8625079667245974041
   - rid: 8625079667245974042
   - rid: 8625079667245974043
   - rid: 8625079678806262514
+  - rid: 8625079894267396196
+  - rid: 8625079894320087343
   m_OriginalGraph: {fileID: 0}
   m_IsInitialised: 0
   m_IsStarted: 0
@@ -309,15 +310,7 @@ MonoBehaviour:
         GUID:
           m_Value0: 11345413872489952020
           m_Value1: 4405279783435690339
-        Name: RespawnPoint1
-        m_Value: {fileID: 0}
-    - rid: 1914981334647308924
-      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 11280212106975940866
-          m_Value1: 17139345017175559048
-        Name: RespawnPoint2
+        Name: respawnPoint
         m_Value: {fileID: 0}
     - rid: 1989111657100738632
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
@@ -325,15 +318,7 @@ MonoBehaviour:
         GUID:
           m_Value0: 6508103627525848672
           m_Value1: 5895962579494928670
-        Name: MonsterRespawn1
-        m_Value: {fileID: 0}
-    - rid: 1989111657100738633
-      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 17873533838876477083
-          m_Value1: 7252251551268337881
-        Name: MonsterRespawn2
+        Name: monsterRespawnPoint
         m_Value: {fileID: 0}
     - rid: 2320555136217252090
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
@@ -399,6 +384,22 @@ MonoBehaviour:
           m_Value1: 4009922134695712477
         Name: ScriptedSceneSound
         m_Value: {fileID: 521415726480557336}
+    - rid: 8625079894267396196
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 5744594257331014201
+          m_Value1: 15422458036254775120
+        Name: chaseStartPosition
+        m_Value: {fileID: 0}
+    - rid: 8625079894320087343
+      type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 3593610371394841617
+          m_Value1: 6894295246890815665
+        Name: chaseStartLookAtPoint
+        m_Value: {fileID: 0}
 --- !u!114 &6014912869232668478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -413,12 +414,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   NewVarsEvent: {fileID: 11400000, guid: 66dab9bf52afa9847823af1cb91f436b, type: 2}
   UpdateVariables: 0
-  MoveSpeed_Patrol: 6
+  MoveSpeed_Patrol: 5
   TurnSpeed_Patrol: 5
   StoppingDistance_Patrol: 2
-  MoveRadius_Patrol: 20
   MinWaitAfterMove_Patrol: 0
   MaxWaitAfterMove_Patrol: 1
+  MinRoomTime_Patrol: 8
+  MaxRoomTime_Patrol: 15
   EcholocationParams_Patrol:
     uniformity: 0
     numRays: 20000
@@ -427,8 +429,8 @@ MonoBehaviour:
   MoveSpeed_Investigate: 8
   TurnSpeed_Investigate: 5
   StoppingDistance_Investigate: 2
-  Repetitions_Investigate: 4
-  RadiusFromStartPoint_Investigate: 10
+  Repetitions_Investigate: 2
+  RadiusFromStartPoint_Investigate: 5
   MinWaitBetweenRepetitions_Investigate: 1
   MaxWaitBetweenRepetitions_Investigate: 1.5
   EcholocationParams_Investigate:
@@ -436,37 +438,38 @@ MonoBehaviour:
     numRays: 20000
     angle: 100
     visualVolume: 100
-  MaxQuietSound_Sound: 35
-  MaxMediumSound_Sound: 75
+  MaxQuietSound_Sound: 70
+  MaxMediumSound_Sound: 100
   EcholocationParams_Sound:
     uniformity: 0
     numRays: 20000
     angle: 100
     visualVolume: 100
   QuietSounds:
-    MinWaitTime: 1
-    MaxWaitTime: 3
-    MoveSpeed: 4
-    StoppingDistance: 2
-    RadiusFromSound: 8
-  MediumSounds:
     MinWaitTime: 0.2
-    MaxWaitTime: 1
-    MoveSpeed: 7
-    StoppingDistance: 2
-    RadiusFromSound: 5
+    MaxWaitTime: 0.4
+    MoveSpeed: 4.2
+    StoppingDistance: 1
+    RadiusFromSound: 3
+  MediumSounds:
+    MinWaitTime: 0.5
+    MaxWaitTime: 0.8
+    MoveSpeed: 5.3
+    StoppingDistance: 1
+    RadiusFromSound: 1.5
   LoudSounds:
-    MinWaitTime: 0
-    MaxWaitTime: 0
-    MoveSpeed: 9
+    MinWaitTime: 0.8
+    MaxWaitTime: 1.5
+    MoveSpeed: 8.8
     StoppingDistance: 2
-    RadiusFromSound: 2
+    RadiusFromSound: 0.5
   MinSpeed_Chase: 10
   MaxSpeed_Chase: 30
   SpeedIncrement_Chase: 0.18
   TurnSpeed_Chase: 10
   StoppingDistance_Chase: 2
   DistanceMonsterLosesPlayer_Chase: 15
+  FinalChaseSpeed_Chase: 10.5
   EcholocationParams_Chase:
     uniformity: 0
     numRays: 20000
@@ -500,10 +503,15 @@ MonoBehaviour:
     numRays: 20000
     angle: 100
     visualVolume: 100
-  MaxDistanceFromPlayer: 45
-  DistanceToMoveToIfFarFromPlayer: 35
+  MaxDistanceFromPlayer: 35
+  DistanceToMoveToIfFarFromPlayer: 25
   MoveSpeedFarFromPlayer: 12
   StoppingDistanceFarFromPlayer: 2
+  TimeUntilMovesClose: 60
+  DistanceToMoveAwayFromPlayer: 100
+  MoveSpeedAwayFromPlayer: 9
+  StoppingDistanceAwayFromPlayer: 2
+  TimeUntilMovesAway: 60
   PlayerSeenScreamVolume: 1
   GrenadeScreamVolume: 1
   WaterfallScreamVolume: 1
@@ -582,12 +590,30 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f41b16a884a77ea4ea05efabe713814e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maxSoundDistance: 20
+  minDots: 45
+  maxSoundDistance: 9.5
   AgentEyeHeight: 3.9
   ObstructionMask:
     serializedVersion: 2
     m_Bits: 53576
   ShowDebugVisuals: 1
+--- !u!114 &4211793844371950918
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5683829060095955525}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 337bdefd69b87ba4dafdc240cf594c03, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tunnelTurnAroundChance: 0.2
+  tunnelTurnAroundChanceDecreaseValue: 0.1
+  tunnelMaxTurns: 2
+  roomPickAreaJustVisitedOnExitChance: 0.3
+  roomPickVisitedNodeChance: 0.3
 --- !u!114 &8795594309079875185
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -686,6 +712,7 @@ MonoBehaviour:
     echoRays: 5000
     maxDistance: 8
     volForMonster: 0
+  teleportDistanceThreshold: 3
 --- !u!82 &8255928641836917361
 AudioSource:
   m_ObjectHideFlags: 0

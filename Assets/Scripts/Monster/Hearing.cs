@@ -1,7 +1,8 @@
 using UnityEngine;
 
-public class HearingChecker : MonoBehaviour, INoiseSensitive
+public class HearingChecker : MonoBehaviour, INoiseSensitive, IEchoSeesPlayerSensitive
 {
+    public int minDots = 30;
     public float maxSoundDistance = 30f;
     public float AgentEyeHeight = 3.9f;
     public LayerMask ObstructionMask;
@@ -10,6 +11,8 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive
     private SoundData newSource;
     private bool newSound = false;
     private float newMaxDist = 0;
+
+    private int monsterSeenPlayerHits = 0;
 
     // This function is called automatically by the Scanner when rays hit the monster
     public void OnHeardScan(Vector3 source, float volume, bool isFootsteps, float priority)
@@ -25,7 +28,7 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive
         {
             bool viewObstructed = Physics.Raycast(eyePos, source - eyePos, distance, ObstructionMask);
             // TODO: this calculation is fairly arbritrary! improve it?
-            if (viewObstructed) newMaxDist *= 0.75f;  
+            if (viewObstructed) newMaxDist *= 0.8f;  
 
             if (distance <= newMaxDist){
                 newSound = true;
@@ -34,6 +37,20 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive
                 newSource.isFootsteps = isFootsteps;
             }
         }
+    }
+
+    public void OnMonsterEcholocation(int monsterSeenPlayerHits)
+    {
+        // Debug.Log("Monster seen player hits: " + monsterSeenPlayerHits);
+        if (monsterSeenPlayerHits > minDots)
+            this.monsterSeenPlayerHits = monsterSeenPlayerHits;
+        else
+            this.monsterSeenPlayerHits = 0;
+    }
+    // called every frame by monster behaviour tree to check for player dots
+    public int PlayerSightCheck()
+    {
+        return monsterSeenPlayerHits; 
     }
 
     // called every frame by monster behaviour tree to check for new sounds
@@ -52,6 +69,7 @@ public class HearingChecker : MonoBehaviour, INoiseSensitive
             Vector3 eyePos = transform.position + Vector3.up * AgentEyeHeight;
             Gizmos.color = Color.green;
             Gizmos.DrawWireSphere(eyePos, newMaxDist);
+            // Gizmos.DrawWireSphere(eyePos, maxSoundDistance);
         }
     }
 }

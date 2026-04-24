@@ -8,6 +8,8 @@ public class WaterfallTrigger : MonoBehaviour
     [SerializeField] private GameObject respawnPoint;
     [SerializeField] private GameObject monsterRespawnPoint;
 
+    private bool firstEnter = true;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -34,6 +36,12 @@ public class WaterfallTrigger : MonoBehaviour
             agent.BlackboardReference.SetVariableValue("playerInRespawn", false);
             agent.BlackboardReference.SetVariableValue("respawnPoint", respawnPoint);
             agent.BlackboardReference.SetVariableValue("monsterRespawnPoint", monsterRespawnPoint);
+
+            if (firstEnter)
+            {
+                GameObject.Find("UIManager").GetComponent<SimpleOverlayMap>().AddStaticBlueDot(transform.GetChild(1).position);
+                firstEnter = false;
+            }
         }
     }
 }

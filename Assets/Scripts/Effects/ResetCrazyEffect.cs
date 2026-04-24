@@ -46,7 +46,7 @@ public class ResetCrazyEffect : MonoBehaviour
         transform.GetChild(0).gameObject.SetActive(false);
 
         audioSource.PlayOneShot(swallowSound, swallowVolume);
-        ct.FadeOutSounds();
+        if (ct != null) ct.FadeOutSounds();
 
         //fade to black
         float timer = 0f;
@@ -71,7 +71,7 @@ public class ResetCrazyEffect : MonoBehaviour
         }
 
         Time.timeScale = 1;
-        ct.ResetEffect();
+        if (ct != null) ct.ResetEffect();
         pm.enabled = true;
         cc.enabled = true;
 

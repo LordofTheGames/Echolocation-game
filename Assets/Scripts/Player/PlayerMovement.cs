@@ -26,7 +26,8 @@ public class PlayerMovement : MonoBehaviour
     private float defaultCamY;
     private PlayerFootsteps footstepsScript;
 
-    
+    private CrazyTimer crazyTimer;
+
 
     // hold shift
     public void OnSprint(InputAction.CallbackContext context)
@@ -92,6 +93,7 @@ public class PlayerMovement : MonoBehaviour
     void Start()
     {
         footstepsScript = gameObject.GetComponent<PlayerFootsteps>();
+        crazyTimer = gameObject.GetComponent<CrazyTimer>();
         defaultCamY = cameraTransform.localPosition.y;
     }
     // Update is called once per frame
@@ -99,11 +101,10 @@ public class PlayerMovement : MonoBehaviour
     {
 
         // change height when crouching
-        float targetY = isCrouching ? defaultCamY - 0.3f : defaultCamY;
-
-        Vector3 camPos = cameraTransform.localPosition;
-        camPos.y = Mathf.Lerp(camPos.y, targetY, Time.deltaTime * 10);
-        cameraTransform.localPosition = camPos;
+        float targetYScale = isCrouching? 0.62f : 1;
+        Vector3 scale = transform.localScale;
+        scale.y =  Mathf.Lerp(transform.localScale.y, targetYScale, Time.deltaTime * 10);
+        transform.localScale = scale;
 
         //checking if we hit the ground to reset our falling velocity, otherwise we will fall faster the next time
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
@@ -116,9 +117,10 @@ public class PlayerMovement : MonoBehaviour
         bool sprintAllowed = !isCrouching;
 
         float currentSpeed = walkSpeed;
-
         if (isCrouching)
+        {
             currentSpeed = crouchSpeed;
+        }
         else if (sprintAllowed && isSprinting)
         {
             currentSpeed = sprintSpeed;
@@ -129,7 +131,9 @@ public class PlayerMovement : MonoBehaviour
                 footstepsScript.CurrentState = MoveState.WALK;
             }
         }
-        
+
+        // play crazy effect faster if sprinting, turn it off if not
+        crazyTimer.isSprinting = isSprinting;
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         controller.Move(currentSpeed * Time.deltaTime * move);

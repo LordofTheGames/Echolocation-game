@@ -57,7 +57,9 @@ public class EcholocationManager : MonoBehaviour
 
 
     [Header("Colour Palettes")]
-    public Color[] monsterColors = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
+    public Color[] monsterColorsRed = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
+    public Color[] monsterColorsOrange = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
+    public Color[] monsterColorsYellow = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
     public Color[] batColors = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
     public Color[] interactableColors = new Color[3] {Color.green, new Color(0f, 0.8f, 0f), new Color(0f, 0.6f, 0f)};
     public Color[] defaultColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
@@ -125,6 +127,11 @@ public class EcholocationManager : MonoBehaviour
 
     // Tells monster if it's a footstep sound
     private bool isFootstepsScan = false;
+
+    // Lets system know if the monster is the thing that produced this instance of echolcation,
+    // makes all dots red and alerts monster if it hits the player
+    bool isMonsterEcho = false;
+    MonsterSearchMode monsterSearchMode = MonsterSearchMode.RED;
 
     // Layer memory - to restore object+children's layers, after setting to IgnoreRaycast layer on first pulse, and reset before first reflections
     private Dictionary<Transform, int> layerMemory = new Dictionary<Transform, int>();
@@ -248,7 +255,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float visualVolume = 10f, float monsterVolume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default, float priority = 1f)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float visualVolume = 10f, float monsterVolume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default, float priority = 1f, bool isMonsterEcholocation = false, MonsterSearchMode searchMode = MonsterSearchMode.RED)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -262,6 +269,8 @@ public class EcholocationManager : MonoBehaviour
         initialVisualVolume = visualVolume;
         initialMonsterVolume = monsterVolume;
         isFootstepsScan = isFootsteps;
+        isMonsterEcho = isMonsterEcholocation;
+        monsterSearchMode = searchMode;
 
         // FIXME: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
@@ -316,6 +325,10 @@ public class EcholocationManager : MonoBehaviour
     // Fires the rays
     void PerformScan()
     {
+        // If it's a monster echolocation and it "sees" the player set to true
+        bool monsterSeenPlayer = false;
+        // Count number of hits
+        int monsterSeenPlayerHits = 0;
 
         GameObject sourceObj = (objectToIgnore != null) ? objectToIgnore : this.gameObject;
 
@@ -415,36 +428,64 @@ public class EcholocationManager : MonoBehaviour
 
                 // --- Assign colours (main thread unpacking) ---
                 int currentBounceHits = visualHits.Length;
+                int renderedHitsThisBounce = 0; // Track valid hits to prevent gaps in GPU arrays - player hits aren't rendered
 
                 // Unpack visual data and assign colours
                 for (int k  = 0; k < currentBounceHits; k++)
                 {
                     VisualHit vHit = visualHits[k];
 
+                    // If the monster produced the echolocation and the rays hit the player (using player category) alert monster
+                    if (isMonsterEcho && (vHit.colorCategory == 13))
+                    {
+                        monsterSeenPlayer = true;
+                        monsterSeenPlayerHits++;
+                    }
+
+                    // Skip this hit if it was a player hit so that it is not rendered
+                    if (vHit.colorCategory == 13)
+                    {
+                        continue;
+                    }
+
                     // Use global index so bounce 1 doesn't overwrite bounce 0
-                    int globalIndex = activeHitCount + k;
+                    int globalIndex = activeHitCount + renderedHitsThisBounce;
 
                     if (globalIndex >= instanceMatrices.Length) break; // Safety if goes past safeBufferSize
 
                     instanceMatrices[globalIndex] = vHit.matrix;
 
                     // Assign colour
-                    Color baseColor = vHit.colorCategory switch
+                    Color baseColor;
+                    if (isMonsterEcho) // If monster produced this instance of echolocation make all dots red
                     {
-                        1 => monsterColors[vHit.colorVariant],
-                        2 => interactableColors[vHit.colorVariant],
-                        3 => metalColors[vHit.colorVariant],
-                        4 => dirtColors[vHit.colorVariant],
-                        5 => woodColors[vHit.colorVariant],
-                        6 => labColors[vHit.colorVariant],
-                        7 => railColors[vHit.colorVariant],
-                        8 => hideRockColors[vHit.colorVariant],
-                        9 => waterColors[vHit.colorVariant],
-                        10 => batColors[vHit.colorVariant],
-                        11 => keyColors[vHit.colorVariant],
-                        12 => pillBoxColors[vHit.colorVariant],
-                        _ => defaultColors[vHit.colorVariant]
-                    };
+                        baseColor = monsterSearchMode switch
+                        {
+                            MonsterSearchMode.RED => monsterColorsRed[vHit.colorVariant],
+                            MonsterSearchMode.ORANGE => monsterColorsOrange[vHit.colorVariant],
+                            MonsterSearchMode.YELLOW => monsterColorsYellow[vHit.colorVariant],
+                            _ => monsterColorsRed[vHit.colorVariant]
+                        };
+                    }
+                    else
+                    {
+                        baseColor = vHit.colorCategory switch
+                        {
+                            1 => monsterColorsRed[vHit.colorVariant],
+                            2 => interactableColors[vHit.colorVariant],
+                            3 => metalColors[vHit.colorVariant],
+                            4 => dirtColors[vHit.colorVariant],
+                            5 => woodColors[vHit.colorVariant],
+                            6 => labColors[vHit.colorVariant],
+                            7 => railColors[vHit.colorVariant],
+                            8 => hideRockColors[vHit.colorVariant],
+                            9 => waterColors[vHit.colorVariant],
+                            10 => batColors[vHit.colorVariant],
+                            11 => keyColors[vHit.colorVariant],
+                            12 => pillBoxColors[vHit.colorVariant],
+                            _ => defaultColors[vHit.colorVariant]
+                        };
+                    }
 
                     float normalisedVolume = Mathf.Clamp01(vHit.hitVolume / maxPossibleVolume); // Clamped to 1 if hit volume > maxPossibleVolume - starts at max brightness
 
@@ -455,9 +496,11 @@ public class EcholocationManager : MonoBehaviour
 
                     // Calculate reveal time
                     instanceRevealTimes[globalIndex] = useSoundPropagation ? vHit.travelDistance / soundSpeed : 0f;
+
+                    renderedHitsThisBounce++;
                 }
 
-                activeHitCount += currentBounceHits;
+                activeHitCount += renderedHitsThisBounce;
                         
                 //TODO: add this when we have multiple ray bounces working
                 // Get the hit with the highest volume - makes the most sense for the monster to be interested in
@@ -478,13 +521,17 @@ public class EcholocationManager : MonoBehaviour
                 }
 
                 // Alert the monster with the volume and the source of the ray
-                GameObject monster = GameObject.Find("Monster");
-                INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
+                // TODO: add this when echo system working
+                // GameObject monster = GameObject.Find("Monster");
+                // if (monster != null)
+                // {
+                //     INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
 
-                if (sensitiveTarget != null)
-                {
-                    sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
-                }
+                //     if (sensitiveTarget != null)
+                //     {
+                //         sensitiveTarget.OnHeardScan(raySource, maxRayVolume, isFootstepsScan);
+                //     }
+                // }
 
 
                 // Cleanup current "generation"
@@ -496,6 +543,20 @@ public class EcholocationManager : MonoBehaviour
 
                 // Swap to next generation
                 currentRays = nextRays;
+            }
+        }
+
+        // If monster echo, send the number of rays the hit the player to the monster - even if 0
+        if (isMonsterEcho)
+        {
+            // Debug.Log("Monster has seen the player with " + monsterSeenPlayerHits + " hits");
+
+            GameObject monster = GameObject.Find("Monster");
+            IEchoSeesPlayerSensitive sensitiveTarget = monster.GetComponent<IEchoSeesPlayerSensitive>();
+
+            if (sensitiveTarget != null)
+            {
+                sensitiveTarget.OnMonsterEcholocation(monsterSeenPlayerHits);
             }
         }
 

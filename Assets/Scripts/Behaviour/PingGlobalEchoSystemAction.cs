@@ -9,7 +9,6 @@ using Unity.Properties;
 public partial class PingGlobalEchoSystemAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
-    [SerializeReference] public BlackboardVariable<GameObject> Player;
 
     [Tooltip("Echo Projection Uniformity (0 = clumped, 1 = uniform)")]
     [SerializeReference] public BlackboardVariable<float> uniformity = new BlackboardVariable<float>(0);
@@ -25,7 +24,7 @@ public partial class PingGlobalEchoSystemAction : Action
     [Tooltip("Volume of sound (used for AI reactions)")]
     [SerializeReference] public BlackboardVariable<float> monsterVolume = new BlackboardVariable<float>(0);
 
-    [SerializeReference] public BlackboardVariable<Vector3> positionOffset = new BlackboardVariable<Vector3>(new(0, 1, 0));
+    [SerializeReference] public BlackboardVariable<Vector3> MonsterHeightOffset;
 
     [SerializeReference] public BlackboardVariable<AudioClip> sound1;
     [SerializeReference] public BlackboardVariable<AudioClip> sound2;
@@ -38,7 +37,7 @@ public partial class PingGlobalEchoSystemAction : Action
         if (soundNum == 1) audioSource.Value.PlayOneShot(sound1, soundVolume);
         if (soundNum == 2) audioSource.Value.PlayOneShot(sound2, soundVolume);
 
-        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + positionOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume);
+        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: MonsterSearchMode.RED);
         return Status.Running;
     }
 
