@@ -90,7 +90,7 @@ public partial class LookAroundAction : Action
                 return Status.Success;
             }
 
-            GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, echoAngle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true);
+            GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, echoAngle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: MonsterSearchMode.RED);
             int soundNum = UnityEngine.Random.Range(1, 3);
             if (soundNum == 1) audioSource.Value.PlayOneShot(sound1, soundVolume);
             if (soundNum == 2) audioSource.Value.PlayOneShot(sound2, soundVolume);
