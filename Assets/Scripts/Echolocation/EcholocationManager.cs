@@ -57,7 +57,9 @@ public class EcholocationManager : MonoBehaviour
 
 
     [Header("Colour Palettes")]
-    public Color[] monsterColors = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
+    public Color[] monsterColorsRed = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
+    public Color[] monsterColorsOrange = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
+    public Color[] monsterColorsYellow = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
     public Color[] batColors = new Color[3] {Color.red, new Color(0.8f, 0f, 0f), new Color(0.6f, 0f, 0)};
     public Color[] interactableColors = new Color[3] {Color.green, new Color(0f, 0.8f, 0f), new Color(0f, 0.6f, 0f)};
     public Color[] defaultColors = new Color[3] {Color.cyan, new Color(0f, 0.8f, 0.8f), new Color(0f, 0.6f, 0.6f)};
@@ -129,6 +131,7 @@ public class EcholocationManager : MonoBehaviour
     // Lets system know if the monster is the thing that produced this instance of echolcation,
     // makes all dots red and alerts monster if it hits the player
     bool isMonsterEcho = false;
+    MonsterSearchMode monsterSearchMode = MonsterSearchMode.RED;
 
     // Layer memory - to restore object+children's layers, after setting to IgnoreRaycast layer on first pulse, and reset before first reflections
     private Dictionary<Transform, int> layerMemory = new Dictionary<Transform, int>();
@@ -252,7 +255,7 @@ public class EcholocationManager : MonoBehaviour
     }
 
     // Defaults to uniform rays
-    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float visualVolume = 10f, float monsterVolume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default, float priority = 1f, bool isMonsterEcholocation = false)
+    public void SetupScan(GameObject ignoreMe, Vector3 direction, float angle, float uniformity = 1.0f, int numRays = 4000, float visualVolume = 10f, float monsterVolume = 10f, bool isFootsteps = false, NativeHashMap<int, int> colorMap = default, float priority = 1f, bool isMonsterEcholocation = false, MonsterSearchMode searchMode = MonsterSearchMode.RED)
     {
         // Check to prevent LookRotation(0,0,0) errors
         if (direction.sqrMagnitude < 0.001f) direction = Vector3.forward;
@@ -267,6 +270,7 @@ public class EcholocationManager : MonoBehaviour
         initialMonsterVolume = monsterVolume;
         isFootstepsScan = isFootsteps;
         isMonsterEcho = isMonsterEcholocation;
+        monsterSearchMode = searchMode;
 
         // FIXME: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
@@ -455,13 +459,19 @@ public class EcholocationManager : MonoBehaviour
                     Color baseColor;
                     if (isMonsterEcho) // If monster produced this instance of echolocation make all dots red
                     {
-                        baseColor = monsterColors[vHit.colorVariant];
+                        baseColor = monsterSearchMode switch
+                        {
+                            MonsterSearchMode.RED => monsterColorsRed[vHit.colorVariant],
+                            MonsterSearchMode.ORANGE => monsterColorsOrange[vHit.colorVariant],
+                            MonsterSearchMode.YELLOW => monsterColorsYellow[vHit.colorVariant],
+                            _ => monsterColorsRed[vHit.colorVariant]
+                        };
                     }
                     else
                     {
                         baseColor = vHit.colorCategory switch
                         {
-                            1 => monsterColors[vHit.colorVariant],
+                            1 => monsterColorsRed[vHit.colorVariant],
                             2 => interactableColors[vHit.colorVariant],
                             3 => metalColors[vHit.colorVariant],
                             4 => dirtColors[vHit.colorVariant],
