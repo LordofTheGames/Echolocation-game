@@ -8,7 +8,7 @@ public class MinimapArrowUI : MonoBehaviour
     {
         if (player == null) return;
 
-        float yRotation = player.eulerAngles.y;
-        transform.localEulerAngles = new Vector3(0, 0, -yRotation);
+        // float yRotation = player.eulerAngles.y;
+        // transform.localEulerAngles = new Vector3(0, 0, -yRotation);
     }
 }
