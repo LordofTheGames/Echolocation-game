@@ -16,6 +16,7 @@ public class ChaseStart : MonoBehaviour
     private CrazyTimer ct;
     private BehaviorGraphAgent agent;
     private RendererCutoff cutoff;
+    private GameObject finalChaseMessage;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -30,6 +31,7 @@ public class ChaseStart : MonoBehaviour
         ml = player.GetComponentInChildren<MouseLook>();
         pm = player.GetComponent<PlayerMovement>();
         ct = player.GetComponent<CrazyTimer>();
+        finalChaseMessage = GameObject.Find("Final Chase Message");
     }
 
     void OnTriggerEnter(Collider other)
@@ -67,8 +69,8 @@ public class ChaseStart : MonoBehaviour
         yield return new WaitUntil(() => !brain.IsBlending);
 
         // Add "Run!" message
-        GameObject finalChaseMessage = GameObject.Find("Final Chase Message");
-        finalChaseMessage.SetActive(true);
+        Transform runTransform = finalChaseMessage.transform.Find("Canvas/Run");
+        runTransform.gameObject.SetActive(true);
 
         yield return new WaitForSeconds(0.5f);
         playerCam.enabled = false;
@@ -77,7 +79,6 @@ public class ChaseStart : MonoBehaviour
         agent.BlackboardReference.SetVariableValue("chaseStart", true);
 
         yield return new WaitForSeconds(3);
-        finalChaseMessage.SetActive(false);
-
+        runTransform.gameObject.SetActive(false);
     }
 }
