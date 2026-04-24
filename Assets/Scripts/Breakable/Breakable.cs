@@ -252,9 +252,9 @@ public class Breakable : MonoBehaviour
         if (IsAlarmBox)
         {
             cs.GlassBroken = true;
+            GameObject.Find("Monster").GetComponent<BehaviorGraphAgent>().BlackboardReference.SetVariableValue("chaseInit", true);
             fl.flashLights();
             StartCoroutine(PlayAlarms());
-            GameObject.Find("Monster").GetComponent<BehaviorGraphAgent>().BlackboardReference.SetVariableValue("chaseInit", true);
         } 
 
         StartCoroutine(HideBrokenVisualLater());
