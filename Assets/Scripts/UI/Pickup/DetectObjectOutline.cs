@@ -1,3 +1,5 @@
+// using System.Numerics;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -6,9 +8,10 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private Camera cam;
     // maximum distance the ray can reach
     [SerializeField] private float maxDistance = 5f;
-    [SerializeField] private float sphereRadius = 0.28f;
+    // [SerializeField] private float sphereRadius = 0.28f;
     // prevents flickering
     [SerializeField] private float loseDelay = 0.12f;
+    [SerializeField] private float pickupAngle = 90f;
 
     [SerializeField] private LayerMask interactMask = ~0; 
     [SerializeField] private LayerMask obstacleMask = ~0; 
@@ -22,6 +25,7 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject breakableVolumePanel;
     [SerializeField] private GameObject hidePanel;
     [SerializeField] private GameObject exitHidePanel;
+    [SerializeField] private ThrowItem throwItem;
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
@@ -32,6 +36,8 @@ public class DetectObjectOutline : MonoBehaviour
 
     private void Awake()
     {
+        if (!cam) cam = Camera.main;
+        if (!throwItem) throwItem = GetComponent<ThrowItem>();
         if (pickupPanel) pickupPanel.SetActive(false);
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
@@ -108,22 +114,17 @@ public class DetectObjectOutline : MonoBehaviour
         current.SetOutlined(false);
 
         var button = FindInTarget<DoorButton>(current);
+        var pickup = FindInTarget<PickupItem>(current);
+        var hide = FindInTarget<HideInBox>(current);
+        var crazyReset = FindInTarget<ResetCrazyEffect>(current);
+
         if (button != null)
         {
             button.Interact();
             current = null;
             return;
         }
-
-        var pickup = current.GetComponent<PickupItem>();
-        if (!pickup) pickup = current.GetComponentInParent<PickupItem>();
-        if (!pickup) pickup = current.GetComponentInChildren<PickupItem>();
-
-        var hide = current.GetComponent<HideInBox>();
-        if (!hide) hide = current.GetComponentInParent<HideInBox>();
-        if (!hide) hide = current.GetComponentInChildren<HideInBox>();
-
-        if (pickup != null)
+        else if (pickup != null)
         {
             pickup.Interact();
         }
@@ -133,16 +134,24 @@ public class DetectObjectOutline : MonoBehaviour
             hide.Interact();
             isHiding = true;
         }
+        else if (crazyReset != null)
+        {
+            crazyReset.ResetEffect();
+        }
 
         current = null;
     }
 
     private void Update()
     {
-        // create a ray from the center of the screen
-        var ray = cam.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0));
+        if (!cam) return;
+        if (throwItem != null && throwItem.IsHoldingThrowItem)
+        {
+            ClearAll();
+            return;
+        }
 
-        OutlineTarget best = FindBestTarget(ray);
+        OutlineTarget best = FindBestTarget();
 
         if (best != null)
         {
@@ -165,11 +174,11 @@ public class DetectObjectOutline : MonoBehaviour
             else if (best.gameObject.CompareTag("Button"))
             {
                 var button = FindInTarget<DoorButton>(best);
-                if (!button.CanInteract || button.IsDoorMoving)
+                if (button == null || !button.CanInteract || button.IsDoorMoving)
                 {
                     ShowOnly(null);
                 }
-                if (button.IsDoorOpen)
+                else if (button.IsDoorOpen)
                 {
                     ShowOnly(doorClosePanel);
                 }
@@ -219,19 +228,21 @@ public class DetectObjectOutline : MonoBehaviour
     }
 
         
-    private OutlineTarget FindBestTarget(Ray ray)
+    private OutlineTarget FindBestTarget()
     {
-        var hits = Physics.SphereCastAll(ray, sphereRadius, maxDistance, interactMask, QueryTriggerInteraction.Ignore);
+        Vector3 origin = cam.transform.position;
+        Vector3 forward = cam.transform.forward;
+
+        Collider[] hits = Physics.OverlapSphere(origin, maxDistance, interactMask, QueryTriggerInteraction.Ignore);
         if (hits == null || hits.Length == 0) return null;
 
         // track the best target and its score (lower = better)
         OutlineTarget best = null;
         float bestScore = float.PositiveInfinity;
-        Vector3 bestHitPoint = Vector3.zero;
 
         for (int i = 0; i < hits.Length; i++)
         {
-            var col = hits[i].collider;
+            Collider col = hits[i];
             if (!col) continue;
 
             // don't outline lift chain if flag set to true 
@@ -239,8 +250,8 @@ public class DetectObjectOutline : MonoBehaviour
             // flag is set/unset in the LiftControl script attatched to the Controller child of the Lift GameObject
             if (col.gameObject.name == "Lift chain" && ignoreLiftChain)
                 continue;
-            
-            var t = col.GetComponentInParent<OutlineTarget>();
+
+            OutlineTarget t = col.GetComponentInParent<OutlineTarget>();
             if (!t) continue;
 
             var button = FindInTarget<DoorButton>(t);
@@ -249,28 +260,84 @@ public class DetectObjectOutline : MonoBehaviour
                 continue;
             }
 
-            // vector from camera to the hit point
-            Vector3 to = hits[i].point - ray.origin;
-            float distance = to.magnitude;
-            // how far the hit is from the center ray (smaller = closer to where the player is looking)
-            float centerError = Vector3.Cross(ray.direction, to).magnitude;
-            // objects that are closer to the center of the screen and not too far away. 
-            float score = centerError * 2f + distance * 1f;
+            Vector3 targetPoint = GetBestTargetPoint(col, origin);
+            Vector3 toTarget = targetPoint - origin;
+            float distance = toTarget.magnitude;
+
+            if (distance > maxDistance || distance <= 0.001f)
+                continue;
+
+            Vector3 dirToTarget = toTarget.normalized;
+
+            float angle = Vector3.Angle(forward, dirToTarget);
+            if (angle > pickupAngle)
+                continue;
+            if (!HasLineOfSight(col, origin))
+                continue;
+
+            float angleScore = angle * 2f;
+            float distanceScore = distance;
+            float score = angleScore + distanceScore;
 
             if (score < bestScore)
             {
                 bestScore = score;
                 best = t;
-                bestHitPoint = hits[i].point;
             }
         }
-        // If we found a valid target, verify we have Line of Sight to it
-        if (best != null)
-        {
-            if (Physics.Linecast(ray.origin, bestHitPoint, obstacleMask, QueryTriggerInteraction.Ignore))
-                return null;
-        }
         return best;
+    }
+        private Vector3 GetBestTargetPoint(Collider col, Vector3 origin)
+    {
+        Bounds b = col.bounds;
+
+        Vector3 center = b.center;
+        Vector3 upperCenter = new Vector3(b.center.x, b.center.y + b.extents.y * 0.5f, b.center.z);
+        Vector3 top = new Vector3(b.center.x, b.max.y, b.center.z);
+
+        float centerHeightDiff = Mathf.Abs(origin.y - center.y);
+        float upperHeightDiff = Mathf.Abs(origin.y - upperCenter.y);
+        float topHeightDiff = Mathf.Abs(origin.y - top.y);
+
+        Vector3 best = center;
+        float bestDiff = centerHeightDiff;
+
+        if (upperHeightDiff < bestDiff)
+        {
+            best = upperCenter;
+            bestDiff = upperHeightDiff;
+        }
+
+        if (topHeightDiff < bestDiff)
+        {
+            best = top;
+        }
+
+        return best;
+    }
+
+    private bool HasLineOfSight(Collider col, Vector3 origin)
+    {
+        Bounds b = col.bounds;
+
+        Vector3[] testPoints = new Vector3[]
+        {
+            b.center,
+            new Vector3(b.center.x, b.center.y + b.extents.y * 0.35f, b.center.z),
+            new Vector3(b.center.x, b.max.y, b.center.z)
+        };
+
+        for (int i = 0; i < testPoints.Length; i++)
+        {
+            Vector3 dir = testPoints[i] - origin;
+            float dist = dir.magnitude;
+            if (dist <= 0.001f) return true;
+
+            if (!Physics.Raycast(origin, dir.normalized, dist, obstacleMask, QueryTriggerInteraction.Ignore))
+                return true;
+        }
+
+        return false;
     }
     public void SetEnabled(bool value)
     {

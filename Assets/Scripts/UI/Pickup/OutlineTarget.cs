@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class OutlineTarget : MonoBehaviour
 {
+    [SerializeField] private bool renderOutline = true;
     [SerializeField] private string outlinedLayerName = "Outlined Object";
     [SerializeField] private bool affectChildren = true;
 
@@ -43,6 +44,7 @@ public class OutlineTarget : MonoBehaviour
 
     public void SetOutlined(bool on)
     {
+        if (renderOutline == false) return;
         if (outlinedLayer == -1) return;
 
         if (cache.Count == 0) RebuildCache();

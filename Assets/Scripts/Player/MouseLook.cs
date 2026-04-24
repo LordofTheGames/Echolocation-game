@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -5,6 +6,8 @@ public class MouseLook : MonoBehaviour
 {
     public float mouseSensitivity = 20f;
     public float gamepadSensitivity = 13f;
+    public bool LimitVerticalLook = false;
+    public float verticalLookLimit = 30f;
     public Transform playerBody;
     public Transform lightTransform;
     private float xRotation = 0f;
@@ -66,7 +69,10 @@ public class MouseLook : MonoBehaviour
         }
         else
         {
-            xRotation = Mathf.Clamp(xRotation, -90f, 90f); 
+            if (LimitVerticalLook)
+                xRotation = Mathf.Clamp(xRotation, -verticalLookLimit, verticalLookLimit);
+            else
+                xRotation = Mathf.Clamp(xRotation, -90f, 90f); 
             transform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
             if (lightTransform) lightTransform.localRotation = Quaternion.Euler(xRotation, 0f, 0f);
 

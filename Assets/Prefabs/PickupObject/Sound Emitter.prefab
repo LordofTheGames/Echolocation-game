@@ -190,8 +190,8 @@ MonoBehaviour:
   pingSound: {fileID: 8300000, guid: b0c1a2941e6584f43a95a8c12c152819, type: 3}
   soundVolume: 1
   initialDelay: 0.2
-  pingInterval: 3
-  maxPings: 3
+  pingInterval: 2
+  maxPings: 5
   angle: 360
   uniformity: 1
   numRays: 8000
@@ -247,7 +247,7 @@ MonoBehaviour:
   uniformity: 1
   numRays: 10000
   visualVolume: 50
-  monsterVolume: 65
+  monsterVolume: 100
 --- !u!114 &6263023253677180433
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -260,6 +260,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d63b9ade7f4384acbb49c10317bd1500, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  renderOutline: 1
   outlinedLayerName: Outlined Object
   affectChildren: 1
 --- !u!114 &8624872326471097137

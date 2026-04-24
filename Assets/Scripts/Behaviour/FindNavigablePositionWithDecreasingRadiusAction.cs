@@ -13,6 +13,10 @@ public partial class FindNavigablePositionWithDecreasingRadiusAction : Action
     [SerializeReference] public BlackboardVariable<Vector3> FinalPoint;
     [SerializeReference] public BlackboardVariable<float> MaxRadius = new BlackboardVariable<float>(10.0f);
 
+    [SerializeReference] public BlackboardVariable<bool> stayNearTarget = new BlackboardVariable<bool>(false);
+    [SerializeReference] public BlackboardVariable<GameObject> Target;
+    [SerializeReference] public BlackboardVariable<float> maxDistanceFromTarget;
+
     private float checkCount;
     private float currRadius;
     private NavMeshAgent agent;
@@ -38,6 +42,15 @@ public partial class FindNavigablePositionWithDecreasingRadiusAction : Action
         checkCount++;
         if(NavMesh.SamplePosition(randomPosition, out hit, maxSearchDist, NavMesh.AllAreas))
         {
+            if (stayNearTarget)
+            {
+                if (Vector3.Distance(Target.Value.transform.position, hit.position) > maxDistanceFromTarget)
+                {
+                    FinalPoint.Value = Agent.Value.transform.position;
+                    return Status.Running;
+                }
+            }
+
             NavMeshPath path = new NavMeshPath();
             if (agent.CalculatePath(hit.position, path))
             {

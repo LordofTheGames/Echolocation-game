@@ -9,6 +9,7 @@ public class MicInput : MonoBehaviour
     // public float sensitivity = 3f;
     public float volume;
     public float relativeVolume;
+    public float minVolume = 0.05f;
     private int windowSize = 4096;
 
     private AudioSource audioSource;
@@ -102,7 +103,7 @@ public class MicInput : MonoBehaviour
 
         // loudness = target;
         volume = rms;
-        if (volume  < 0.01f){
+        if (volume < minVolume){
             volume = 0f;
         }
         relativeVolume = getRelativeVolume(volume);

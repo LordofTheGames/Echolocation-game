@@ -55,8 +55,9 @@ public partial class UpdateAiSensesAction : Action
 
     protected override Status OnUpdate()
     {
-        updateFOV();
+        // updateFOV();
         updateHearing();
+        updateDotsSight();
         return Status.Success;
     }
 
@@ -76,13 +77,31 @@ public partial class UpdateAiSensesAction : Action
         targetSeen.Value = false;
     }
 
+    private void updateDotsSight()
+    {
+        int hits = hearingScript.PlayerSightCheck();
+        if (hits != 0)
+        {
+            targetSeen.Value = true;
+            // secondToLastLocation = lastLocation.Value;
+            lastLocation.Value = Target.Value.transform.position;
+            // lastDirection.Value = lastLocation.Value - secondToLastLocation;
+
+            Debug.Log("Seen with " + hits + " hits");
+        } 
+        else
+        {
+            targetSeen.Value = false;
+        }
+    }
+
     private void updateHearing()
     {
         SoundData? source = hearingScript.HearingCheck();
         if (source.HasValue)
         {
             newSoundToInvestigate.Value = true;
-            newSoundLocation.Value = source.Value.transform.position;
+            newSoundLocation.Value = source.Value.location;
             newSoundVolume.Value = source.Value.volume;
             newIsFootsteps.Value = source.Value.isFootsteps;
         } 
