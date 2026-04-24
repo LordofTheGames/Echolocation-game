@@ -5,6 +5,8 @@ using System.Collections.Generic;
 
 public class SimpleOverlayMap : MonoBehaviour
 {
+    public bool TurnOnEzMap = false;
+
     [SerializeField] private Transform player;
     [SerializeField] private Vector2 panelAnchorMin = new Vector2(0.28f, 0.1f);
     [SerializeField] private Vector2 panelAnchorMax = new Vector2(0.72f, 0.9f);
@@ -29,6 +31,9 @@ public class SimpleOverlayMap : MonoBehaviour
     private List<Vector3> _blueDotWorldPositions = new List<Vector3>();
     private List<RectTransform> _blueDotRects = new List<RectTransform>();
 
+    private GameObject ezMap;
+    private bool ezMapVisible = false;
+
     private void Awake()
     {
         if (player == null)
@@ -41,6 +46,9 @@ public class SimpleOverlayMap : MonoBehaviour
         BuildUi();
         _visible = false;
         _canvas.gameObject.SetActive(false);
+
+        ezMap = GameObject.Find("EzMap");
+        ezMap.SetActive(false);
     }
 
     private void Update()
@@ -71,7 +79,15 @@ public class SimpleOverlayMap : MonoBehaviour
     {
         if (context.performed)
         {
-            SetVisible(!_visible);
+            if (TurnOnEzMap)
+            {
+                ezMapVisible = !ezMapVisible;
+                ezMap.SetActive(ezMapVisible);
+            }
+            else
+            {
+                SetVisible(!_visible);
+            }
         }
     }
 
