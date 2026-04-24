@@ -240,6 +240,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mouseSensitivity: 20
   gamepadSensitivity: 13
+  LimitVerticalLook: 0
+  verticalLookLimit: 25
   playerBody: {fileID: 3853411543216132462}
   lightTransform: {fileID: 7770523898133361850}
   isHiding: 0
@@ -463,6 +465,7 @@ GameObject:
   - component: {fileID: 7401529261617155565}
   - component: {fileID: 1248414904700985948}
   - component: {fileID: 2610361652763653379}
+  - component: {fileID: 3411062355009450623}
   m_Layer: 7
   m_Name: Player
   m_TagString: Player
@@ -695,7 +698,20 @@ MonoBehaviour:
       m_Calls: []
   m_ControlsChangedEvent:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 3411062355009450623}
+        m_TargetAssemblyTypeName: BroadcastSwitchEvent, Assembly-CSharp
+        m_MethodName: HandleControlsChanged
+        m_Mode: 2
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.InputSystem.PlayerInput,
+            Unity.InputSystem
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   m_ActionEvents:
   - m_PersistentCalls:
       m_Calls:
@@ -1218,7 +1234,7 @@ MonoBehaviour:
     m_ActionId: 522b1e33-78be-4e12-991e-5655a2b2171f
     m_ActionName: 'Player/Open Map[/XInputControllerWindows/buttonNorth,/Keyboard/x]'
   m_NeverAutoSwitchControlSchemes: 0
-  m_DefaultControlScheme: 
+  m_DefaultControlScheme: Gamepad
   m_DefaultActionMap: Player
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
@@ -1475,6 +1491,18 @@ MonoBehaviour:
     maxValue: 0.63
     speed: 0.3
   soundVolumeMinOscillationValue: 0.25
+--- !u!114 &3411062355009450623
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5235627052445221193}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa0fbee9b6128a34892feb8f3092568b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &5489064552480596990
 GameObject:
   m_ObjectHideFlags: 0

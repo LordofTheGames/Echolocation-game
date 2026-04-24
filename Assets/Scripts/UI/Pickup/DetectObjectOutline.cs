@@ -25,6 +25,7 @@ public class DetectObjectOutline : MonoBehaviour
     [SerializeField] private GameObject breakableVolumePanel;
     [SerializeField] private GameObject hidePanel;
     [SerializeField] private GameObject exitHidePanel;
+    [SerializeField] private ThrowItem throwItem;
     public bool ignoreLiftChain;
 
     private OutlineTarget current;
@@ -35,6 +36,8 @@ public class DetectObjectOutline : MonoBehaviour
 
     private void Awake()
     {
+        if (!cam) cam = Camera.main;
+        if (!throwItem) throwItem = GetComponent<ThrowItem>();
         if (pickupPanel) pickupPanel.SetActive(false);
         if (pullPanel) pullPanel.SetActive(false);
         if (gateHintPanel) gateHintPanel.SetActive(false);
@@ -142,6 +145,11 @@ public class DetectObjectOutline : MonoBehaviour
     private void Update()
     {
         if (!cam) return;
+        if (throwItem != null && throwItem.IsHoldingThrowItem)
+        {
+            ClearAll();
+            return;
+        }
 
         OutlineTarget best = FindBestTarget();
 
