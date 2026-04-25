@@ -36,6 +36,9 @@ public class CirclingBatMovement : MonoBehaviour
 
     void Update()
     {
+        // Safety check
+        if (mgr == null) return;
+        
         float dt = Time.deltaTime;
         Vector3 pos = transform.position;
 
