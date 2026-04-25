@@ -9,7 +9,7 @@ public class RendererCutoff : MonoBehaviour
     public float fadeEndDistance = 50f;   // Fully dissolved (invisible)
 
     private Material mat;
-    private MeshRenderer meshRenderer;
+    private SkinnedMeshRenderer meshRenderer;
     private float currentCutoff;
     private static readonly int CutoffID = Shader.PropertyToID("_Cutoff");
 
@@ -17,7 +17,7 @@ public class RendererCutoff : MonoBehaviour
 
     void Start()
     {
-        meshRenderer = GetComponentInChildren<MeshRenderer>();
+        meshRenderer = GetComponentInChildren<SkinnedMeshRenderer>();
         mat = meshRenderer.material;
     }
 
