@@ -26,6 +26,9 @@ public class PlayerMovement : MonoBehaviour
     private float defaultCamY;
     private PlayerFootsteps footstepsScript;
 
+    private float sprintTimer = 0f;
+    private bool hasCompletedSprintTask = false;
+
     
 
     // hold shift
@@ -128,7 +131,18 @@ public class PlayerMovement : MonoBehaviour
                 isSprinting = false;
                 footstepsScript.CurrentState = MoveState.WALK;
             }
+            else if (!hasCompletedSprintTask)
+            {
+                sprintTimer += Time.deltaTime;
+                if (sprintTimer >= 5f)
+                {
+                    hasCompletedSprintTask = true;
+                    Debug.Log("Completed!");
+                    TutorialManager.OnTaskComplete?.Invoke("Sprint"); 
+                }
+            }
         }
+        
         
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
