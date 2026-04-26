@@ -15,7 +15,6 @@ public class ChecklistItem : MonoBehaviour
         if (completedTask == taskName)
         {
             tickboxImage.sprite = checkmarkSprite;
-            tickboxImage.color = Color.green; 
         }
     }
 }
