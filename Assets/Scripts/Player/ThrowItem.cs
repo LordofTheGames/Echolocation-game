@@ -278,7 +278,7 @@ public class ThrowItem : MonoBehaviour
 
         if (holdingType == ItemType.Rock && !hasCompletedThrowRockTask)
         {
-            hasCompletedThrowRockTask = true; // Lock it so it only fires once
+            hasCompletedThrowRockTask = true; 
             Debug.Log("Throw Rock Task Completed!");
             TutorialManager.OnTaskComplete?.Invoke("Throw");
         }
