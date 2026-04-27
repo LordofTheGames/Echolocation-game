@@ -43,6 +43,7 @@ public class ThrowItem : MonoBehaviour
 
     private float scrollInput;
     public LayerMask layerMask;
+    private bool hasCompletedThrowRockTask = false;
 
 
     private void Start()
@@ -273,6 +274,13 @@ public class ThrowItem : MonoBehaviour
         {
             CancelHolding(); // no item -> cancel
             return;
+        }
+
+        if (holdingType == ItemType.Rock && !hasCompletedThrowRockTask)
+        {
+            hasCompletedThrowRockTask = true; // Lock it so it only fires once
+            Debug.Log("Throw Rock Task Completed!");
+            TutorialManager.OnTaskComplete?.Invoke("Throw");
         }
 
         currentObj.transform.SetParent(null);

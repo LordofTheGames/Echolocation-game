@@ -10,6 +10,10 @@ public class TutorialManager : MonoBehaviour
     void Start()
     {
         tasks.Add("Sprint", false);
+        tasks.Add("Clicker", false);
+        tasks.Add("Crouch", false);
+        tasks.Add("Walk", false);
+        tasks.Add("Pick-up", false);
     }
 
     void OnEnable()

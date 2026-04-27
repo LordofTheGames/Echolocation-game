@@ -41,6 +41,8 @@ public class ClickerTrigger : MonoBehaviour
     private float nextAvailableTime = 0f; // Tracks when the player is allowed to use clicker again
     private RectTransform cooldownBarRect;
     private Vector2 newSizeDelta;
+    private int successfulClicks = 0;
+    private bool clickerTutorialComplete = false;
     
     void Start()
     {
@@ -93,6 +95,17 @@ public class ClickerTrigger : MonoBehaviour
                     audioSource.PlayOneShot(clickerSound, soundEffectVolume);
                 }
                 GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, numRays, visualVolume, monsterVolume);
+
+                if (!clickerTutorialComplete)
+            {
+                successfulClicks++;
+                
+                if (successfulClicks >= 3)
+                {
+                    clickerTutorialComplete = true; 
+                    TutorialManager.OnTaskComplete?.Invoke("Clicker"); 
+                }
+            }
 
                 // Start next cooldown timer
                 nextAvailableTime = Time.time + cooldownTime;
