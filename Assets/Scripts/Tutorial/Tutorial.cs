@@ -40,7 +40,7 @@ public enum TutorialStates
 public class Tutorial : MonoBehaviour
 {
     public static Tutorial Instance;
-    
+    public GameObject warpPoint;
     public AudioSource audioSource;
     public AudioClip monsterSound;
     public float monsterSoundVolume = 0.8f;
@@ -58,6 +58,7 @@ public class Tutorial : MonoBehaviour
     private Dictionary<TutorialStates, GameObject> states;
     private Dictionary<TutorialStates, List<GameObject>> stateObjects;
     private TutorialStates currentState;
+
     private bool hasFinishedTutorial = false;
 
     private float micHoldTimer = 0f;
@@ -153,8 +154,8 @@ public class Tutorial : MonoBehaviour
     {
         if (context.started)
         {
-            animator.SetBool("Tutorial", false);
-            tutorial = false;
+           
+            hasFinishedTutorial = true;
             PlayerRespawn script = player.GetComponent<PlayerRespawn>();
             script.RespawnPosition = warpPoint.transform.position;
             script.Respawn();

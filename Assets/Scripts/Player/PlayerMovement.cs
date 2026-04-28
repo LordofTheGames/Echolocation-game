@@ -125,7 +125,6 @@ public class PlayerMovement : MonoBehaviour
         float currentSpeed = walkSpeed;
         if (isCrouching)
         {
-        {
             currentSpeed = crouchSpeed;
 
             if (!moveInput.Equals(Vector2.zero) && !hasCompletedCrouchTask)
