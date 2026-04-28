@@ -35,6 +35,7 @@ public class MonsterFootsteps : MonoBehaviour
 
     private Vector3 lastPos;
     private float distanceTraveled;
+    [SerializeField] private float teleportDistanceThreshold = 3f;
     private MoveSettings currentSettings;
     private float smoothedSpeed; 
     private bool isRightFoot = false; // Toggle for left/right steps
@@ -54,6 +55,14 @@ public class MonsterFootsteps : MonoBehaviour
         // Calculate REAL distance moved this frame
         Vector3 currentPos = transform.position;
         float moveDistance = Vector3.Distance(new Vector3(currentPos.x, 0, currentPos.z), new Vector3(lastPos.x, 0, lastPos.z));
+
+        if (moveDistance > teleportDistanceThreshold)
+        {
+            distanceTraveled = 0f;
+            lastPos = currentPos;
+            return;
+        }
+
         // float rawSpeed = moveDistance / Time.deltaTime;
 
         // Smooth speed for profile selection
@@ -118,6 +127,6 @@ public class MonsterFootsteps : MonoBehaviour
         float visualVolume = currentSettings.maxDistance * 2f;
         // Trigger Echo
         // We use footPos as origin, and transform.forward for direction (though if angle is 360, direction doesn't matter)
-        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, visualVolume, currentSettings.volForMonster, true);
+        GlobalEchoSystem.Ping(this.gameObject, footPos, transform.forward, echoAngle, 0.3f, currentSettings.echoRays, visualVolume, currentSettings.volForMonster, true, isMonsterEcholocation: true);
     }
 }

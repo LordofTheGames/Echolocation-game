@@ -12,6 +12,8 @@ public class LabDoor : MonoBehaviour
 
     [SerializeField] private float rotateSpeed = 180f;
 
+    public float MonsterDistance = 8;
+
     private Quaternion leftClosedRot;
     private Quaternion rightClosedRot;
     private Quaternion leftOpenRot;
@@ -24,6 +26,8 @@ public class LabDoor : MonoBehaviour
 
     public bool IsOpen => isOpen;
     public bool IsMoving => isMoving;
+
+    private GameObject monster;
 
     private void Awake()
     {
@@ -45,6 +49,8 @@ public class LabDoor : MonoBehaviour
 
         isOpen = false;
         isMoving = false;
+
+        monster = GameObject.Find("Monster");
     }
 
     public void Interact()
@@ -104,5 +110,20 @@ public class LabDoor : MonoBehaviour
 
         isMoving = false;
         rotateRoutine = null;
+    }
+
+    void Update()
+    {
+        if (Vector3.Distance(transform.position, monster.transform.position) <= MonsterDistance)
+        {
+            OpenDoors();
+            StartCoroutine(closeDoorMonster());
+        }
+    }
+     private IEnumerator closeDoorMonster()
+    {
+        while (Vector3.Distance(transform.position, monster.transform.position) <= MonsterDistance)
+            yield return new WaitForSeconds(1);
+        CloseDoors();
     }
 }

@@ -11,8 +11,20 @@ public partial class LookAroundAction : Action
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
     [SerializeReference] public BlackboardVariable<float> Angle;
     [SerializeReference] public BlackboardVariable<LookDirection> InitialDirection;
-    [SerializeReference] public BlackboardVariable<float> Speed  = new BlackboardVariable<float>(1.0f);
-    [SerializeReference] public BlackboardVariable<int> NumberOfRotations  = new BlackboardVariable<int>(2);
+    [SerializeReference] public BlackboardVariable<float> Speed = new BlackboardVariable<float>(1.0f);
+    [SerializeReference] public BlackboardVariable<int> NumberOfRotations = new BlackboardVariable<int>(2);
+
+    [SerializeReference] public BlackboardVariable<bool> PingEchoSystem = new BlackboardVariable<bool>(true);
+    [SerializeReference] public BlackboardVariable<float> uniformity = new BlackboardVariable<float>(0);
+    [SerializeReference] public BlackboardVariable<int> numRays = new BlackboardVariable<int>(20000);
+    [SerializeReference] public BlackboardVariable<float> echoAngle = new BlackboardVariable<float>(80);
+    [SerializeReference] public BlackboardVariable<float> visualVolume = new BlackboardVariable<float>(100);
+    [SerializeReference] public BlackboardVariable<float> monsterVolume = new BlackboardVariable<float>(0);
+    [SerializeReference] public BlackboardVariable<Vector3> MonsterHeightOffset;
+    [SerializeReference] public BlackboardVariable<AudioClip> sound1;
+    [SerializeReference] public BlackboardVariable<AudioClip> sound2;
+    [SerializeReference] public BlackboardVariable<float> soundVolume = new BlackboardVariable<float>(1);
+    [SerializeReference] public BlackboardVariable<AudioSource> audioSource;
 
     private enum LookPhase { ToLeft, ToRight, ToCenter }
     private LookPhase currentPhase;
@@ -77,6 +89,11 @@ public partial class LookAroundAction : Action
             {
                 return Status.Success;
             }
+
+            GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, echoAngle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: MonsterSearchMode.RED);
+            int soundNum = UnityEngine.Random.Range(1, 3);
+            if (soundNum == 1) audioSource.Value.PlayOneShot(sound1, soundVolume);
+            if (soundNum == 2) audioSource.Value.PlayOneShot(sound2, soundVolume);
         }
         // Calculate speed based on how far away we are.
         // If angle is 90, speed is High. If angle is 1, speed is Low (but clamped to a minimum).

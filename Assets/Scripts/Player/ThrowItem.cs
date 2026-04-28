@@ -44,6 +44,7 @@ public class ThrowItem : MonoBehaviour
     private float scrollInput;
     public LayerMask layerMask;
     private bool hasCompletedThrowRockTask = false;
+    public bool IsHoldingThrowItem => isHoldingRightClick;
 
 
     private void Start()

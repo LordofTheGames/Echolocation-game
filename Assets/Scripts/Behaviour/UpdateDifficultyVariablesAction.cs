@@ -14,9 +14,10 @@ public partial class UpdateDifficultyVariablesAction : Action
     [SerializeReference] public BlackboardVariable<float> currentSoundVolume;
     [SerializeReference] public BlackboardVariable<float> TurnSpeed_Patrol;
     [SerializeReference] public BlackboardVariable<float> StoppingDistance_Patrol;
-    [SerializeReference] public BlackboardVariable<float> MoveRadius_Patrol;
     [SerializeReference] public BlackboardVariable<float> MinWaitAfterMove_Patrol;
     [SerializeReference] public BlackboardVariable<float> MaxWaitAfterMove_Patrol;
+    [SerializeReference] public BlackboardVariable<float> MinRoomTime_Patrol;
+    [SerializeReference] public BlackboardVariable<float> MaxRoomTime_Patrol;
     [SerializeReference] public BlackboardVariable<float> uniformity_Patrol;
     [SerializeReference] public BlackboardVariable<int> numRays_Patrol;
     [SerializeReference] public BlackboardVariable<float> angle_Patrol;
@@ -58,6 +59,7 @@ public partial class UpdateDifficultyVariablesAction : Action
 
     [SerializeReference] public BlackboardVariable<float> MinSpeed_Chase;
     [SerializeReference] public BlackboardVariable<float> MaxSpeed_Chase;
+    [SerializeReference] public BlackboardVariable<float> FinalChaseSpeed_Chase;
     [SerializeReference] public BlackboardVariable<float> SpeedIncrement_Chase;
     [SerializeReference] public BlackboardVariable<float> TurnSpeed_Chase;
     [SerializeReference] public BlackboardVariable<float> StoppingDistance_Chase;
@@ -100,6 +102,11 @@ public partial class UpdateDifficultyVariablesAction : Action
     [SerializeReference] public BlackboardVariable<float> DistanceToMoveToIfFarFromPlayer;
     [SerializeReference] public BlackboardVariable<float> MoveSpeedFarFromPlayer;
     [SerializeReference] public BlackboardVariable<float> StoppingDistanceFarFromPlayer;
+    [SerializeReference] public BlackboardVariable<float> TimeUntilMovesClose;
+    [SerializeReference] public BlackboardVariable<float> DistanceToMoveAwayFromPlayer;
+    [SerializeReference] public BlackboardVariable<float> MoveSpeedAwayFromPlayer;
+    [SerializeReference] public BlackboardVariable<float> StoppingDistanceAwayFromPlayer;
+    [SerializeReference] public BlackboardVariable<float> TimeUntilMovesAway;
 
     [SerializeReference] public BlackboardVariable<float> PlayerSeenScreamVolume;
     [SerializeReference] public BlackboardVariable<float> GrenadeScreamVolume;
@@ -115,9 +122,11 @@ public partial class UpdateDifficultyVariablesAction : Action
         MoveSpeed_Patrol.Value = manager.MoveSpeed_Patrol;
         TurnSpeed_Patrol.Value = manager.TurnSpeed_Patrol;
         StoppingDistance_Patrol.Value = manager.StoppingDistance_Patrol;
-        MoveRadius_Patrol.Value = manager.MoveRadius_Patrol;
+        // MoveRadius_Patrol.Value = manager.MoveRadius_Patrol;
         MinWaitAfterMove_Patrol.Value = manager.MinWaitAfterMove_Patrol;
         MaxWaitAfterMove_Patrol.Value = manager.MaxWaitAfterMove_Patrol;
+        MinRoomTime_Patrol.Value = manager.MinRoomTime_Patrol;
+        MaxRoomTime_Patrol.Value = manager.MaxRoomTime_Patrol;
         uniformity_Patrol.Value = manager.EcholocationParams_Patrol.uniformity;
         numRays_Patrol.Value = manager.EcholocationParams_Patrol.numRays;
         angle_Patrol.Value = manager.EcholocationParams_Patrol.angle;
@@ -159,6 +168,7 @@ public partial class UpdateDifficultyVariablesAction : Action
 
         MinSpeed_Chase.Value = manager.MinSpeed_Chase;
         MaxSpeed_Chase.Value = manager.MaxSpeed_Chase;
+        FinalChaseSpeed_Chase.Value = manager.FinalChaseSpeed_Chase;
         SpeedIncrement_Chase.Value = manager.SpeedIncrement_Chase;
         TurnSpeed_Chase.Value = manager.TurnSpeed_Chase;
         StoppingDistance_Chase.Value = manager.StoppingDistance_Chase;
@@ -201,6 +211,11 @@ public partial class UpdateDifficultyVariablesAction : Action
         DistanceToMoveToIfFarFromPlayer.Value = manager.DistanceToMoveToIfFarFromPlayer;
         MoveSpeedFarFromPlayer.Value = manager.MoveSpeedFarFromPlayer;
         StoppingDistanceFarFromPlayer.Value = manager.StoppingDistanceFarFromPlayer;
+        TimeUntilMovesClose.Value = manager.TimeUntilMovesClose;
+        DistanceToMoveAwayFromPlayer.Value = manager.DistanceToMoveAwayFromPlayer;
+        MoveSpeedAwayFromPlayer.Value = manager.MoveSpeedAwayFromPlayer;
+        StoppingDistanceAwayFromPlayer.Value = manager.StoppingDistanceAwayFromPlayer;
+        TimeUntilMovesAway.Value = manager.TimeUntilMovesAway;
 
         PlayerSeenScreamVolume.Value = manager.PlayerSeenScreamVolume;
         GrenadeScreamVolume.Value = manager.GrenadeScreamVolume;

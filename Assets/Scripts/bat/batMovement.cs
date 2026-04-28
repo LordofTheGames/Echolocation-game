@@ -22,10 +22,19 @@ public class BatMovement : MonoBehaviour
     // When avoiding obstacles, randomly try out how many candidate directions
     [SerializeField] int avoidSamples = 18;
 
+    const int DepenetrateOverlapCapacity = 16;
+
     [SerializeField, Range(0f, 2f)] float heightAmp = 0.35f;
 
     //The frequency of ups and downs
     [SerializeField, Range(0.3f, 5f)] float heightFreq = 2.2f;
+
+    Vector3 flockSeparation;
+    Vector3 flockAlignment;
+    Vector3 flockCohesion;
+    Vector3 steerDesiredDir;
+    Vector3 steerNewDir;
+    Vector3 steerCurrentDir;
 
     public void Init(BatFlockManager manager, float randomSeed)
     {
@@ -43,7 +52,6 @@ public class BatMovement : MonoBehaviour
 
         Quaternion initRot = Quaternion.LookRotation(dir, Vector3.up);
 
-        // if the imported bat model does not face Unity's forward axis (Z+),
         // apply an extra Y rotation offset.
         if (Mathf.Abs(mgr.modelForwardOffsetY) > 0.01f)
             initRot *= Quaternion.Euler(0f, mgr.modelForwardOffsetY, 0f);
@@ -60,69 +68,53 @@ public class BatMovement : MonoBehaviour
     {
         if (!mgr || !mgr.pointA || !mgr.pointB) return;
 
-        // route switching
-        if (!mgr.IsObscuring && Vector3.Distance(transform.position, target.position) < mgr.waypointReach)
+        RefreshFlockingFromManager();
+        UpdateSteeringAndVelocity();
+        ApplyMovement();
+        ApplyRotation();
+    }
+
+    void RefreshFlockingFromManager()
+    {
+        if (!mgr.TryGetFlockingPreprocess(this, out flockSeparation, out flockAlignment, out flockCohesion))
+            flockSeparation = flockAlignment = flockCohesion = Vector3.zero;
+    }
+
+    void UpdateSteeringAndVelocity()
+    {
+        TryAdvanceRouteWaypoint();
+        float t = Time.time;
+        Vector3 pos = transform.position;
+
+        float heightTarget = SampleHeightTarget(t);
+        Vector3 seekDir = BuildSeekDirection(pos, heightTarget);
+        Vector3 followLeader = BuildFollowLeaderDirection(pos);
+        Vector3 facing = FacingForwardForSteering(seekDir);
+        Vector3 avoid = ObstacleAvoidance3D(pos, facing);
+        Vector3 flightFeel = BuildFlightFeel(t);
+        Vector3 steer = CombineSteering(seekDir, followLeader, avoid, flightFeel);
+
+        ApplyDirectionAndSpeed(t, seekDir, facing, steer);
+    }
+
+    void TryAdvanceRouteWaypoint()
+    {
+        float waypointReachSq = mgr.waypointReach * mgr.waypointReach;
+        if (!mgr.IsObscuring && (transform.position - target.position).sqrMagnitude < waypointReachSq)
         {
             goingToB = !goingToB;
             target = goingToB ? mgr.pointB : mgr.pointA;
         }
+    }
 
-        Vector3 pos = transform.position;
+    float SampleHeightTarget(float t)
+    {
+        return heightBase + Mathf.Sin(t * heightFreq + heightPhase) * heightAmp;
+    }
 
-        Vector3 separation = Vector3.zero;  //Push away from nearby bats
-        Vector3 alignment = Vector3.zero;   // Match direction of nearby bats
-        Vector3 cohesion = Vector3.zero;  // Move toward local group center
-
-        int nCount = 0;
-        Vector3 center = Vector3.zero;
-        Vector3 avgVelocity = Vector3.zero;
-
-        for (int i = 0; i < mgr.agents.Count; i++)
-        {
-            var other = mgr.agents[i];
-            if (!other || other == this) continue;
-
-            Vector3 diff = other.transform.position - pos;
-            float d = diff.magnitude;
-
-            if (d <= mgr.neighborRadius)
-            {
-                nCount++;
-                center += other.transform.position;
-                avgVelocity += other.velocity;
-
-                // If another bat is very close, generate separation force.
-                // The d*d term makes very close bats repel more strongly.
-                if (d <= mgr.separationRadius)
-                    separation -= diff / (d * d);
-            }
-        }
-
-        if (nCount > 0)
-        {
-            center /= nCount;
-            avgVelocity /= nCount;
-
-            Vector3 toCenter = center - pos;
-            float distToCenter = toCenter.magnitude;
-            if (distToCenter > 0.0001f)
-            {
-                // Cohesion pulls the bat toward the average neighbor position.
-                cohesion = toCenter.normalized;
-                // slightly strengthen cohesion to pull it back if it gets too far from the group
-                if (distToCenter > 2f) cohesion *= 1f + (distToCenter - 2f) * 0.15f;
-            }
-            else cohesion = Vector3.zero;
-            alignment = avgVelocity.sqrMagnitude > 0.01f ? avgVelocity.normalized : Vector3.zero;
-        }
-
-        float t = Time.time;
-        // Calculate the bat's desired vertical oscillation height using a sine wave.
-        float heightTarget = heightBase + Mathf.Sin(t * heightFreq + heightPhase) * heightAmp;
-
+    Vector3 BuildSeekDirection(Vector3 pos, float heightTarget)
+    {
         Vector3 seekTargetPos;
-        // If the flock is currently obscuring the player and this bat IS the center bat,
-        // then fly toward the obscure target position (usually in front of the player camera)
         if (mgr.IsObscuring && mgr.centerBat != null && mgr.centerBat == this)
             seekTargetPos = mgr.GetObscureTargetPosition();
         else if (mgr.centerBat != null && mgr.centerBat != this)
@@ -130,41 +122,40 @@ public class BatMovement : MonoBehaviour
         else
             seekTargetPos = target.position;
 
-        // If it is the leader bat that is currently performing the action of blocking the player,
-        // then its height is the same as the point that blocks the target.
-        // Otherwise, continue to rise and fall at the normal flight altitude.
         float yTarget = (mgr.IsObscuring && mgr.centerBat == this) ? seekTargetPos.y : heightTarget;
         Vector3 target3D = new Vector3(seekTargetPos.x, yTarget, seekTargetPos.z);
-        Vector3 seek = (target3D - pos).normalized;
+        return (target3D - pos).normalized;
+    }
 
-        Vector3 followLeader = Vector3.zero;
-        if (mgr.centerBat != null && mgr.centerBat != this)
-        {
-            Vector3 toLeader = mgr.centerBat.transform.position - pos;
-            if (toLeader.sqrMagnitude > 0.0001f)
-                followLeader = toLeader.normalized;
-        }
-        // Use velocity direction as current forward direction if moving,
-        // otherwise use seek direction.
-        Vector3 forward = (velocity.sqrMagnitude > 0.01f) ? velocity.normalized : seek;
-        Vector3 avoid = ObstacleAvoidance3D(pos, forward);
+    Vector3 BuildFollowLeaderDirection(Vector3 pos)
+    {
+        if (mgr.centerBat == null || mgr.centerBat == this)
+            return Vector3.zero;
+        Vector3 toLeader = mgr.centerBat.transform.position - pos;
+        return toLeader.sqrMagnitude > 0.0001f ? toLeader.normalized : Vector3.zero;
+    }
 
-        // Small vertical bobbing component for a more natural flight feel.
+    Vector3 FacingForwardForSteering(Vector3 seekFallback)
+    {
+        return (velocity.sqrMagnitude > 0.01f) ? velocity.normalized : seekFallback;
+    }
+
+    Vector3 BuildFlightFeel(float t)
+    {
         float bob = Mathf.Sin(t * mgr.bobFreq + seed) * mgr.bobAmp;
-
-        // Generate Perlin noise values so each bat gets smooth random drifting motion.
         float nx = Mathf.PerlinNoise(seed, t * mgr.noiseFreq) * 2f - 1f;
         float nz = Mathf.PerlinNoise(seed + 33.3f, t * mgr.noiseFreq) * 2f - 1f;
         float ny = Mathf.PerlinNoise(seed + 77.7f, t * mgr.noiseFreq) * 2f - 1f;
-
         Vector3 noise = new Vector3(nx, ny * 0.3f, nz) * (mgr.noiseAmp * 0.35f);
-        Vector3 flightFeel = noise + Vector3.up * (bob * 0.2f);
+        return noise + Vector3.up * (bob * 0.2f);
+    }
 
-        // Non-leader bats follow the leader more strongly.
+    Vector3 CombineSteering(Vector3 seek, Vector3 followLeader, Vector3 avoid, Vector3 flightFeel)
+    {
         float leaderFollowWeight = (mgr.centerBat != null && mgr.centerBat != this) ? 2.5f : 1.5f;
 
-        Vector3 sepContrib = separation.sqrMagnitude > 0.0001f
-            ? separation.normalized * Mathf.Min(separation.magnitude * mgr.separationWeight, mgr.maxSeparationForce)
+        Vector3 sepContrib = flockSeparation.sqrMagnitude > 0.0001f
+            ? flockSeparation.normalized * Mathf.Min(flockSeparation.magnitude * mgr.separationWeight, mgr.maxSeparationForce)
             : Vector3.zero;
 
         bool isLeader = mgr.centerBat != null && mgr.centerBat == this;
@@ -174,29 +165,29 @@ public class BatMovement : MonoBehaviour
 
         Vector3 steer =
             sepContrib +
-            alignment * alignW +
-            cohesion * cohesW +
+            flockAlignment * alignW +
+            flockCohesion * cohesW +
             seek * seekW +
             followLeader * leaderFollowWeight +
             avoid * mgr.obstacleWeight +
             flightFeel;
 
-        if (steer.sqrMagnitude < 0.0001f) steer = seek;
+        if (steer.sqrMagnitude < 0.0001f)
+            steer = seek;
+        return steer;
+    }
 
-        Vector3 desiredDir = steer.normalized;
+    void ApplyDirectionAndSpeed(float t, Vector3 seek, Vector3 forward, Vector3 steer)
+    {
+        steerDesiredDir = steer.normalized;
+        steerDesiredDir.y = Mathf.Clamp(steerDesiredDir.y, -maxClimbY, maxClimbY);
+        steerDesiredDir.Normalize();
 
-        desiredDir.y = Mathf.Clamp(desiredDir.y, -maxClimbY, maxClimbY);
-        desiredDir.Normalize();
+        steerCurrentDir = forward;
+        steerNewDir = Vector3.Slerp(steerCurrentDir, steerDesiredDir, mgr.turnSpeed * Time.deltaTime).normalized;
+        steerNewDir.y = Mathf.Clamp(steerNewDir.y, -maxClimbY, maxClimbY);
+        steerNewDir.Normalize();
 
-        // Smoothly rotate current direction toward desired direction.
-        Vector3 currentDir = forward;
-        Vector3 newDir = Vector3.Slerp(currentDir, desiredDir, mgr.turnSpeed * Time.deltaTime).normalized;
-
-        newDir.y = Mathf.Clamp(newDir.y, -maxClimbY, maxClimbY);
-        newDir.Normalize();
-
-        // Add a tiny speed wobble so bats do not all fly at perfectly constant speed.
-        // When obscuring the player, bats fly faster; back to normal after scare.
         float speedWobble = 0.15f;
         float speedMult = mgr.IsObscuring ? 2.0f : 1f;
         float effectiveMin = mgr.minSpeed * speedMult;
@@ -204,45 +195,47 @@ public class BatMovement : MonoBehaviour
         float desiredSpeed = Mathf.Clamp(baseSpeed * speedMult + Mathf.Sin(t * 0.6f + seed) * speedWobble, effectiveMin, effectiveMax);
         float newSpeed = Mathf.MoveTowards(velocity.magnitude, desiredSpeed, mgr.acceleration * Time.deltaTime);
 
-        velocity = newDir * newSpeed;
+        velocity = steerNewDir * newSpeed;
+    }
 
+    void ApplyMovement()
+    {
         Vector3 delta = velocity * Time.deltaTime;
         MoveWithSlide(delta);
 
-        // if the bat still overlaps geometry, push it back out.
         if (mgr.depenetrateAfterMove)
             Depenetrate();
+    }
 
-        if (newDir.sqrMagnitude > 0.01f)
-        {
-            // Blend between actual movement direction and intended steering direction
-            float intentBlend = mgr.lookIntentBlend;
-            Vector3 intentDir = Vector3.Slerp(newDir, desiredDir, 1f - intentBlend).normalized;
-            Quaternion look = Quaternion.LookRotation(intentDir, Vector3.up);
+    void ApplyRotation()
+    {
+        if (steerNewDir.sqrMagnitude <= 0.01f)
+            return;
 
-            float turnSign = Vector3.Dot(Vector3.Cross(currentDir, newDir), Vector3.up);
-            float bank = -turnSign * mgr.bankAngle;
-            Quaternion bankRot = Quaternion.AngleAxis(bank, intentDir);
+        float intentBlend = mgr.lookIntentBlend;
+        Vector3 intentDir = Vector3.Slerp(steerNewDir, steerDesiredDir, 1f - intentBlend).normalized;
+        Quaternion look = Quaternion.LookRotation(intentDir, Vector3.up);
 
-            // Axis used for pitch (up/down tilt)
-            Vector3 pitchAxis = Vector3.Cross(Vector3.up, intentDir).normalized;
-            if (pitchAxis.sqrMagnitude < 0.01f) pitchAxis = Vector3.right;
+        float turnSign = Vector3.Dot(Vector3.Cross(steerCurrentDir, steerNewDir), Vector3.up);
+        float bank = -turnSign * mgr.bankAngle;
+        Quaternion bankRot = Quaternion.AngleAxis(bank, intentDir);
 
-            float pitchStr = mgr.pitchFromClimb;
-            float dipStr = mgr.turnDipAngle;
-            float climbRate = velocity.y;
-            float pitch = Mathf.Clamp(climbRate * pitchStr, -25f, 25f);
+        Vector3 pitchAxis = Vector3.Cross(Vector3.up, intentDir).normalized;
+        if (pitchAxis.sqrMagnitude < 0.01f) pitchAxis = Vector3.right;
 
-            // Add a slight downward dip during sharper turns.
-            float turnAmount = Vector3.Angle(currentDir, newDir);
-            float turnDip = Mathf.Clamp01(turnAmount / 30f) * -dipStr;
-            Quaternion pitchRot = Quaternion.AngleAxis(-pitch + turnDip, pitchAxis);
+        float pitchStr = mgr.pitchFromClimb;
+        float dipStr = mgr.turnDipAngle;
+        float climbRate = velocity.y;
+        float pitch = Mathf.Clamp(climbRate * pitchStr, -25f, 25f);
 
-            Quaternion targetRot = look * bankRot * pitchRot;
-            if (Mathf.Abs(mgr.modelForwardOffsetY) > 0.01f)
-                targetRot *= Quaternion.Euler(0f, mgr.modelForwardOffsetY, 0f);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 10f * Time.deltaTime);
-        }
+        float turnAmount = Vector3.Angle(steerCurrentDir, steerNewDir);
+        float turnDip = Mathf.Clamp01(turnAmount / 30f) * -dipStr;
+        Quaternion pitchRot = Quaternion.AngleAxis(-pitch + turnDip, pitchAxis);
+
+        Quaternion targetRot = look * bankRot * pitchRot;
+        if (Mathf.Abs(mgr.modelForwardOffsetY) > 0.01f)
+            targetRot *= Quaternion.Euler(0f, mgr.modelForwardOffsetY, 0f);
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, 10f * Time.deltaTime);
     }
     // This function checks whether there is an obstacle in front of the bat.
     // If the path ahead is clear, it returns Vector3.zero (no avoidance needed).
@@ -318,6 +311,8 @@ public class BatMovement : MonoBehaviour
     void Depenetrate()
     {
         if (depenetrateCapsule == null) InitDepenetrateCapsule();
+        if (depenetrateOverlapBuffer == null)
+            depenetrateOverlapBuffer = new Collider[DepenetrateOverlapCapacity];
 
         float r = Mathf.Max(0.02f, mgr.agentRadius);
         Vector3 pos = transform.position;
@@ -331,10 +326,11 @@ public class BatMovement : MonoBehaviour
         depenetrateCapsule.direction = 1;
         depenetrateCapsule.center = Vector3.zero;
 
-        Collider[] overlap = Physics.OverlapCapsule(p1, p2, r, mgr.obstacleMask, QueryTriggerInteraction.Ignore);
-        for (int i = 0; i < overlap.Length; i++)
+        int overlapCount = Physics.OverlapCapsuleNonAlloc(
+            p1, p2, r, depenetrateOverlapBuffer, mgr.obstacleMask, QueryTriggerInteraction.Ignore);
+        for (int i = 0; i < overlapCount; i++)
         {
-            var col = overlap[i];
+            var col = depenetrateOverlapBuffer[i];
             if (Physics.ComputePenetration(
                 depenetrateCapsule, center, Quaternion.identity,
                 col, col.transform.position, col.transform.rotation,
@@ -349,6 +345,7 @@ public class BatMovement : MonoBehaviour
     }
 
     CapsuleCollider depenetrateCapsule;
+    Collider[] depenetrateOverlapBuffer;
 
     void InitDepenetrateCapsule()
     {
@@ -356,6 +353,7 @@ public class BatMovement : MonoBehaviour
         go.hideFlags = HideFlags.HideAndDontSave;
         depenetrateCapsule = go.AddComponent<CapsuleCollider>();
         depenetrateCapsule.isTrigger = true;
+        depenetrateOverlapBuffer = new Collider[DepenetrateOverlapCapacity];
     }
     // This function moves the bat while handling collisions in a smooth way.
     // Instead of letting the bat pass through walls or stop abruptly,

@@ -24,6 +24,8 @@ public class PickupItem : MonoBehaviour
     [SerializeField] private int amount = 1;
     [SerializeField] private string tutorialTaskName = "Pick-up";
 
+    public ItemType PickupItemType => itemType;
+
     public void Interact()
     {
         if (InventoryManager.Instance != null)

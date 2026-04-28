@@ -151,10 +151,14 @@ public class Tutorial : MonoBehaviour
 
     public void OnSkip(InputAction.CallbackContext context)
     {
-        if (context.started && !hasFinishedTutorial)
+        if (context.started)
         {
-            hasFinishedTutorial = true;
-            StartCoroutine(ExitTutorialAfterWait(0));
+            animator.SetBool("Tutorial", false);
+            tutorial = false;
+            PlayerRespawn script = player.GetComponent<PlayerRespawn>();
+            script.RespawnPosition = warpPoint.transform.position;
+            script.Respawn();
+            player.GetComponent<CrazyTimer>().StartEffect();
         }
     }
 
