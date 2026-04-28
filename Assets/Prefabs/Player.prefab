@@ -637,6 +637,7 @@ MonoBehaviour:
   breakableVolumePanel: {fileID: 0}
   hidePanel: {fileID: 0}
   exitHidePanel: {fileID: 0}
+  throwItem: {fileID: 0}
   ignoreLiftChain: 0
 --- !u!114 &6448768869653819886
 MonoBehaviour:
@@ -704,11 +705,10 @@ MonoBehaviour:
       - m_Target: {fileID: 3411062355009450623}
         m_TargetAssemblyTypeName: BroadcastSwitchEvent, Assembly-CSharp
         m_MethodName: HandleControlsChanged
-        m_Mode: 2
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.InputSystem.PlayerInput,
-            Unity.InputSystem
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 

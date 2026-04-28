@@ -274,7 +274,7 @@ public class EcholocationManager : MonoBehaviour
 
         // FIXME: remove this when multiple ray bounces have been implemented
         // for now just make the monster hear the sound
-        GameObject monster = GameObject.FindGameObjectWithTag("Monster");
+        GameObject monster = GameObject.Find("Monster");
         if (monster != null) {
             INoiseSensitive sensitiveTarget = monster.GetComponent<INoiseSensitive>();
             if (sensitiveTarget != null) sensitiveTarget.OnHeardScan(transform.position, monsterVolume, isFootsteps, priority);

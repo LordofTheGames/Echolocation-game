@@ -332,7 +332,7 @@ GameObject:
   - component: {fileID: 9046772350672695956}
   m_Layer: 0
   m_Name: rig
-  m_TagString: Untagged
+  m_TagString: Monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -623,8 +623,8 @@ GameObject:
   - component: {fileID: 4708676959776660981}
   - component: {fileID: 143923725014144810}
   m_Layer: 10
-  m_Name: Model
-  m_TagString: Untagged
+  m_Name: model
+  m_TagString: Monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -872,8 +872,8 @@ GameObject:
   - component: {fileID: 388930974885395403}
   - component: {fileID: 4057049619523497317}
   m_Layer: 10
-  m_Name: monster.002
-  m_TagString: Untagged
+  m_Name: model
+  m_TagString: Monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1463,7 +1463,7 @@ NavMeshAgent:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5683829060095955525}
   m_Enabled: 1
-  m_AgentTypeID: 0
+  m_AgentTypeID: 1479372276
   m_Radius: 70
   m_Speed: 8
   m_Acceleration: 30
@@ -1504,6 +1504,7 @@ MonoBehaviour:
   - rid: 8625079678806262514
   - rid: 8625079894267396196
   - rid: 8625079894320087343
+  - rid: 8625080014723613463
   m_OriginalGraph: {fileID: 0}
   m_IsInitialised: 0
   m_IsStarted: 0
@@ -1614,6 +1615,14 @@ MonoBehaviour:
           m_Value1: 6894295246890815665
         Name: chaseStartLookAtPoint
         m_Value: {fileID: 0}
+    - rid: 8625080014723613463
+      type: {class: 'BlackboardVariable`1[[UnityEngine.Animator, UnityEngine.AnimationModule]]', ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 13676865075947982938
+          m_Value1: 6062913561355354909
+        Name: MonsterAnim
+        m_Value: {fileID: 143923725014144810}
 --- !u!114 &6014912869232668478
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1717,12 +1726,12 @@ MonoBehaviour:
     numRays: 20000
     angle: 100
     visualVolume: 100
-  MaxDistanceFromPlayer: 35
-  DistanceToMoveToIfFarFromPlayer: 25
+  MaxDistanceFromPlayer: 40
+  DistanceToMoveToIfFarFromPlayer: 30
   MoveSpeedFarFromPlayer: 12
   StoppingDistanceFarFromPlayer: 2
   TimeUntilMovesClose: 60
-  DistanceToMoveAwayFromPlayer: 100
+  DistanceToMoveAwayFromPlayer: 80
   MoveSpeedAwayFromPlayer: 9
   StoppingDistanceAwayFromPlayer: 2
   TimeUntilMovesAway: 60
@@ -1739,7 +1748,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5683829060095955525}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cbf0b31af0e16104c83a220d744db206, type: 3}
   m_Name: 
@@ -1799,7 +1808,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5683829060095955525}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f41b16a884a77ea4ea05efabe713814e, type: 3}
   m_Name: 
@@ -3028,7 +3037,7 @@ GameObject:
   - component: {fileID: 521415726480557336}
   m_Layer: 10
   m_Name: ScriptedSceneAudioSource
-  m_TagString: Untagged
+  m_TagString: Monster
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

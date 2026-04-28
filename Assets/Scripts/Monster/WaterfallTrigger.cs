@@ -3,7 +3,7 @@ using Unity.Behavior;
 
 public class WaterfallTrigger : MonoBehaviour
 {
-    [SerializeField] private BehaviorGraphAgent agent;
+    private BehaviorGraphAgent agent;
     [SerializeField] private Transform waterfallExitLocation;
     [SerializeField] private GameObject respawnPoint;
     [SerializeField] private GameObject monsterRespawnPoint;
@@ -13,7 +13,7 @@ public class WaterfallTrigger : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        agent = GameObject.Find("Monster").GetComponent<BehaviorGraphAgent>();
     }
 
     // Update is called once per frame
