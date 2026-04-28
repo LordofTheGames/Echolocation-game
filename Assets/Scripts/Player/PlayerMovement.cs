@@ -33,13 +33,6 @@ public class PlayerMovement : MonoBehaviour
     private float walkTimer = 0f;
     private bool hasCompletedWalkTask = false;
 
-    private float sprintTimer = 0f;
-    private bool hasCompletedSprintTask = false;
-    private float crouchTimer = 0f;
-    private bool hasCompletedCrouchTask = false;
-    private float walkTimer = 0f;
-    private bool hasCompletedWalkTask = false;
-
     private CrazyTimer crazyTimer;
 
 
