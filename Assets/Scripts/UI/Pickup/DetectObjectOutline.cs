@@ -254,6 +254,12 @@ public class DetectObjectOutline : MonoBehaviour
             OutlineTarget t = col.GetComponentInParent<OutlineTarget>();
             if (!t) continue;
 
+            var pickup = FindInTarget<PickupItem>(t);
+            if (pickup != null && !pickup.CanPickup)
+            {
+                continue;
+            }
+
             var button = FindInTarget<DoorButton>(t);
             if (button != null && !button.CanInteract)
             {

@@ -7,6 +7,9 @@ public class Breakable : MonoBehaviour
 {
     [SerializeField] private GameObject intactObject;
     [SerializeField] private GameObject brokenObject;
+
+    [SerializeField] private PickupItem itemLockedUntilBreak;
+
     [SerializeField] private AudioClip breakSound;
     [SerializeField] private float breakSoundVolume = 1f;
 
@@ -39,6 +42,10 @@ public class Breakable : MonoBehaviour
 
         if (intactObject != null) intactObject.SetActive(true);
         if (brokenObject != null) brokenObject.SetActive(false);
+
+        // Key stays visible, but cannot be picked up before glass breaks
+        if (itemLockedUntilBreak != null)
+            itemLockedUntilBreak.SetCanPickup(false);
     }
 
     private void Update()
@@ -70,12 +77,15 @@ public class Breakable : MonoBehaviour
     {
         if (hasBroken) return;
 
-        OnRockBroken?.Invoke(); // Tell the game the player broke a rock
+        OnRockBroken?.Invoke();
 
         hasBroken = true;
 
         if (intactObject != null) intactObject.SetActive(false);
         if (brokenObject != null) brokenObject.SetActive(true);
+
+        if (itemLockedUntilBreak != null)
+            itemLockedUntilBreak.SetCanPickup(true);
 
         if (audioSource != null && breakSound != null)
         {
