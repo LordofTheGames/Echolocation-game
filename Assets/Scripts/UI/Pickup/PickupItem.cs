@@ -26,8 +26,19 @@ public class PickupItem : MonoBehaviour
 
     public ItemType PickupItemType => itemType;
 
+    [SerializeField] private bool canPickup = true;
+
+    public bool CanPickup => canPickup;
+
+    public void SetCanPickup(bool value)
+    {
+        canPickup = value;
+    }
+
     public void Interact()
     {
+        if (!canPickup) return;
+
         if (InventoryManager.Instance != null)
         {
             InventoryManager.Instance.Add(itemType, amount);
