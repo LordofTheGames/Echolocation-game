@@ -33,8 +33,17 @@ public class PlayerMovement : MonoBehaviour
     private float walkTimer = 0f;
     private bool hasCompletedWalkTask = false;
 
+    private bool finalChase = false;
+
     private CrazyTimer crazyTimer;
 
+    public void FinalChaseSprint()
+    {
+        finalChase = true;
+        isCrouching = false;
+        isSprinting = true;
+        footstepsScript.CurrentState = MoveState.SPRINT;
+    }
 
     // hold shift
     public void OnSprint(InputAction.CallbackContext context)
@@ -63,6 +72,8 @@ public class PlayerMovement : MonoBehaviour
 
     public void OnCrouch(InputAction.CallbackContext context)
     {
+        if (finalChase) return; // Disable crouching in final chase
+
         if (context.performed)
         {
             isCrouching = !isCrouching; 
@@ -142,11 +153,11 @@ public class PlayerMovement : MonoBehaviour
         {
             currentSpeed = sprintSpeed;
 
-            if(moveInput.Equals(Vector2.zero)){ 
-                currentSpeed = walkSpeed;
-                isSprinting = false;
-                footstepsScript.CurrentState = MoveState.WALK;
-            }
+            // if(moveInput.Equals(Vector2.zero)){ 
+            //     currentSpeed = walkSpeed;
+            //     isSprinting = false;
+            //     footstepsScript.CurrentState = MoveState.WALK;
+            // }
             // else if (!hasCompletedSprintTask)
             // {
             //     sprintTimer += Time.deltaTime;
@@ -175,7 +186,7 @@ public class PlayerMovement : MonoBehaviour
         
 
         // play crazy effect faster if sprinting, turn it off if not
-        crazyTimer.isSprinting = isSprinting;
+        // crazyTimer.isSprinting = isSprinting;
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
         if (controller.enabled)

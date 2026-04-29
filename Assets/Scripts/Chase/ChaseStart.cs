@@ -74,6 +74,7 @@ public class ChaseStart : MonoBehaviour
         playerCam.enabled = false;
         ml.enabled = true;
         pm.enabled = true;
+        pm.FinalChaseSprint();
         agent.BlackboardReference.SetVariableValue("chaseStart", true);
 
         yield return new WaitForSeconds(3);
