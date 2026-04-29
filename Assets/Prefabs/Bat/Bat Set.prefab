@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 620492970974196414}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -50.559334, y: 0.21680915, z: 78.35281}
+  m_LocalPosition: {x: -28.58, y: 0, z: 14.47}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 2437118228536949695}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -38.359337, y: 0.21680924, z: 127.05281}
+  m_LocalPosition: {x: 4.8, y: 0, z: 5.29}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -149,7 +149,7 @@ MonoBehaviour:
   spawnRadius: 1.5
   obstacleMask:
     serializedVersion: 2
-    m_Bits: 577
+    m_Bits: 576
   agentRadius: 0.35
   minSpeed: 4.5
   maxSpeed: 5.5
@@ -176,11 +176,15 @@ MonoBehaviour:
   pitchFromClimb: 12
   turnDipAngle: 6
   modelForwardOffsetY: 90
-  depenetrateAfterMove: 1
+  depenetrateAfterMove: 0
   skin: 0.03
   playerCam: {fileID: 0}
-  obscureTriggerDistance: 15
+  obscureTriggerDistance: 10
   obscureDistance: 1.5
+  minRelativeVolume: 0.06
+  minRelativePitch: 0.5
+  holdTimeToScare: 1
+  showSpatialCellsDebug: 0
 --- !u!1001 &2110994441798677406
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -323,7 +327,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 858b5cc970b8d4913b796fb012266627, type: 3}
       propertyPath: m_TagString
-      value: Monster
+      value: Untagged
       objectReference: {fileID: 0}
     - target: {fileID: 2324750421780177100, guid: 858b5cc970b8d4913b796fb012266627, type: 3}
       propertyPath: m_Layer
