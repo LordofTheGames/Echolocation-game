@@ -52,7 +52,7 @@ public class MicInput : MonoBehaviour
             if (highPitch == 0)
                 highPitch = 140 - normalPitch;
             if (normalVolume == 0)
-                normalVolume = 0.2f;
+                normalVolume = 0.1f;
             if (highVolume == 0)
                 highVolume = 0.97f - normalVolume;
         }

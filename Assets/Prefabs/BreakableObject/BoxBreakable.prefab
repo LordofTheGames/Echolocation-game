@@ -49,14 +49,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   intactObject: {fileID: 0}
   brokenObject: {fileID: 0}
+  itemLockedUntilBreak: {fileID: 0}
   breakSound: {fileID: 8300000, guid: 24b3d78a62105c14cba8df9fb3a56dbf, type: 3}
   breakSoundVolume: 0.6
   minRelativeVolume: 0.068
-  minRelativePitch: 0.83
+  minRelativePitch: 0.85
   holdTimeToBreak: 0.5
   maxDistanceToMic: 5
   secondsUntilHideBrokenVisual: 5
   audioSource: {fileID: 5019431104252364512}
+  IsAlarmBox: 0
+  AlarmSound1: {fileID: 0}
+  AlarmSound2: {fileID: 0}
+  minFramesForValidAudio: 5
+  audioHistoryDuration: 0.2
 --- !u!82 &5019431104252364512
 AudioSource:
   m_ObjectHideFlags: 0
