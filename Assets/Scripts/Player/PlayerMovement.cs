@@ -26,6 +26,13 @@ public class PlayerMovement : MonoBehaviour
     private float defaultCamY;
     private PlayerFootsteps footstepsScript;
 
+    private float sprintTimer = 0f;
+    private bool hasCompletedSprintTask = false;
+    private float crouchTimer = 0f;
+    private bool hasCompletedCrouchTask = false;
+    private float walkTimer = 0f;
+    private bool hasCompletedWalkTask = false;
+
     private CrazyTimer crazyTimer;
 
 
@@ -62,8 +69,7 @@ public class PlayerMovement : MonoBehaviour
             if (isCrouching) 
             {
                 footstepsScript.CurrentState = MoveState.CROUCH;
-            isSprinting = false;
-
+                isSprinting = false;
             }
             else footstepsScript.CurrentState = MoveState.WALK;
         }
@@ -120,6 +126,17 @@ public class PlayerMovement : MonoBehaviour
         if (isCrouching)
         {
             currentSpeed = crouchSpeed;
+
+            if (!moveInput.Equals(Vector2.zero) && !hasCompletedCrouchTask)
+            {
+                crouchTimer += Time.deltaTime;
+                if (crouchTimer >= 3f)
+                {
+                    hasCompletedCrouchTask = true;
+                    Debug.Log("Crouch Task Completed!");
+                    TutorialManager.OnTaskComplete?.Invoke("Crouch"); 
+                }
+            }
         }
         else if (sprintAllowed && isSprinting)
         {
@@ -130,7 +147,32 @@ public class PlayerMovement : MonoBehaviour
                 isSprinting = false;
                 footstepsScript.CurrentState = MoveState.WALK;
             }
+            else if (!hasCompletedSprintTask)
+            {
+                sprintTimer += Time.deltaTime;
+                if (sprintTimer >= 5f)
+                {
+                    hasCompletedSprintTask = true;
+                    Debug.Log("Completed!");
+                    TutorialManager.OnTaskComplete?.Invoke("Sprint"); 
+                }
+            }
         }
+        else 
+        {
+            currentSpeed = walkSpeed;
+            if (!moveInput.Equals(Vector2.zero) && !hasCompletedWalkTask)
+            {
+                walkTimer += Time.deltaTime;
+                if (walkTimer >= 8f)
+                {
+                    hasCompletedWalkTask = true;
+                    Debug.Log("Walk Task Completed!");
+                    TutorialManager.OnTaskComplete?.Invoke("Walk"); 
+                }
+            }
+        }
+        
 
         // play crazy effect faster if sprinting, turn it off if not
         crazyTimer.isSprinting = isSprinting;

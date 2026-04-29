@@ -19,6 +19,7 @@ public class InventoryManager : MonoBehaviour
     //currently highlighted item in inventory
     public ItemType Selecting { get; private set; } =ItemType.None;
     [SerializeField] private InventoryToggleCursor toggle;
+    private bool hasCompletedGrenadeTask = false;
 
     private void Awake()
     {
@@ -112,6 +113,13 @@ public class InventoryManager : MonoBehaviour
         if (GetCount(type) <= 0) return;
         Selected = type;
         Selection(type);
+
+        if (type == ItemType.SonicGrenade && !hasCompletedGrenadeTask)
+        {
+            hasCompletedGrenadeTask = true; 
+            Debug.Log("Equipped Sonic Grenade Task Completed!");
+            TutorialManager.OnTaskComplete?.Invoke("Switch");
+        }
     }
 
     public void Selection(ItemType type)

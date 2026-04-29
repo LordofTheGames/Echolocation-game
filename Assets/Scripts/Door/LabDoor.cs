@@ -28,7 +28,6 @@ public class LabDoor : MonoBehaviour
     public bool IsMoving => isMoving;
 
     private GameObject monster;
-    private GameObject player;
 
     private void Awake()
     {
@@ -52,7 +51,6 @@ public class LabDoor : MonoBehaviour
         isMoving = false;
 
         monster = GameObject.Find("Monster");
-        player = GameObject.Find("Player");
     }
 
     public void Interact()
@@ -116,7 +114,7 @@ public class LabDoor : MonoBehaviour
 
     void Update()
     {
-        if (Vector3.Distance(transform.position, player.transform.position) <= MonsterDistance)
+        if (Vector3.Distance(transform.position, monster.transform.position) <= MonsterDistance)
         {
             OpenDoors();
             StartCoroutine(closeDoorMonster());
@@ -124,7 +122,7 @@ public class LabDoor : MonoBehaviour
     }
      private IEnumerator closeDoorMonster()
     {
-        while (Vector3.Distance(transform.position, player.transform.position) <= MonsterDistance)
+        while (Vector3.Distance(transform.position, monster.transform.position) <= MonsterDistance)
             yield return new WaitForSeconds(1);
         CloseDoors();
     }
