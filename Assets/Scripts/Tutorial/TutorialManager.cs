@@ -21,7 +21,7 @@ public class TutorialManager : MonoBehaviour
 
     void Start()
     {
-        tasks.Add("Sprint", false);
+        // tasks.Add("Sprint", false);
         tasks.Add("Clicker", false);
         tasks.Add("Crouch", false);
         tasks.Add("Walk", false);
@@ -52,7 +52,7 @@ public class TutorialManager : MonoBehaviour
 
     void Update()
     {
-        if (tasksCompleted == 7)
+        if (tasksCompleted == 6)
         {
             headText.SetActive(true);
             posterText.SetActive(true);

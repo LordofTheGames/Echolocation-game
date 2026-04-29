@@ -147,16 +147,16 @@ public class PlayerMovement : MonoBehaviour
                 isSprinting = false;
                 footstepsScript.CurrentState = MoveState.WALK;
             }
-            else if (!hasCompletedSprintTask)
-            {
-                sprintTimer += Time.deltaTime;
-                if (sprintTimer >= 5f)
-                {
-                    hasCompletedSprintTask = true;
-                    Debug.Log("Completed!");
-                    TutorialManager.OnTaskComplete?.Invoke("Sprint"); 
-                }
-            }
+            // else if (!hasCompletedSprintTask)
+            // {
+            //     sprintTimer += Time.deltaTime;
+            //     if (sprintTimer >= 5f)
+            //     {
+            //         hasCompletedSprintTask = true;
+            //         Debug.Log("Completed!");
+            //         TutorialManager.OnTaskComplete?.Invoke("Sprint"); 
+            //     }
+            // }
         }
         else 
         {
