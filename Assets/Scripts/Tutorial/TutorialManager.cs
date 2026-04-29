@@ -14,8 +14,8 @@ public class TutorialManager : MonoBehaviour
     public GameObject player;
     public GameObject spawnPointAfterExit;
     private int tasksCompleted = 0;
-    public TMP_Text headText;
-    public TMP_Text posterText;
+    public GameObject headText;
+    public GameObject posterText;
     private bool hasFinishedTutorial = true;
     public GameObject warpPoint;
 
@@ -54,8 +54,8 @@ public class TutorialManager : MonoBehaviour
     {
         if (tasksCompleted == 7)
         {
-            headText.enabled = true;
-            posterText.enabled = true;
+            headText.SetActive(true);
+            posterText.SetActive(true);
             hasFinishedTutorial = false;
             StartCoroutine(textOff());
         }
@@ -64,7 +64,7 @@ public class TutorialManager : MonoBehaviour
     IEnumerator textOff()
     {
         yield return new WaitForSeconds(3);
-        headText.enabled = false;
+        headText.SetActive(false);
     }
 
     public void OnGameStart(InputAction.CallbackContext context)
