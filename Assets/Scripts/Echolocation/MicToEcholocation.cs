@@ -6,10 +6,10 @@ public class MicToEcholocation : MonoBehaviour
     public MicInput mic;
     public Transform cameraTransform;
 
-    private float numRaysScale = 0.6f;
-    private int maxRays = 10000;
-    private int minRays = 100;
-    private float maxVisualVolume = 100f;
+    private float numRaysScale = 0.8f;
+    private int maxRays = 30000;
+    private int minRays = 1000;
+    private float maxVisualVolume = 300f;
     private float maxVolForMonster = 300f;
     private float timer;
     private float proportion;
@@ -42,8 +42,8 @@ public class MicToEcholocation : MonoBehaviour
         rays = Mathf.Clamp(rays, minRays, maxRays);
 
         proportion = ((float) rays / maxRays);
-        visualVolume = proportion * maxVisualVolume;    // Calculate visual volume of rays to travel based on proportion of max - gives a max distance of 50, loss per meter = 2
-        volForMonster = proportion * maxVolForMonster;  // Calculate max volume for monster based on proportion of rays of max rays
+        visualVolume = proportion * maxVisualVolume * 1.5f;    // Calculate visual volume of rays to travel based on proportion of max - gives a max distance of 50, loss per meter = 2
+        volForMonster = proportion * maxVolForMonster * 1.2f;  // Calculate max volume for monster based on proportion of rays of max rays
 
         GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, rays, visualVolume, volForMonster);
 
