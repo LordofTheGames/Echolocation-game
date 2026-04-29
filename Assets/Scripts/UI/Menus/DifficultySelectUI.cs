@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -11,21 +12,23 @@ public class DifficultySelectUI : MonoBehaviour
 
     public void OnEasyClicked()
     {
-        Invoke(nameof(LoadGameScene), 0.5f);
+        StartCoroutine(LoadGameScene("EASY"));
+
     }
 
     public void OnNormalClicked()
     {
-        Invoke(nameof(LoadGameScene), 0.5f);
+        StartCoroutine(LoadGameScene("NORMAL"));
     }
 
     public void OnHardClicked()
     {
-        Invoke(nameof(LoadGameScene), 0.5f);
+        StartCoroutine(LoadGameScene("HARD"));
     }
 
-    private void LoadGameScene()
+    IEnumerator LoadGameScene(string scene)
     {
-        SceneManager.LoadScene("FINAL");
+        yield return new WaitForSeconds(0.5f);
+        SceneManager.LoadScene(scene);
     }
 }
