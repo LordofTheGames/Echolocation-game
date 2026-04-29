@@ -12,7 +12,7 @@ public class AreaTrigger : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        if (other.name == "Monster")
+        if (other.CompareTag("Monster"))
         {
             movementScript.SetArea(Area.name);
         }

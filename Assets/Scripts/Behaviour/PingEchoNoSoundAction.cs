@@ -25,10 +25,11 @@ public partial class PingEchoNoSoundAction : Action
     [SerializeReference] public BlackboardVariable<float> monsterVolume = new BlackboardVariable<float>(0);
 
     [SerializeReference] public BlackboardVariable<Vector3> MonsterHeightOffset;
+    [SerializeReference] public BlackboardVariable<MonsterSearchMode> searchMode;
 
     protected override Status OnStart()
     {
-        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: MonsterSearchMode.RED);
+        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: searchMode);
         return Status.Running;
     }
 

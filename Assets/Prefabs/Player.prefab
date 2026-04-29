@@ -48,7 +48,7 @@ MeshRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4256274560277351473}
-  m_Enabled: 1
+  m_Enabled: 0
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -117,7 +117,7 @@ Transform:
   m_GameObject: {fileID: 4920237846165806001}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.79999995, z: 0}
+  m_LocalPosition: {x: 0, y: 0.8, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -277,7 +277,7 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
-  CustomBlends: {fileID: 0}
+  CustomBlends: {fileID: 11400000, guid: ad8f94e56c519b34a92a79a67b5fad3a, type: 2}
 --- !u!114 &2406973988799435245
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -637,6 +637,7 @@ MonoBehaviour:
   breakableVolumePanel: {fileID: 0}
   hidePanel: {fileID: 0}
   exitHidePanel: {fileID: 0}
+  throwItem: {fileID: 0}
   ignoreLiftChain: 0
 --- !u!114 &6448768869653819886
 MonoBehaviour:
@@ -704,11 +705,10 @@ MonoBehaviour:
       - m_Target: {fileID: 3411062355009450623}
         m_TargetAssemblyTypeName: BroadcastSwitchEvent, Assembly-CSharp
         m_MethodName: HandleControlsChanged
-        m_Mode: 2
+        m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.InputSystem.PlayerInput,
-            Unity.InputSystem
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 

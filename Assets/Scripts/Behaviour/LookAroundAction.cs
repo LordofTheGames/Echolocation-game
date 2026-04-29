@@ -25,6 +25,7 @@ public partial class LookAroundAction : Action
     [SerializeReference] public BlackboardVariable<AudioClip> sound2;
     [SerializeReference] public BlackboardVariable<float> soundVolume = new BlackboardVariable<float>(1);
     [SerializeReference] public BlackboardVariable<AudioSource> audioSource;
+    [SerializeReference] public BlackboardVariable<MonsterSearchMode> searchMode;
 
     private enum LookPhase { ToLeft, ToRight, ToCenter }
     private LookPhase currentPhase;
@@ -34,8 +35,15 @@ public partial class LookAroundAction : Action
     private Quaternion targetRotation;   // Where we are going in the current swing
     private Transform agentTransform;
 
+    private Quaternion echoRotation;
+
     protected override Status OnStart()
     {
+        Speed.Value = 2;
+        Angle.Value = 30;
+        InitialDirection.Value = LookDirection.RIGHT;
+        NumberOfRotations.Value = 2;
+
         rotationsCompleted = 0;
         agentTransform = Agent.Value.transform;
         centerRotation = agentTransform.rotation;
@@ -55,17 +63,22 @@ public partial class LookAroundAction : Action
             currentPhase = LookPhase.ToRight;
             targetRotation = centerRotation * Quaternion.Euler(0, Angle.Value, 0);
         }
+
+        echoRotation = agentTransform.rotation;
+
         return Status.Running;
     }
 
     protected override Status OnUpdate()
     {
-        float angle = Quaternion.Angle(agentTransform.rotation, targetRotation);
+        // float angle = Quaternion.Angle(agentTransform.rotation, targetRotation);
+        float angle = Quaternion.Angle(echoRotation, targetRotation);
         // If we are done, start next phase or exit
         if (angle < 0.5f) 
         {
             // snap to rotation
-            agentTransform.rotation = targetRotation;
+            // agentTransform.rotation = targetRotation;
+            echoRotation = targetRotation;
             rotationsCompleted++;
             if (rotationsCompleted == NumberOfRotations && currentPhase != LookPhase.ToCenter)
             {
@@ -90,7 +103,8 @@ public partial class LookAroundAction : Action
                 return Status.Success;
             }
 
-            GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, echoAngle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: MonsterSearchMode.RED);
+            // GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, echoAngle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: MonsterSearchMode.RED);
+            GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, echoRotation * Agent.Value.transform.forward, echoAngle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: searchMode);
             int soundNum = UnityEngine.Random.Range(1, 3);
             if (soundNum == 1) audioSource.Value.PlayOneShot(sound1, soundVolume);
             if (soundNum == 2) audioSource.Value.PlayOneShot(sound2, soundVolume);
@@ -100,7 +114,8 @@ public partial class LookAroundAction : Action
         // This mimics Slerp but ensures we never drop below '20f' speed.
         float dynamicSpeed = Mathf.Lerp(20f, Speed.Value * 50f, angle / 90f);
         // Apply rotation
-        agentTransform.rotation = Quaternion.RotateTowards(agentTransform.rotation, targetRotation, dynamicSpeed * Time.deltaTime);
+        // agentTransform.rotation = Quaternion.RotateTowards(agentTransform.rotation, targetRotation, dynamicSpeed * Time.deltaTime);
+        echoRotation = Quaternion.RotateTowards(echoRotation, targetRotation, dynamicSpeed * Time.deltaTime);
 
         return Status.Running;
     }

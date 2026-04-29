@@ -178,11 +178,13 @@ public class PlayerMovement : MonoBehaviour
         crazyTimer.isSprinting = isSprinting;
 
         Vector3 move = transform.right * moveInput.x + transform.forward * moveInput.y;
-        controller.Move(currentSpeed * Time.deltaTime * move);
+        if (controller.enabled)
+            controller.Move(currentSpeed * Time.deltaTime * move);
 
 
         velocity.y += gravity * Time.deltaTime;
-        controller.Move(velocity * Time.deltaTime);
+        if (controller.enabled)
+            controller.Move(velocity * Time.deltaTime);
     }
 
     public bool GetSprint()

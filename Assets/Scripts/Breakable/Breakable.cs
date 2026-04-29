@@ -138,16 +138,18 @@ public class Breakable : MonoBehaviour
         float averageVolume = 0f;
         bool hasValidData = false;
 
-        bool isValidFrame = micInput.relativeVolume >= 0f && micInput.relativeVolume <= 1f &&
-                            micInput.relativePitch >= 0f && micInput.relativePitch <= 1f;
+        float relPitchClamp = Mathf.Min(micInput.relativePitch, 1);
+        float relVolClamp = Mathf.Min(micInput.relativeVolume, 1);
+        bool isValidFrame = relPitchClamp >= 0f && 
+                           relVolClamp >= 0f;
 
         // Only add new data to the queue if there is noise
-        if (micInput.relativeVolume > 0.01f && isValidFrame)
+        if (relVolClamp > 0.01f && isValidFrame)
         {
             // Add current frame's data to the queue
             audioHistory.Enqueue(new AudioRecord { 
-                pitch = micInput.relativePitch, 
-                volume = micInput.relativeVolume, 
+                pitch = relPitchClamp, 
+                volume = relVolClamp, 
                 time = Time.time 
             });
         }

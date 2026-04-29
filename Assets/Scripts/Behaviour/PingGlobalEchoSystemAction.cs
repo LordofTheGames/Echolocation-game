@@ -30,6 +30,7 @@ public partial class PingGlobalEchoSystemAction : Action
     [SerializeReference] public BlackboardVariable<AudioClip> sound2;
     [SerializeReference] public BlackboardVariable<float> soundVolume = new BlackboardVariable<float>(1);
     [SerializeReference] public BlackboardVariable<AudioSource> audioSource;
+    [SerializeReference] public BlackboardVariable<MonsterSearchMode> searchMode;
 
     protected override Status OnStart()
     {
@@ -37,7 +38,7 @@ public partial class PingGlobalEchoSystemAction : Action
         if (soundNum == 1) audioSource.Value.PlayOneShot(sound1, soundVolume);
         if (soundNum == 2) audioSource.Value.PlayOneShot(sound2, soundVolume);
 
-        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: MonsterSearchMode.RED);
+        GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, angle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: searchMode);
         return Status.Running;
     }
 
