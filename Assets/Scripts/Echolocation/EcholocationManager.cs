@@ -33,9 +33,23 @@ public class EcholocationManager : MonoBehaviour
     [Tooltip("Maximum number of times sound rays will bounce before stopping")]
     public int maxBounces = 2;
     public bool visualiseAllBounces = true;
-    [Tooltip("Percentage of volume retained after each bounce (0.0 to 1.0)")]
-    [Range(0f, 1f)]
-    public float bounceVolumeMultiplier = 0.5f;
+
+    [Header("Material Bounce Multipliers")]
+    [Tooltip("Percentage of volume retained after bouncing off different surfaces (0.0 to 1.0)")]
+    [Range(0f, 1f)] public float defaultBounceMultiplier = 0.5f;
+    [Range(0f, 1f)] public float monsterBounceMultiplier = 0.1f;
+    [Range(0f, 1f)] public float interactableBounceMultiplier = 0.5f;
+    [Range(0f, 1f)] public float metalBounceMultiplier = 0.8f;
+    [Range(0f, 1f)] public float dirtBounceMultiplier = 0.2f;
+    [Range(0f, 1f)] public float woodBounceMultiplier = 0.4f;
+    [Range(0f, 1f)] public float labBounceMultiplier = 0.7f;
+    [Range(0f, 1f)] public float railBounceMultiplier = 0.6f;
+    [Range(0f, 1f)] public float hideRockBounceMultiplier = 0.3f;
+    [Range(0f, 1f)] public float waterBounceMultiplier = 0.1f;
+    [Range(0f, 1f)] public float batBounceMultiplier = 0.2f;
+    [Range(0f, 1f)] public float keyBounceMultiplier = 0.6f;
+    [Range(0f, 1f)] public float pillBoxBounceMultiplier = 0.5f;
+    [Range(0f, 1f)] public float playerBounceMultiplier = 0.1f;
 
     [Header("Visual Settings")]
     // Tooltip adds pop-up info when hovering mouse over the variable in the inspector
@@ -415,7 +429,21 @@ public class EcholocationManager : MonoBehaviour
                     visualiseAllBounces = visualiseAllBounces,
 
                     volumeLossPerMeter = volumeLossPerMeter,
-                    bounceVolumeMultiplier = bounceVolumeMultiplier,
+                    
+                    defaultBounceMultiplier = defaultBounceMultiplier,
+                    monsterBounceMultiplier = monsterBounceMultiplier,
+                    interactableBounceMultiplier = interactableBounceMultiplier,
+                    metalBounceMultiplier = metalBounceMultiplier,
+                    dirtBounceMultiplier = dirtBounceMultiplier,
+                    woodBounceMultiplier = woodBounceMultiplier,
+                    labBounceMultiplier = labBounceMultiplier,
+                    railBounceMultiplier = railBounceMultiplier,
+                    hideRockBounceMultiplier = hideRockBounceMultiplier,
+                    waterBounceMultiplier = waterBounceMultiplier,
+                    batBounceMultiplier = batBounceMultiplier,
+                    keyBounceMultiplier = keyBounceMultiplier,
+                    pillBoxBounceMultiplier = pillBoxBounceMultiplier,
+                    playerBounceMultiplier = playerBounceMultiplier,
 
                     colliderColorMap = colliderColorMap,
                     nextRays = nextRays.AsParallelWriter(),
@@ -701,7 +729,21 @@ public class EcholocationManager : MonoBehaviour
         public bool visualiseAllBounces;
 
         public float volumeLossPerMeter;
-        public float bounceVolumeMultiplier;
+        
+        public float defaultBounceMultiplier;
+        public float monsterBounceMultiplier;
+        public float interactableBounceMultiplier;
+        public float metalBounceMultiplier;
+        public float dirtBounceMultiplier;
+        public float woodBounceMultiplier;
+        public float labBounceMultiplier;
+        public float railBounceMultiplier;
+        public float hideRockBounceMultiplier;
+        public float waterBounceMultiplier;
+        public float batBounceMultiplier;
+        public float keyBounceMultiplier;
+        public float pillBoxBounceMultiplier;
+        public float playerBounceMultiplier;
 
         public NativeList<RayData>.ParallelWriter nextRays;
         public NativeList<MonsterHitData>.ParallelWriter monsterHits;
@@ -765,8 +807,27 @@ public class EcholocationManager : MonoBehaviour
 
             if (bounce < maxBounces)
             {
-                float nextVolume = hitVolume * bounceVolumeMultiplier; // Calculate volume of ray upon reflection with loss
+                // Determine multiplier using a switch statement
+                float multiplier = defaultBounceMultiplier;
+                switch (colorCategory)
+                {
+                    case 1: multiplier = monsterBounceMultiplier; break;
+                    case 2: multiplier = interactableBounceMultiplier; break;
+                    case 3: multiplier = metalBounceMultiplier; break;
+                    case 4: multiplier = dirtBounceMultiplier; break;
+                    case 5: multiplier = woodBounceMultiplier; break;
+                    case 6: multiplier = labBounceMultiplier; break;
+                    case 7: multiplier = railBounceMultiplier; break;
+                    case 8: multiplier = hideRockBounceMultiplier; break;
+                    case 9: multiplier = waterBounceMultiplier; break;
+                    case 10: multiplier = batBounceMultiplier; break;
+                    case 11: multiplier = keyBounceMultiplier; break;
+                    case 12: multiplier = pillBoxBounceMultiplier; break;
+                    case 13: multiplier = playerBounceMultiplier; break;
+                }
 
+                float nextVolume = hitVolume * multiplier;
+                
                 if (nextVolume > 0.0f) // Only spawn a new ray if the ray still has any volume/'sound energy' left
                 {
                     float3 incoming = currentRays[i].direction;
