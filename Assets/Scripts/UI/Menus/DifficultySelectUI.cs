@@ -18,7 +18,7 @@ public class DifficultySelectUI : MonoBehaviour
 
     public void OnNormalClicked()
     {
-        StartCoroutine(LoadGameScene("NORMAL"));
+        StartCoroutine(LoadGameScene("MEDIUM"));
     }
 
     public void OnHardClicked()
