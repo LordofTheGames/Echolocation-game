@@ -46,6 +46,14 @@ public class ChaseStart : MonoBehaviour
             pm.enabled = false;
             playerCam.enabled = true;
 
+            GameObject.Find("Circling Bat Set").SetActive(false);
+            GameObject.Find("Circling Bat Set (1)").SetActive(false);
+            GameObject.Find("Circling Bat Set (2)").SetActive(false);
+            GameObject.Find("Circling Bat Set (3)").SetActive(false);
+            GameObject.Find("Doors").SetActive(false);
+
+
+
             StartCoroutine(WaitForCutscene()); 
         }
     }
