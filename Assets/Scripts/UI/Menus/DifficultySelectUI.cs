@@ -10,12 +10,6 @@ public class DifficultySelectUI : MonoBehaviour
         Cursor.lockState = CursorLockMode.None;
     }
 
-    public void OnEasyClicked()
-    {
-        StartCoroutine(LoadGameScene("EASY"));
-
-    }
-
     public void OnNormalClicked()
     {
         StartCoroutine(LoadGameScene("MEDIUM"));

@@ -70,6 +70,7 @@ public class CirclingBatManager : MonoBehaviour
     // Make it easier to break the longer they interact
     private float timePitchDecrement;
     private float currentRelativePitch;
+    private bool hidePrompt = false;
 
 
     void Awake()
@@ -136,11 +137,13 @@ public class CirclingBatManager : MonoBehaviour
         {
             col.SetActive(true);
             text.SetActive(true);
+            hidePrompt = false;
         }
-        else
+        else if (!hidePrompt)
         {
             col.SetActive(false);
             text.SetActive(false);
+            hidePrompt = true;
         }
 
         if (isScared || micInput == null) return;

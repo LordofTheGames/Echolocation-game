@@ -18,6 +18,7 @@ public class TutorialManager : MonoBehaviour
     public GameObject posterText;
     private bool hasFinishedTutorial = true;
     public GameObject warpPoint;
+    public bool textOn = false;
 
     void Start()
     {
@@ -28,6 +29,7 @@ public class TutorialManager : MonoBehaviour
         tasks.Add("Pick-up", false);
         tasks.Add("Switch", false);
         tasks.Add("Throw", false);
+        headText.SetActive(false);
     }
 
     void OnEnable()
@@ -52,12 +54,13 @@ public class TutorialManager : MonoBehaviour
 
     void Update()
     {
-        if (tasksCompleted == 6)
+        if (tasksCompleted == 6 && !textOn)
         {
             headText.SetActive(true);
             posterText.SetActive(true);
             hasFinishedTutorial = false;
             StartCoroutine(textOff());
+            textOn = true;  
         }
     }
     
