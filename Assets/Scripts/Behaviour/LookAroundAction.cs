@@ -25,6 +25,7 @@ public partial class LookAroundAction : Action
     [SerializeReference] public BlackboardVariable<AudioClip> sound2;
     [SerializeReference] public BlackboardVariable<float> soundVolume = new BlackboardVariable<float>(1);
     [SerializeReference] public BlackboardVariable<AudioSource> audioSource;
+    [SerializeReference] public BlackboardVariable<MonsterSearchMode> searchMode;
 
     private enum LookPhase { ToLeft, ToRight, ToCenter }
     private LookPhase currentPhase;
@@ -103,7 +104,7 @@ public partial class LookAroundAction : Action
             }
 
             // GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, Agent.Value.transform.forward, echoAngle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: MonsterSearchMode.RED);
-            GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, echoRotation * Agent.Value.transform.forward, echoAngle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: MonsterSearchMode.RED);
+            GlobalEchoSystem.Ping(Agent.Value, Agent.Value.transform.position + MonsterHeightOffset, echoRotation * Agent.Value.transform.forward, echoAngle, uniformity, numRays, visualVolume, monsterVolume, isMonsterEcholocation: true, monsterSearchMode: searchMode);
             int soundNum = UnityEngine.Random.Range(1, 3);
             if (soundNum == 1) audioSource.Value.PlayOneShot(sound1, soundVolume);
             if (soundNum == 2) audioSource.Value.PlayOneShot(sound2, soundVolume);

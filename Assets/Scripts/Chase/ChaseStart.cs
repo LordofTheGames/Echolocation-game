@@ -38,8 +38,6 @@ public class ChaseStart : MonoBehaviour
     {
         if (GlassBroken && other.CompareTag("Player"))
         {
-            GlassBroken = false;
-
             agent.BlackboardReference.SetVariableValue("chasePosition", true);
             cutoff.Disable();
 
