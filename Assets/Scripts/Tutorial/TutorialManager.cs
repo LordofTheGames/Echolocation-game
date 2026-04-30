@@ -78,6 +78,8 @@ public class TutorialManager : MonoBehaviour
             PlayerRespawn script = player.GetComponent<PlayerRespawn>();
             script.RespawnPosition = warpPoint.transform.position;
             script.Respawn();
+            InventoryManager man = GameObject.Find("UIManager").GetComponent<InventoryManager>();
+            man.Add(ItemType.SonicGrenade, 3);
             player.GetComponent<CrazyTimer>().StartEffect();
         }
     }
@@ -90,6 +92,8 @@ public class TutorialManager : MonoBehaviour
             PlayerRespawn script = player.GetComponent<PlayerRespawn>();
             script.RespawnPosition = warpPoint.transform.position;
             script.Respawn();
+            InventoryManager man = GameObject.Find("UIManager").GetComponent<InventoryManager>();
+            man.Add(ItemType.SonicGrenade, 3);
             player.GetComponent<CrazyTimer>().StartEffect();
         }
     }
