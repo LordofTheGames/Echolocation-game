@@ -46,6 +46,8 @@ public class CirclingBatManager : MonoBehaviour
 
     InputAction scareBatsAction;
     bool isScared;
+    private AudioSource audioSource;
+    public AudioClip batsScared;
     bool playerInRange;
     public bool IsScared => isScared;
 
@@ -94,6 +96,11 @@ public class CirclingBatManager : MonoBehaviour
                 scareBatsAction.performed += OnScareBats;
                 scareBatsAction.Enable();
             }
+        }
+
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
         }
 
         SpawnBats();
@@ -239,6 +246,7 @@ public class CirclingBatManager : MonoBehaviour
             if (micHoldTimer >= holdTimeToScare)
             {
                 isScared = true;
+                audioSource.PlayOneShot(batsScared, 1);
             }
         }
         else
