@@ -56,10 +56,10 @@ public class CirclingBatManager : MonoBehaviour
 
       // Variables for tracking pitch history
     [Tooltip("How many frames of sound we need before trusting the data")]
-    [SerializeField] private int minFramesForValidAudio = 5;
+    [SerializeField] private int minFramesForValidAudio = 3;
 
     [Tooltip("Time to hold audio data over")]
-    [SerializeField] private float audioHistoryDuration = 0.2f;
+    [SerializeField] private float audioHistoryDuration = 0.3f;
 
     private struct AudioRecord
     {
