@@ -43,7 +43,7 @@ public class MicToEcholocation : MonoBehaviour
 
         proportion = ((float) rays / maxRays);
         visualVolume = proportion * maxVisualVolume * 1.5f;    // Calculate visual volume of rays to travel based on proportion of max - gives a max distance of 50, loss per meter = 2
-        volForMonster = proportion * maxVolForMonster * 1.2f;  // Calculate max volume for monster based on proportion of rays of max rays
+        volForMonster = proportion * maxVolForMonster * 1.5f;  // Calculate max volume for monster based on proportion of rays of max rays
 
         GlobalEchoSystem.Ping(this.gameObject, cameraTransform.position, cameraTransform.forward, angle, uniformity, rays, visualVolume, volForMonster);
 
