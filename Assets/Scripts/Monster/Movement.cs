@@ -181,6 +181,9 @@ public class Movement : MonoBehaviour
             {
                 firstTunnelMove = false;
                 currentNodeIdx += (currTunnelMoveDir == Direction.Increasing) ? 1 : -1;
+                 // catch errors
+                if (currentNodeIdx < 0) currentNodeIdx = 1;
+                else if (currentNodeIdx > currentArea.nodes.Count - 1) currentNodeIdx = currentArea.nodes.Count - 2;
                 currentNode = currentArea.nodes[currentNodeIdx];
                 return currentNode;
             }

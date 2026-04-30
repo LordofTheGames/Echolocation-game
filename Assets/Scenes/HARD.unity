@@ -26633,6 +26633,39 @@ PrefabInstance:
       propertyPath: m_Name
       value: Monster
       objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: TimeUntilMovesAway
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: TimeUntilMovesClose
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: MaxDistanceFromPlayer
+      value: 34
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: DistanceToMoveAwayFromPlayer
+      value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: DistanceToMoveToIfFarFromPlayer
+      value: 22
+      objectReference: {fileID: 0}
+    - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: 'managedReferences[8625080062362779830]'
+      value: 'Unity.Behavior Unity.Behavior.BlackboardVariable`1[[System.Boolean,
+        mscorlib]]'
+      objectReference: {fileID: 0}
+    - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: managedReferences[8625080062362779830].Name
+      value: easyMode
+      objectReference: {fileID: 0}
+    - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: m_BlackboardVariableOverridesList.Array.size
+      value: 17
+      objectReference: {fileID: 0}
     - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
       propertyPath: managedReferences[1914981334647308923].m_Value
       value: 
@@ -26673,6 +26706,26 @@ PrefabInstance:
       propertyPath: managedReferences[8625079894320087343].m_Value
       value: 
       objectReference: {fileID: 295052137}
+    - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: managedReferences[8625080041851060870].m_Value
+      value: 
+      objectReference: {fileID: 9049301164109207028}
+    - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: managedReferences[8625080062362779830].m_Value
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: 'm_BlackboardVariableOverridesList.Array.data[16]'
+      value: 8625080062362779830
+      objectReference: {fileID: 0}
+    - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: managedReferences[8625080062362779830].GUID.m_Value0
+      value: 12685379784712927266
+      objectReference: {fileID: 0}
+    - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: managedReferences[8625080062362779830].GUID.m_Value1
+      value: 15717347355627391226
+      objectReference: {fileID: 0}
     - target: {fileID: 8795594309079875185, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
       propertyPath: player
       value: 
@@ -28210,7 +28263,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1559437136
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40532,6 +40585,10 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1217169538}
     - target: {fileID: 1248414904700985948, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      propertyPath: Lives
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 1248414904700985948, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: livesText
       value: 
       objectReference: {fileID: 1853211069}
@@ -40590,6 +40647,14 @@ PrefabInstance:
     - target: {fileID: 3853411543216132462, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4330546464607904839, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      propertyPath: m_Range
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4330546464607904839, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      propertyPath: m_Intensity
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5235627052445221193, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_Name
@@ -41161,6 +41226,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: c1fdc8f18abf55e4ea0efc92feb5cfbf, type: 3}
+--- !u!1 &9049301164109207028 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 2619204679216966553, guid: c1fdc8f18abf55e4ea0efc92feb5cfbf, type: 3}
+  m_PrefabInstance: {fileID: 9049301164109207027}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

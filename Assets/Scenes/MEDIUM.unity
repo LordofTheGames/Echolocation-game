@@ -26514,9 +26514,33 @@ PrefabInstance:
       propertyPath: m_Name
       value: Monster
       objectReference: {fileID: 0}
+    - target: {fileID: 5683829060095955525, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
       propertyPath: MoveSpeed_Patrol
       value: 4
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: TimeUntilMovesAway
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: TimeUntilMovesClose
+      value: 45
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: MaxDistanceFromPlayer
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: DistanceToMoveAwayFromPlayer
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 6014912869232668478, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
+      propertyPath: DistanceToMoveToIfFarFromPlayer
+      value: 26
       objectReference: {fileID: 0}
     - target: {fileID: 8737043143605252243, guid: 0154bc25b91f91944a4eb7678daebf2b, type: 3}
       propertyPath: 'managedReferences[8625080059813691550]'
@@ -28128,7 +28152,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1559437136
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -40388,10 +40412,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 3160933991669145881, guid: a4e32bb7c5f5c1249906747df595911f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: -16.07
-      objectReference: {fileID: 0}
     - target: {fileID: 4140619760396641870, guid: a4e32bb7c5f5c1249906747df595911f, type: 3}
       propertyPath: agent
       value: 
@@ -40585,6 +40605,14 @@ PrefabInstance:
       propertyPath: mic
       value: 
       objectReference: {fileID: 1998086073}
+    - target: {fileID: 3677165169037684896, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      propertyPath: LimitVerticalLook
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3677165169037684896, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      propertyPath: verticalLookLimit
+      value: 20
+      objectReference: {fileID: 0}
     - target: {fileID: 3853411543216132462, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_LocalPosition.x
       value: -199.88
@@ -40624,6 +40652,14 @@ PrefabInstance:
     - target: {fileID: 3853411543216132462, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4330546464607904839, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      propertyPath: m_Range
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4330546464607904839, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
+      propertyPath: m_Intensity
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 5235627052445221193, guid: 9719fd3b76bb0794a98a0fddd7542603, type: 3}
       propertyPath: m_Name

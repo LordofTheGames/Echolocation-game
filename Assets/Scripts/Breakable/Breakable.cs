@@ -57,7 +57,7 @@ public class Breakable : MonoBehaviour
     [SerializeField] private int minFramesForValidAudio = 3;
 
     [Tooltip("Time to hold audio data over")]
-    [SerializeField] private float audioHistoryDuration = 0.3f;
+    [SerializeField] private float audioHistoryDuration = 0.5f;
 
     private struct AudioRecord
     {
